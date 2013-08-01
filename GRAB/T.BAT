@@ -1,0 +1,1 @@
+sp d:\wc2gfx\objects.4 -o %1 %2 %3 %4 %5

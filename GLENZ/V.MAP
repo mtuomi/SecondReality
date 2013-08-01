@@ -1,0 +1,61 @@
+
+ Start  Stop   Length Name                   Class
+ 00000H 006C3H 006C4H ZOOMER_TEXT            CODE
+ 006C4H 017C8H 01105H MAIN_TEXT              CODE
+ 017D0H 06BDDH 0540EH text__vid              CODE
+ 06BE0H 06D57H 00178H text__asm              CODE
+ 06D60H 079E0H 00C81H text__vec              CODE
+ 079F0H 0B288H 03899H text__math             CODE
+ 0B290H 0B363H 000D4H text_disc              CODE
+ 0B370H 0D7FBH 0248CH glvtext                CODE
+ 0D7FCH 0E36BH 00B70H _TEXT                  CODE
+ 0E370H 0E371H 00002H EMULATOR_TEXT          CODE
+ 0E372H 0E372H 00000H C_ETEXT                ENDCODE
+ 0E380H 10801H 02482H data_v                 DATA
+ 10802H 10AB5H 002B4H MAIN_DATA              FAR_DATA
+ 10AB6H 10AB6H 00000H MAIN_CONST             FAR_DATA
+ 10AB6H 10AB6H 00000H MAIN_BSS               FAR_DATA
+ 10AC0H 10AC0H 00000H EMULATOR_DATA          FAR_DATA
+ 10AC0H 1F6CFH 0EC10H text__zoom             CODE2
+ 1F6D0H 2F6BFH 0FFF0H data_new1              FARDATA
+ 2F6C0H 3F6AFH 0FFF0H data_new2              FARDATA
+ 3F6B0H 4F3BFH 0FD10H DATA__fc               FARDATA
+ 4F3C0H 4FF95H 00BD6H FAR_BSS                FAR_BSS
+ 4FFA0H 5FF9EH 0FFFFH FAR_BSS                FAR_BSS
+ 5FFA0H 60D2FH 00D90H FAR_BSS                FAR_BSS
+ 60D30H 60D71H 00042H NULL                   BEGDATA
+ 60D72H 61511H 007A0H _DATA                  DATA
+ 61512H 61513H 00002H XIQC                   DATA
+ 61514H 61521H 0000EH DBDATA                 DATA
+ 61522H 6152FH 0000EH CDATA                  DATA
+ 61530H 61530H 00000H XIFB                   DATA
+ 61530H 61530H 00000H XIF                    DATA
+ 61530H 61530H 00000H XIFE                   DATA
+ 61530H 61530H 00000H XIB                    DATA
+ 61530H 61530H 00000H XI                     DATA
+ 61530H 61530H 00000H XIE                    DATA
+ 61530H 61530H 00000H XPB                    DATA
+ 61530H 61530H 00000H XP                     DATA
+ 61530H 61530H 00000H XPE                    DATA
+ 61530H 61530H 00000H XCB                    DATA
+ 61530H 61530H 00000H XC                     DATA
+ 61530H 61530H 00000H XCE                    DATA
+ 61530H 61530H 00000H XCFB                   DATA
+ 61530H 61530H 00000H XCF                    DATA
+ 61530H 61530H 00000H XCFE                   DATA
+ 61530H 6154FH 00020H CONST                  CONST
+ 61550H 61557H 00008H HDR                    MSG
+ 61558H 6162DH 000D6H MSG                    MSG
+ 6162EH 6162FH 00002H PAD                    MSG
+ 61630H 61630H 00001H EPAD                   MSG
+ 61632H 61632H 00000H _BSS                   BSS
+ 61632H 61632H 00000H XOB                    BSS
+ 61632H 61632H 00000H XO                     BSS
+ 61632H 61632H 00000H XOE                    BSS
+ 61640H 61640H 00000H c_common               BSS
+ 61640H 61E3FH 00800H STACK                  STACK
+
+ Origin   Group
+ 60D3:0   DGROUP
+
+Program entry point at 0D7F:001C

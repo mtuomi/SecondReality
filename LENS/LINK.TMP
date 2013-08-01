@@ -1,0 +1,5 @@
+/E +
+main.obj asm.obj ..\dis\disc.obj +
+_lensexb.obk _filler.obk _lensex1.obk _lensex0.obk +
+_lensex2.obk _lensex3.obk _lensex4.obk _lensexp.obk
+,lens.exe,lens.map;

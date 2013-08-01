@@ -1,0 +1,75 @@
+
+Pikaohjeet fontintekoon:
+
+* Pohjakuva tulee tehd„ DeluxePaintilla resoluutioon 640x480x16v„ri„.
+* V„ri 15 pit„„ ottaa taustaksi (sen kirkkautta kannattaa ehk„ v„h„n
+  pienent„„ silmien s„„st„miseksi).
+* Fontit kirjoitetaan v„rill„ 0 siten ett„ jokaisen kirjaimen ymp„rill„
+  on v„hint„„n 1 tyhj„ pikseli (yleens„ n„in on automaattisesti).
+* Merkkien j„rjestyksen tulee olla seuraava (alku on ASCII:n mukainen,
+  ja alkaa merkist„ 33 (ei spacea luonnollisestikaan)):
+      ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ?
+    @ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _
+    ` a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~
+      ™ † „ ”
+  Jos viel„ t„m„n j„lkeen tulee merkkej„, ne asettuvat kreikkalaisten
+  kirjainten p„„lle (ASCII 224..239).
+  Koska Spacea ei voi m„„ritell„, olettaa konvertteri sen olevan tyhj„
+  merkki ja asettaa sen leveydeksi kaikkien merkkien leveyden keskiarvon
+  (toimii hyvin). T„t„ voi viritt„„ muuttamalla spacen leveytt„
+  fonttitiedostosta (offset 16+256*2+32*2=592=250h).
+* Jokaisen kirjainrivin peruslinjan kohdalle (esim kirjainten
+  alareuna) on ruudun vasempaan reunaan laitettava piste (v„ri
+  joku muu kuin 0/15). T„m„ piste synkronisoi fontit samalle 
+  riville, esim 1 (* kyseist„ v„ri„):
+  ESIM1.......................   ...................ÛÛ............
+  ...........Û......Û.........   .....ÛÛ**..**ÛÛ....ÛÛ............
+  ......ÛÛÛ..Û................   ........ÛÛÛÛ......ÛÛ.............
+  .....Û...Û.ÛÛÛ....Û.........   .......Û....Û......*.............
+  .....ÛÛÛÛÛ.Û..Û...Û.........   .......Û....Û......*.............
+  *....Û...Û.ÛÛÛ....Û.........   .......Û....Û......*.............
+  ................ÛÛ..........   ........ÛÛÛÛ.......*.............
+  ............................   ............................ESIM2
+* Jos kirjaimissa on irtaimia osia, tulee ne yhdist„„ samalla v„rill„
+  jolla ruudun vasemman reunan piste piirrettiin. Esim 2 yl„puolella.
+* Kaikkien merkkien tulee my”s ulottua peruslinjalle asti. Jollei
+  n„in ole, voidaan merkki„ 'jatkaa' yhdistysv„rill„ (esim 2).
+* Fonttia muunnettaessa yhdistysv„ri katoaa; se ei siis h„iritse 
+  tulostusta.
+  
+* Kun kuva on talletettu, kopioidaan se t„h„n hakemistoon ja ajetaan
+  dofont: DOFONT <tiedostonnimi ilman .LBM:„„)
+    esim: DOFONT fontti3
+  Lopputulos on esimerkkitapauksessa FONTTI3.FNT, jota voi k„ytt„„
+  PRINT ohjelmassa.
+
+
+  
+PRINT ohjelma - EPSON/IBM Graphics etc. yht. sop.
+
+K„ytt”: PRINT "teksti"
+  esim: PRINT "Testiteksti!"
+Lis„parametrit: /F<fontinnimi>
+		/S<lis„tyhj„„ kirjainten v„liin n„in monta pixeli„>
+Oletukset: fontinnimi=DEFAULT.FNT
+	   lis„tyhj„=0
+Maksimit: fonttitiedoston koko 30000 tavua
+
+	   
+
+
+.FNT tiedoston formaatti:
+
+8   bytes: "BIGFONT",1ah
+1    word: fontin korkeus merkeiss„ (1 merkki=8 pikseli„)
+1    word: lis„v„lityhj„n oletusarvo (nyky„„n aina 0lla)
+1    word: 0
+1    word: 0
+Seuraavissa taulukoissa indeksin„ k„ytet„„n fontin (ASCII) numeroa:
+256 words: merkin osoite tiedostossa (tavuja alusta)
+256 words: merkin leveys (pikseli„)
+    bytes: merkkidata
+    
+    
+C-sorsien k„„nt„minen (%=sorsan nimi):
+cl /W3 /AL /qc %.c	tai	qcl /AL %.c

@@ -1,0 +1,1 @@
+vw2 d:\3ds\images\fcsten.fli

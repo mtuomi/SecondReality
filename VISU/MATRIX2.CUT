@@ -1,0 +1,164 @@
+ALIGN 4
+invm	dd	0,0,0,0,0,0 ,0,0
+	dd	0,0,0,0,0,0 ,0,0
+	dd	0,0,0,0,0,0 ,0,0
+	
+invswap MACRO zl1,zl2
+	zzz=0
+	REPT 6
+	mov	eax,cs:invm[zl1*32+zzz]
+	xchg	eax,cs:invm[zl2*32+zzz]
+	mov	cs:invm[zl1*32+zzz],eax
+	zzz=zzz+4
+	ENDM
+	ENDM
+
+submacro MACRO zsub,zto,zmul,zdiv
+	;row[to]-=row[add]*zmul/zdiv
+	zzz=0
+	REPT 6
+	mov	eax,cs:invm[zzz+zsub*32]
+	imul	zmul
+	idiv	zdiv
+	sub	cs:invm[zzz+zto*32],eax
+	zzz=zzz+4
+	ENDM
+	ENDM
+
+addmacro MACRO zadd,zto
+	;row[to]+=row[add]
+	zzz=0
+	REPT 6
+	mov	eax,cs:invm[zzz+zadd*32]
+	add	cs:invm[zzz+zto*32],eax
+	zzz=zzz+4
+	ENDM
+	ENDM
+
+scalemacro MACRO zto,zdiv
+	mov	ecx,32767
+	zzz=0
+	REPT 6
+	mov	eax,cs:invm[zzz+zto*32]
+	imul	ecx
+	idiv	zdiv
+	mov	cs:invm[zzz+zto*32],eax
+	zzz=zzz+4
+	ENDM
+	ENDM
+
+;entry: es:di=matrix1
+; exit: es:di=matrix1 (overwritten by it's inverse)
+invmatrix PROC NEAR
+	xor	ecx,ecx
+	mov	ebx,32767
+	movsx	eax,word ptr es:[di+0]
+	mov	cs:invm[0],eax
+	movsx	eax,word ptr es:[di+2]
+	mov	cs:invm[4],eax
+	movsx	eax,word ptr es:[di+4]
+	mov	cs:invm[8],eax
+	mov	cs:invm[12],ebx
+	mov	cs:invm[16],ecx
+	mov	cs:invm[20],ecx
+	movsx	eax,word ptr es:[di+6]
+	mov	cs:invm[32+0],eax
+	movsx	eax,word ptr es:[di+8]
+	mov	cs:invm[32+4],eax
+	movsx	eax,word ptr es:[di+10]
+	mov	cs:invm[32+8],eax
+	mov	cs:invm[32+12],ecx
+	mov	cs:invm[32+16],ebx
+	mov	cs:invm[32+20],ecx
+	movsx	eax,word ptr es:[di+12]
+	mov	cs:invm[64+0],eax
+	movsx	eax,word ptr es:[di+14]
+	mov	cs:invm[64+4],eax
+	movsx	eax,word ptr es:[di+16]
+	mov	cs:invm[64+8],eax
+	mov	cs:invm[64+12],ecx
+	mov	cs:invm[64+16],ecx
+	mov	cs:invm[64+20],ebx
+	;
+	int 3
+	mov	ecx,cs:invm[4*0+32*0]
+	mov	ebx,cs:invm[4*0+32*1]
+	mov	eax,cs:invm[4*0+32*2]
+	or	ecx,ecx
+	jnz	@@1
+	or	ebx,ebx
+	jnz	@@2
+	or	eax,eax
+	jz	@@0
+	mov	ecx,eax
+	addmacro 0,2
+	jmp	@@1
+@@2:	mov	ecx,ebx
+	addmacro 0,1
+@@1:	mov	ebx,cs:invm[4*0+32*1]
+	or	ebx,ebx
+	jz	@@3
+	submacro 0,1,ebx,ecx
+@@3:	mov	ebx,cs:invm[4*0+32*2]
+	or	ebx,ebx
+	jz	@@4
+	submacro 0,2,ebx,ecx
+@@4:
+	mov	ecx,cs:invm[4*1+32*1]
+	mov	ebx,cs:invm[4*1+32*2]
+	or	ecx,ecx
+	jnz	@@b1
+	or	ebx,ebx
+	jz	@@0
+	mov	ecx,ebx
+	addmacro 1,2
+@@b1:	mov	ebx,cs:invm[4*1+32*0]
+	or	ebx,ebx
+	jz	@@b3
+	submacro 1,0,ebx,ecx
+@@b3:	mov	ebx,cs:invm[4*1+32*2]
+	or	ebx,ebx
+	jz	@@b4
+	submacro 1,2,ebx,ecx
+@@b4:
+	mov	ecx,cs:invm[4*2+32*2]
+	or	ecx,ecx
+	jz	@@0
+	mov	ebx,cs:invm[4*2+32*0]
+	or	ebx,ebx
+	jz	@@c3
+	submacro 2,0,ebx,ecx
+@@c3:	mov	ebx,cs:invm[4*2+32*1]
+	or	ebx,ebx
+	jz	@@c4
+	submacro 2,1,ebx,ecx
+@@c4:
+	mov	ebx,cs:invm[4*0+32*0]
+	scalemacro 0,ebx
+	mov	ebx,cs:invm[4*1+32*1]
+	scalemacro 1,ebx
+	mov	ebx,cs:invm[4*2+32*2]
+	scalemacro 2,ebx
+
+	int 3
+	mov	ax,word ptr cs:invm[12+4*0+32*0]
+	mov	es:[di+0],ax
+	mov	ax,word ptr cs:invm[12+4*1+32*0]
+	mov	es:[di+2],ax
+	mov	ax,word ptr cs:invm[12+4*2+32*0]
+	mov	es:[di+4],ax
+	mov	ax,word ptr cs:invm[12+4*0+32*1]
+	mov	es:[di+6],ax
+	mov	ax,word ptr cs:invm[12+4*1+32*1]
+	mov	es:[di+8],ax
+	mov	ax,word ptr cs:invm[12+4*2+32*1]
+	mov	es:[di+10],ax
+	mov	ax,word ptr cs:invm[12+4*0+32*2]
+	mov	es:[di+12],ax
+	mov	ax,word ptr cs:invm[12+4*1+32*2]
+	mov	es:[di+14],ax
+	mov	ax,word ptr cs:invm[12+4*2+32*2]
+	mov	es:[di+16],ax
+@@0:	ret
+invmatrix ENDP
+

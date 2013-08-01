@@ -1,0 +1,9 @@
+
+ Start  Stop   Length Name                   Class
+ 00000H 000D3H 000D4H text_disc              CODE
+ 000E0H 0616BH 0608CH CODE                   CODE
+ 06170H 0A02FH 03EC0H DATA__textpic          FARDATA
+ 0A030H 0A42FH 00400H STACK                  STACK
+ 0A430H 0A43FH 00010H lastseg                DATA
+
+Program entry point at 000E:6063

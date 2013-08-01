@@ -1,0 +1,97 @@
+GFX file format specification (quickly written, errors inevitable :-)
+
+**MAIN HEADER**
+6bytes	"GFX10",1ah
+word	number of subfiles
+word(s)	paragraph offset to subfile 0,1,2,... (true offset=paraoff*16)
+
+**SUBFILE HEADER**
+byte	file type
+		0ffh = unknown data
+		0feh = palette
+		004h = Optimized X sprite
+		003h = vertical bitmap
+		002h = 1-bitplane packed bitmap
+		001h = 4-bitplane packed bitmap
+		
+**PALETTE**
+768 bytes of palette data (I think...)
+		
+**VERTICAL BITMAPS**
+byte	reserved
+word	add to Y to center bitmap
+word	add to X to center bitmap
+word	heigth (pixels)
+word	width (pixels)
+repeat width times
+{
+	a=byte
+	b=byte
+	if(b==0) end of column
+	skip (b>>1) pixels
+	copy a bytes
+}
+		
+**UNPACKED BITMAP FORMAT**
+byte	reserved
+word	add to Y to center bitmap
+word	add to X to center bitmap
+word	heigth (pixels)
+word	width (pixels)
+byte(s) data from top to bottom, rows from left to right
+
+**1-BITPLANE PACKED BITMAP FORMAT**
+byte	reserved
+word	add to Y to center bitmap
+word	add to X to center bitmap
+word	heigth (pixels)
+word	width (pixels)
+bytes(s) packed data, composed of subblocks, read like this:
+for(;;)
+{
+	a=byte
+	if(a==0) end of picture (or bitplane in 4-bitplane mode)
+	else if(a>0) skip a bytes
+	else if(a&1) copy ((a&127)>>1) bytes to screen
+	else b=byte, write b ((a&127)>>1) times to screen
+}
+
+**4-BITPLANE PACKED BITMAP FORMAT**
+byte	reserved
+word	add to Y to center bitmap
+word	add to X to center bitmap
+word	heigth (pixels)
+word	width (pixels)
+byte(s) data, like in 1-BITPLANE except that data is saved in
+	four passes, one for every tweaked mode bitplane.
+
+**X SPRITE**
+byte	reserved (0)
+word	add to Y to center bitmap
+word	add to X to center bitmap
+word	heigth (pixels)
+word	width (pixels)
+repeat 4 times (bitplane)
+{
+  repeat heigth times
+  {
+    repeat until end of row
+    {
+	b=byte
+	if(!b)
+	{
+		b=byte;
+		if(b) skip b 8 byte blocks
+		else end of row
+	}
+	else
+	{
+		for bits 0..7 in b:
+			if bit=0, skip pixel 
+			else read byte, write it
+	}
+    }
+  }
+  next bitplane
+}
+		

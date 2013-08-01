@@ -1,0 +1,43 @@
+Turbo Assembler	 Version 2.5	    07/11/93 17:22:34	    Page 1
+koe.asm
+
+
+
+      1	    0000			 .MODEL	LARGE
+      2					 .386
+      3	    0000			 .CODE
+      4
+      5	    0000  66| 8B 84 1111	 mov	 eax,ds:[si+1111h]
+      6	    0005  83 C6	04		 add	 si,4
+      7	    0008  66| 26: 89 05		 mov	 es:[di],eax
+      8	    000C  81 C7	4000		 add	 di,4000h
+      9
+     10					 END
+Turbo Assembler	 Version 2.5	    07/11/93 17:22:34	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "07/11/93"
+??FILENAME			  Text	 "koe	  "
+??TIME				  Text	 "17:22:34"
+??VERSION			  Number 0205
+@CODE				  Text	 KOE_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0D0FH
+@CURSEG				  Text	 KOE_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 1
+@FILENAME			  Text	 KOE
+@MODEL				  Text	 5
+@WORDSIZE			  Text	 2
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0000 Word	  Public  DATA
+KOE_TEXT			  16  0010 Word	  Public  CODE
+

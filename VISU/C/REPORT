@@ -1,0 +1,92 @@
+
+                              Norton Disk Doctor II
+                              Norton Utilities, 5.0
+                           Sunday, 25 July 1993 23.38
+
+                            *************************
+                            *  Report for Drive C:  *
+                            *************************
+
+                                   DISK TOTALS
+                     -----------------------------------------
+                      62 181 376 bytes Total Disk Space
+                      60 704 768 bytes in 3 119 User Files
+                         555 008 bytes in 263 Directories
+                         337 920 bytes in 19 Hidden Files
+                         583 680 bytes Available on the Disk
+
+
+                            LOGICAL DISK INFORMATION
+                     -----------------------------------------
+                        Media Descriptor:  F8
+                         Large Partition:  Yes
+                                FAT Type:  16-bit
+                           Total Sectors:  121 720
+                          Total Clusters:  30 362
+                        Bytes Per Sector:  512
+                     Sectors Per Cluster:  4
+                       Bytes Per Cluster:  2 048
+                          Number of FATs:  2
+                     First Sector of FAT:  1
+               Number of Sectors Per FAT:  119
+                First Sector of Root Dir:  239
+           Number of Sectors in Root Dir:  32
+           Maximum Root Dir File Entries:  512
+               First Sector of Data Area:  271
+
+
+                            PHYSICAL DISK INFORMATION
+                     -----------------------------------------
+                            Drive Number:  80
+                                   Heads:  7
+                               Cylinders:  1 023
+                       Sectors Per Track:  17
+                           Starting Head:  1
+                       Starting Cylinder:  0
+                         Starting Sector:  1
+                             Ending Head:  6
+                         Ending Cylinder:  1 022
+                           Ending Sector:  17
+
+
+                               SYSTEM AREA STATUS
+                     -----------------------------------------
+                          No Errors in the System Area
+
+
+                              FILE STRUCTURE STATUS
+                     -----------------------------------------
+
+    ******************** Entries with an Invalid Cluster *******************
+
+                              \MINCODE\VISU\C\c.exe
+                                Status: Truncated
+
+
+    ****************************** Lost Chains *****************************
+
+                      Lost cluster chain at cluster 30 174
+                                 Status: Deleted
+
+                      Lost cluster chain at cluster 30 175
+                                 Status: Deleted
+
+                      Lost cluster chain at cluster 30 363
+                                 Status: Deleted
+
+
+
+                               SURFACE TEST STATUS
+                     -----------------------------------------
+                                  Test Settings
+                             -----------------------
+                                    Test:  Disk Test     
+                               Test Type:  Daily         
+                          Repair Setting:  Prompt before Repairing
+                        Passes Requested:  1
+                        Passes Completed:  1
+                            Elapsed Time:  1 minute; 58 seconds
+
+                      No Errors encountered in Surface Test
+
+

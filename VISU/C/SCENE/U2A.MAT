@@ -1,0 +1,15 @@
+;format: MATERIAL-NAME <parameters>
+;parameters: 
+;#(number)	first color in fade
+;L#		length of color fade (#=32/16/8/1=no fading)
+;G		gouraud
+;X		Two sided material
+DEFAULT 96 L32
+LIGHT_BLUE 32 L32 G
+BLACK 0 L16 G
+ORANGE 64 L32 
+GREY 128 L32 G
+MOTOR 64 L32 G
+POHJA 4 L16 
+COLOR00 0 L16 
+

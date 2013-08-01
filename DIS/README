@@ -1,0 +1,19 @@
+Demo Interrupt Server - For Internal FC distribution
+====================================================
+
+Version is 1.0á, this is still in development, and will be untill
+< Unreal 2 | [ Rectum ] [Impact] | Potato | ? > is finished.
+
+Read dis.h for function descriptions.
+
+makefile	guess (microsoft nmake)
+dis.h		C header file for routines in disc.asm
+disc.asm	C interface routines for DIS (also usable from asm)
+dis.asm		Resident DIS server main program
+disint.asm	Actual DIS interrupt server
+distest.c	C test program for DIS
+notes		Notes... Nothing special
+
+The disc.asm(obj) is the easiest way to call dis from C. If you want
+to call it from asm, see the disc.asm and copy routines from there
+or include it to your asm.

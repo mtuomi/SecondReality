@@ -1,0 +1,1601 @@
+groupheader equ	2	;bytes to add to group offset to get MEMBERS COUNT
+
+globalshr equ 0 ;2
+
+MAXCMD equ 10000 ;maximum num of commands done by docmd_dssi
+
+ALIGN 4
+curxpos	dd	?
+curypos	dd	?
+curzpos	dd	?
+curmatrix dw	9 dup(?)
+tmpmatrix dw	9 dup(?)
+	dw	9 dup(?)
+	dw	9 dup(?)
+
+ALIGN	4
+objoffset dw	?
+objsegment dw	?
+
+PUBLIC	_zadd
+_zadd	LABEL WORD
+unused	dw	?
+getme	dw	?
+
+ALIGN	4
+;rotate sins/coss
+rxsin	dw	0
+rxcos	dw	0
+rysin	dw	0
+rycos	dw	0
+rzsin	dw	0
+rzcos	dw	0
+
+ALIGN  4
+projxmul dd	256
+projymul dd	256
+projminz dd	256
+projminzshr dw  8   
+projxadd dw	160
+projyadd dw	80
+
+addx	dw	0
+addy	dw	0
+addz	dw	0
+addshr	dw	0
+addy0	dw	0 ;temp shadow
+
+;rotated point data
+pointadd equ	32
+pointshl equ	5
+pointnum dw	0
+ALIGN	4
+cpoint	dw	32 dup(16 dup(0))
+MAXPOINT equ 512
+point	dw	MAXPOINT dup(16 dup(0)) ;-,-,-,flags,PX,PY,-,-, ddX,ddY,ddZ,-,-
+				;+1 = out to right
+				;+2 = out to left
+				;+4 = out to up
+				;+8 = out to down
+				;+16 = behind the eye
+				;PX/PY=projected
+				;ddX/Y/Z are 32 bit for point vertices,
+				; but only 16 bits for normal vertices
+pointend dw	pointadd dup('!')
+PX	equ	0
+PY	equ	4
+PZ	equ	8
+PPX	equ	12
+PPY	equ	14 ;PPY must be just after PPX
+PFL	equ	16
+PRX	equ	18
+PRY	equ	20 ;PRY must be just after PRX
+PRFL	equ	22
+PTX	equ	24
+PTY	equ	26
+totalhiddenflags dw 0
+groupflags dw	0 ;of polygon group
+objectflags dw	0 ;of current object
+polynormal dw	0 ;tmp storage
+
+ALIGN 2
+pointlist dw	32 dup(0)
+
+d3clipcut PROC NEAR
+	;save bp(invisible)/bx,si,di, return dx/ax
+	push	si
+	
+	mov	cl,byte ptr ds:projminzshr
+	
+	mov	esi,dword ptr ds:point[bx+PZ]
+	mov	edx,esi
+	sub	esi,dword ptr ds:point[bp+PZ]
+	sub	edx,ds:projminz
+	xor	eax,eax
+	shr	edx,1
+	rcr	eax,1
+	cmp	esi,edx
+	jle	dcp23
+	div	esi
+	mov	esi,eax
+	
+dcp3:	mov	eax,dword ptr ds:point[bp+PX]
+	sub	eax,dword ptr ds:point[bx+PX]
+	imul	esi
+	shld	edx,eax,1
+	mov	eax,edx
+	add	eax,dword ptr ds:point[bx+PX]
+	imul	ds:projxmul
+	shrd	eax,edx,cl
+	add	ax,ds:projxadd
+	
+	push	ax
+	
+	mov	eax,dword ptr ds:point[bp+PY]
+	sub	eax,dword ptr ds:point[bx+PY]
+	imul	esi
+	shld	edx,eax,1
+	mov	eax,edx
+	add	eax,dword ptr ds:point[bx+PY]
+	imul	ds:projymul
+	shrd	eax,edx,cl
+	add	ax,ds:projyadd
+	
+	pop	dx
+	
+	pop	si
+	ret
+
+dcp23:	mov	esi,16384
+	jmp	dcp3
+d3clipcut ENDP
+
+ALIGN	2
+lastindex dw	0
+clipped	dw	0
+
+d3clip	PROC NEAR
+	;ds:[si]=>points, bp=lastindex
+	push	ds
+	mov	ax,cs
+	mov	ds,ax
+	mov	ds:clipped,0
+	add	bp,OFFSET pointlist
+	mov	ds:lastindex,bp
+	mov	si,OFFSET pointlist
+	mov	di,OFFSET polyxy
+	;first dot
+	mov	bp,ds:[si]
+	mov	dl,-1 ;invisible
+	test	ds:point[bp+PFL],16
+	jnz	dcl5
+	mov	dl,1 ;visible
+	mov	eax,DWORD PTR ds:point[bp+PPX]
+	mov	ds:[di],eax
+	add	di,4
+dcl5:	add	si,2
+	;other dots
+dcl1:	mov	bx,ds:[si]
+	test	ds:point[bx+PFL],16
+	jz	dcl3
+	;invisible dot
+	cmp	dl,-1
+	je	dcl4 ;last was also invisible
+	mov	ds:clipped,1
+	;last line was visible, cut
+	xchg	bp,bx
+	call	d3clipcut ;points bp/bx
+	xchg	bp,bx
+	mov	ds:[di],dx ;x
+	mov	ds:[di+2],ax ;y
+	add	di,4
+	mov	dl,-1
+	jmp	dcl4
+	
+dcl3:	;visible dot
+	cmp	dl,1
+	je	dcl6 ;last was also visible
+	;last line was invisible, cut
+	call	d3clipcut ;points bp/bx
+	mov	ds:[di],dx ;x
+	mov	ds:[di+2],ax ;y
+	add	di,4
+	mov	dl,1
+dcl6:	cmp	si,ds:lastindex
+	je	dcl2
+	mov	eax,DWORD PTR ds:point[bx+PPX]
+	mov	ds:[di],eax
+	add	di,4
+	
+dcl4:	cmp	si,ds:lastindex
+	je	dcl2
+	add	si,2
+	mov	bp,bx
+	jmp	dcl1
+dcl2:
+	sub	di,OFFSET polyxy
+	shr	di,2
+	mov	ds:polysides,di
+	mov	ax,ds:clipped
+	pop	ds
+	ret
+d3clip	ENDP
+
+ALIGN 4
+tmpesi	dd	?
+td3clipcut2 PROC NEAR
+	;save bp(invisible)/bx,si,di, return edx/eax/cx(=hiddenflags)
+	push	si
+	
+	mov	cl,byte ptr ds:projminzshr
+	
+	mov	esi,dword ptr ds:point[bx+PZ]
+	mov	eax,esi
+	sub	esi,dword ptr ds:point[bp+PZ]
+	sub	eax,ds:projminz
+	cdq
+	shl	eax,14
+	div	esi
+	mov	esi,eax
+	
+dc1p3:	mov	ds:tmpesi,esi
+	;mov	eax,16384
+	;sub	eax,esi
+	;imul	eax
+	;sar	eax,14
+	;mov	esi,16384
+	;sub	esi,eax
+	;
+	mov	ax,word ptr ds:point[bp+PTX]
+	sub	ax,word ptr ds:point[bx+PTX]
+	cwde
+	imul	esi
+	sar	eax,14
+	add	ax,word ptr ds:point[bx+PTX]
+	push	ax ;X
+	mov	ax,word ptr ds:point[bp+PTY]
+	sub	ax,word ptr ds:point[bx+PTY]
+	cwde
+	imul	esi
+	sar	eax,14
+	add	ax,word ptr ds:point[bx+PTY]
+	push	ax ;Y
+	mov	esi,ds:tmpesi
+
+	mov	eax,dword ptr ds:point[bp+PX]
+	sub	eax,dword ptr ds:point[bx+PX]
+	imul	esi
+	sar	eax,14
+	add	eax,dword ptr ds:point[bx+PX]
+	imul	ds:projxmul
+	shrd	eax,edx,cl
+	add	ax,ds:projxadd
+	push	ax
+	
+	mov	eax,dword ptr ds:point[bp+PY]
+	sub	eax,dword ptr ds:point[bx+PY]
+	imul	esi
+	sar	eax,14
+	add	eax,dword ptr ds:point[bx+PY]
+	imul	ds:projymul
+	shrd	eax,edx,cl
+	add	ax,ds:projyadd
+	pop	dx
+	
+	xor	cx,cx
+	cmp	dx,ds:WMINX
+	jnl	dc1p41
+	or	cl,1
+dc1p41:	cmp	dx,ds:WMAXX
+	jng	dc1p42
+	or	cl,2
+dc1p42:	cmp	ax,ds:WMINY
+	jnl	dc1p43
+	or	cl,4
+dc1p43:	cmp	ax,ds:WMAXY
+	jnl	dc1p44
+	or	cl,8
+dc1p44:	
+	shl	eax,16
+	mov	ax,dx
+	
+	pop	dx
+	shl	edx,16
+	pop	dx
+	
+	pop	si
+	ret
+td3clipcut2 ENDP
+
+td3clip2 PROC NEAR
+	;ds:[si]=>points, bp=lastindex
+	push	ds
+	mov	ax,cs
+	mov	ds,ax
+	mov	ds:clipped,0
+	add	bp,OFFSET pointlist
+	mov	ds:lastindex,bp
+	mov	si,OFFSET pointlist
+	mov	di,OFFSET cpoint
+	;first dot
+	mov	bp,ds:[si]
+	mov	dl,-1 ;invisible
+	test	ds:point[bp+PFL],16
+	jnz	dc1l5
+	mov	dl,1 ;visible
+	mov	eax,DWORD PTR ds:point[bp+PPX]
+	mov	ds:[di+PPX],eax
+	mov	eax,DWORD PTR ds:point[bp+PTX]
+	mov	ds:[di+PTX],eax
+	mov	eax,DWORD PTR ds:point[bp+PZ]
+	mov	ds:[di+PZ],eax
+	mov	ax,ds:point[bp+PFL]
+	mov	ds:[di+PFL],ax
+	add	di,pointadd
+dc1l5:	add	si,2
+	;other dots
+dc1l1:	mov	bx,ds:[si]
+	test	ds:point[bx+PFL],16
+	jz	dc1l3
+	;invisible dot
+	cmp	dl,-1
+	je	dc1l4 ;last was also invisible
+	mov	ds:clipped,1
+	;last line was visible, cut
+	xchg	bp,bx
+	call	td3clipcut2 ;points bp/bx
+	mov	ds:[di+PPX],eax 
+	mov	ds:[di+PTX],edx
+	mov	ds:[di+PFL],cx
+	mov	eax,cs:projminz
+	mov	ds:[di+PZ],eax
+	xchg	bp,bx
+	add	di,pointadd
+	mov	dl,-1
+	jmp	dc1l4
+	
+dc1l3:	;visible dot
+	cmp	dl,1
+	je	dc1l6 ;last was also visible
+	;last line was invisible, cut
+	call	td3clipcut2 ;points bp/bx
+	mov	ds:[di+PPX],eax 
+	mov	ds:[di+PTX],edx
+	mov	ds:[di+PFL],cx
+	mov	eax,cs:projminz
+	mov	ds:[di+PZ],eax
+	add	di,pointadd
+	mov	dl,1
+dc1l6:	cmp	si,ds:lastindex
+	je	dc1l2
+	mov	eax,DWORD PTR ds:point[bx+PPX]
+	mov	ds:[di+PPX],eax
+	mov	eax,DWORD PTR ds:point[bx+PZ]
+	mov	ds:[di+PZ],eax
+	mov	eax,DWORD PTR ds:point[bx+PTX]
+	mov	ds:[di+PTX],eax
+	mov	ax,ds:point[bx+PFL]
+	mov	ds:[di+PFL],ax
+	add	di,pointadd
+	
+dc1l4:	cmp	si,ds:lastindex
+	je	dc1l2
+	add	si,2
+	mov	bp,bx
+	jmp	dc1l1
+dc1l2:
+	sub	di,OFFSET cpoint
+	shr	di,pointshl
+	mov	ds:polysides,di
+	mov	ax,ds:clipped
+	pop	ds
+	ret
+td3clip2 ENDP
+
+td3loadbp PROC NEAR
+	mov	eax,dword ptr ds:cpoint[bp+PPX]
+	mov	ecx,dword ptr ds:cpoint[bp+PZ]
+	mov	edx,dword ptr ds:cpoint[bp+PTX]
+	ret
+td3loadbp ENDP
+
+td3storebx PROC NEAR
+	mov	ds:[di],eax
+	mov	ds:[POLYTXY+di],edx
+	mov	ds:[POLYZ+di],ecx
+	add	di,4
+	ret
+td3storebx ENDP
+
+td3clipbx PROC NEAR
+	;bx=end to be clipped
+	;bp=other end
+	;return: eax=y/x
+	push	si
+	push	di
+	mov	cx,16384 ;delta
+	mov	si,ds:cpoint[bx+PFL]
+td3k0:	test	si,1
+	jz	td3k4
+	;x<minx
+	test	ds:cpoint[bp+PFL],1
+	jnz	td3k9
+	mov	ax,ds:WMINX
+	mov	di,ds:cpoint[bx+PPX]
+	sub	ax,di
+	cwde
+	shl	eax,14
+	neg	di
+	add	di,ds:cpoint[bp+PPX]
+	movsx	edi,di
+	cdq
+	idiv	edi
+	cmp	ax,cx
+	jg	td3k4
+	mov	cx,ax
+td3k4:	test	si,2
+	jz	td3k2
+	;x>maxx
+	test	ds:cpoint[bp+PFL],2
+	jnz	td3k9
+	mov	ax,ds:cpoint[bx+PPX]
+	mov	di,ax
+	sub	ax,ds:WMAXX
+	cwde
+	shl	eax,14
+	sub	di,ds:cpoint[bp+PPX]
+	movsx	edi,di
+	cdq
+	idiv	edi
+	cmp	ax,cx
+	jg	td3k2
+	mov	cx,ax
+td3k2:	;clip by cx (0..16383)
+	;X/Y
+	mov	eax,dword ptr ds:cpoint[bp+PPX] ;end
+	mov	esi,dword ptr ds:cpoint[bx+PPX] ;beg
+	sub	ax,si
+	imul	cx
+	shrd	ax,dx,14
+	add	ax,si ;x
+	rol	eax,16
+	rol	esi,16
+	sub	ax,si
+	imul	cx
+	shrd	ax,dx,14
+	add	ax,si ;y
+	rol	eax,16 ;y/x
+	push	eax
+	;Z
+	;find suitable texture function
+	mov	eax,256
+	imul	dword ptr ds:cpoint[bx+PZ]
+	idiv	dword ptr ds:cpoint[bp+PZ]
+	mov	si,-4
+td3k8:	add	si,4
+	cmp	fs:[si],ax
+	ja	td3k8
+	mov	si,fs:[si+2]
+	mov	ax,cx
+	shr	ax,5
+	shl	ax,1
+	add	si,ax
+	mov	cx,fs:[si] ;si=0..511
+	mov	eax,dword ptr ds:cpoint[bp+PZ] ;end
+	mov	esi,dword ptr ds:cpoint[bx+PZ] ;beg
+	sub	eax,esi
+	imul	cx
+	shrd	ax,dx,9
+	add	eax,esi
+	push	eax ;Z
+	;texture X/Y
+	mov	eax,dword ptr ds:cpoint[bp+PTX] ;end
+	mov	esi,dword ptr ds:cpoint[bx+PTX] ;beg
+	sub	ax,si
+	imul	cx
+	shrd	ax,dx,9
+	add	ax,si ;x
+	rol	eax,16
+	rol	esi,16
+	sub	ax,si
+	imul	cx
+	shrd	ax,dx,9
+	add	ax,si ;y
+	rol	eax,16 ;y/x
+	pop	ecx ;z
+	mov	edx,eax ;txy
+	pop	eax ;xy
+	;
+	pop	di
+	pop	si
+	clc
+	ret
+td3k9:	pop	di
+	pop	si
+	stc
+	ret
+td3clipbx ENDP
+
+td3clip PROC NEAR
+	push	ds
+	mov	fs,cs:depthseg
+	mov	ax,cs
+	mov	ds,ax
+	mov	ds:clipped,0
+	mov	bp,ds:polysides
+	shl	bp,pointshl
+	mov	ds:lastindex,bp
+	xor	si,si
+	mov	di,OFFSET polyxy
+	;BX=beg, BP=endp
+	;first dot
+	mov	bp,si
+td3l1:	cmp	si,ds:lastindex
+	jb	td3l2
+	sub	di,OFFSET polyxy
+	shr	di,2
+	mov	ds:polysides,di
+	pop	ds
+	ret
+td3l2:	mov	bx,bp
+	add	si,pointadd
+	mov	bp,si
+	cmp	bp,ds:lastindex
+	jne	td3l7
+	xor	bp,bp
+td3l7:	mov	ax,ds:cpoint[PFL+bx]
+	and	ax,not (4+8)
+	mov	dx,ds:cpoint[PFL+bp]
+	and	dx,not (4+8)
+	cmp	ax,0
+	je	td3l5
+	cmp	dx,0
+	je	td3l4
+	;clip both ends
+	call	td3clipbx
+	jc	td3l91
+	call	td3storebx
+td3l91:	xchg	bx,bp
+	call	td3clipbx
+	jc	td3l92
+	call	td3storebx
+td3l92:	xchg	bx,bp
+	jmp	td3l1
+td3l4:	cmp	ax,0
+	je	td3l5
+	;bf
+	call	td3clipbx
+	jc	td3l93
+	call	td3storebx
+td3l93:	call	td3loadbp
+	jc	td3l94
+	call	td3storebx
+td3l94:	jmp	td3l1
+td3l5:	cmp	dx,0
+	je	td3l6
+	;ef
+	xchg	bx,bp
+	call	td3clipbx
+	jc	td3l95
+	call	td3storebx
+td3l95:	xchg	bx,bp
+	jmp	td3l1
+td3l6:	call	td3loadbp
+	call	td3storebx
+	jmp	td3l1
+td3clip ENDP
+
+unify32	PROC NEAR
+	;returns: ax,bx,cx (vector length=256)
+	jmp	uni1
+uni2:	sar	eax,4
+	sar	ebx,4
+	sar	ecx,4
+uni1:	cmp	eax,16000
+	jg	uni2
+	cmp	eax,-16000
+	jl	uni2
+	cmp	ebx,16000
+	jg	uni2
+	cmp	ebx,-16000
+	jl	uni2
+	cmp	ecx,16000
+	jg	uni2
+	cmp	ecx,-16000
+	jl	uni2
+	;
+	push	ax
+	push	bx
+	push	cx
+	imul	eax
+	mov	edi,eax
+	mov	eax,ebx
+	imul	eax
+	add	edi,eax
+	mov	eax,ecx
+	imul	eax
+	add	edi,eax
+	mov	si,di
+	shr	edi,16
+	call	longsqrt
+	cmp	ax,0
+	je	uni3
+	mov	si,ax
+	;
+	pop	ax
+	cwd
+	shld	dx,ax,8
+	shl	ax,8
+	idiv	si
+	mov	cx,ax
+	;
+	pop	ax
+	cwd
+	shld	dx,ax,8
+	shl	ax,8
+	idiv	si
+	mov	bx,ax
+	;
+	pop	ax
+	cwd
+	shld	dx,ax,8
+	shl	ax,8
+	idiv	si
+	;
+	ret
+	
+uni3:	xor	ax,ax
+	xor	bx,bx
+	xor	cx,cx
+	ret
+unify32 ENDP
+
+ALIGN 2
+public _testflash,_testflasho,_testflashgo,_testflashpnt
+_testflash dw	0
+_testflasho dw	0
+_testflashgo dw	0
+_testflashpnt dw 0,0
+testflashc dw	0
+flashgo dw	0
+flashgo0 dw	0
+flasher db	0
+
+checkdeg MACRO reg
+	local	l0,l1,l2
+l0:	cmp	reg,3600
+	jb	l1
+	jl	l2
+	;>3600
+	sub	reg,3600
+	jmp	l0
+l2:	;<0
+	add	reg,3600
+	jmp	l0
+l1:	ENDM
+
+	ALIGN 4
+rotatedx dd ?
+rotatedy dd ?
+rotatedz dd ?
+
+rotateposition PROC NEAR
+	mov	eax,ds:[si+0]
+	movsx	ecx,word ptr cs:[di+0]
+	imul	ecx
+	shld	edx,eax,17
+	mov	ebx,edx
+
+	mov	eax,ds:[si+4]
+	movsx	ecx,word ptr cs:[di+2]
+	imul	ecx
+	shld	edx,eax,17
+	add	ebx,edx
+
+	mov	eax,ds:[si+8]
+	movsx	ecx,word ptr cs:[di+4]
+	imul	ecx
+	shld	edx,eax,17
+	add	ebx,edx
+	
+	mov	cs:rotatedx,ebx
+	
+	mov	eax,ds:[si+0]
+	movsx	ecx,word ptr cs:[di+6]
+	imul	ecx
+	shld	edx,eax,17
+	mov	ebx,edx
+
+	mov	eax,ds:[si+4]
+	movsx	ecx,word ptr cs:[di+8]
+	imul	ecx
+	shld	edx,eax,17
+	add	ebx,edx
+
+	mov	eax,ds:[si+8]
+	movsx	ecx,word ptr cs:[di+10]
+	imul	ecx
+	shld	edx,eax,17
+	add	ebx,edx
+	
+	mov	cs:rotatedy,ebx
+	
+	mov	eax,ds:[si+0]
+	movsx	ecx,word ptr cs:[di+12]
+	imul	ecx
+	shld	edx,eax,17
+	mov	ebx,edx
+
+	mov	eax,ds:[si+4]
+	movsx	ecx,word ptr cs:[di+14]
+	imul	ecx
+	shld	edx,eax,17
+	add	ebx,edx
+
+	mov	eax,ds:[si+8]
+	movsx	ecx,word ptr cs:[di+16]
+	imul	ecx
+	shld	edx,eax,17
+	add	ebx,edx
+	
+	mov	cs:rotatedz,ebx
+	ret
+rotateposition ENDP
+
+objadd	LABEL WORD
+	dw	0
+	dw	-1000
+	dw	10000
+objrot	LABEL WORD
+	dw	0
+	dw	0
+	dw	0
+ALIGN 4
+zorder	dw	64 dup(0,0)
+
+;****NRS****
+
+nxpos	dd	?
+nypos	dd	?
+nzpos	dd	?
+;shadow
+nxspos	dd	?
+nyspos	dd	?
+nzspos	dd	?
+PUBLIC _cammatrix
+_cammatrix dw	9 dup(?)
+	dw	9 dup(?) ;reverse cammatrix
+nmatrix	dw	9 dup(?)
+np0	dw	? ;first point number under this node
+npn0	dw	? ;first normal number under this node
+noflags	dw	0
+
+tmprotx dw ?
+tmproty dw ?
+tmprotz dw ?
+
+shadow	db	0 ;flag for drawing
+
+dofirstnrs PROC NEAR
+	mov	ax,cs
+	mov	ds,ax
+	;
+	cmp	dword ptr ds:_tmpxyz[0],-200000000
+	je	notrack
+	mov	ax,asm_objs
+	mov	es,ax
+	mov	si,OFFSET _camera
+	mov	di,OFFSET _tmpxyz
+	call	trackcam
+	mov	ds:_camera[18],bx
+	mov	ds:_camera[20],ax
+notrack:
+	;initial rotate matrix
+	mov	ax,ds:_camera[18]
+	mov	ds:tmprotx,ax
+	mov	ax,ds:_camera[20]
+	mov	ds:tmproty,ax
+	mov	ax,ds:_camera[22]
+	mov	ds:tmprotz,ax
+	;calc XYZ rot
+	mov	si,OFFSET tmprotx
+	mov	di,OFFSET tmpmatrix
+	call	calcmatrixsep ;ds:si=src(rx,ry,rz), ds:di=dest[3 matrices]
+	mov	ax,cs
+	mov	es,ax
+	mov	si,OFFSET tmpmatrix+1*18
+	mov	di,OFFSET tmpmatrix+0*18
+	call	mulmatrices ;Y*=X
+	mov	si,OFFSET tmpmatrix+1*18
+	mov	di,OFFSET tmpmatrix+2*18
+	call	mulmatrices ;Y*=Z
+	mov	si,OFFSET tmpmatrix+1*18
+	mov	cx,9
+	xor	bx,bx
+ccam2:	mov	ax,cs:[si+bx]
+	mov	cs:_cammatrix[bx+9*2],ax
+	add	bx,2
+	loop	ccam2
+	;
+	neg	ds:tmprotx
+	neg	ds:tmproty
+	neg	ds:tmprotz
+	mov	si,OFFSET tmprotx
+	mov	di,OFFSET tmpmatrix
+	call	calcmatrixsep ;ds:si=src(rx,ry,rz), ds:di=dest[3 matrices]
+	;multiply to get: Z*X*Y
+	mov	ax,cs
+	mov	es,ax
+	mov	si,OFFSET tmpmatrix+2*18
+	mov	di,OFFSET tmpmatrix+0*18
+	call	mulmatrices ;Z*=X
+	mov	si,OFFSET tmpmatrix+2*18
+	mov	di,OFFSET tmpmatrix+1*18
+	call	mulmatrices ;Z*=Y
+	;move the result to nmatrix
+	mov	si,OFFSET tmpmatrix+2*18
+	mov	cx,9
+	xor	bx,bx
+ccam1:	mov	ax,cs:[si+bx]
+	mov	cs:nmatrix[bx],ax
+	mov	cs:_cammatrix[bx],ax
+	add	bx,2
+	loop	ccam1
+	;calc initial camera rotation
+	mov	eax,dword ptr ds:_camera[0]
+	neg	eax
+	mov	ds:nxpos,eax
+	mov	eax,dword ptr ds:_camera[4]
+	neg	eax
+	mov	ds:nypos,eax
+	mov	eax,dword ptr ds:_camera[8]
+	neg	eax
+	mov	ds:nzpos,eax
+	mov	si,OFFSET nxpos
+	mov	di,OFFSET nmatrix
+	call	rotateposition ;si=>rotatedx,y,z
+	mov	ebx,ds:rotatedx
+	mov	ecx,ds:rotatedy
+	mov	edx,ds:rotatedz
+	mov	ds:nxpos,ebx
+	mov	ds:nypos,ecx
+	mov	ds:nzpos,edx
+	mov	ds:nxspos,ebx
+	mov	ds:nyspos,ecx
+	mov	ds:nzspos,edx
+;	mov	ds:addy0,cx ;for temp shadow
+	mov	ds:noflags,0
+	;init OBJD list pointers
+	mov	cs:oopnt,OFFSET objdoffs
+	mov	cs:odpnt,OFFSET objdarea
+	;calc horizon
+	cmp	cs:_horizonenabled,0
+	je	nohorz
+	call	calchorizon
+	call	drawhorizon
+nohorz:	;do world
+	mov	ax,asm_objs
+	mov	ds,ax
+	mov	si,OFFSET _worldroot
+	call	donrsnode
+	ret
+dofirstnrs ENDP
+
+ALIGN 2
+newlight dw	9460,9460,9460
+
+normallight PROC NEAR
+	;ds=cs
+	;bx=normal vertex number (preshifted by pointshl)
+	;ret: ax=relative brightness 0..255
+	mov	ax,cs
+	mov	ds,ax
+	mov	ax,ds:point[bx+PX]
+	imul	ds:newlight[0]
+	mov	bp,ax
+	mov	cx,dx
+	mov	ax,ds:point[bx+PY]
+	imul	ds:newlight[2]
+	add	bp,ax
+	adc	cx,dx
+	mov	ax,ds:point[bx+PZ]
+	imul	ds:newlight[4]
+	add	bp,ax
+	adc	cx,dx
+	shld	cx,bp,2
+	mov	ax,cx
+	sar	ax,7
+	add	ax,128
+	;ax=0..255
+	ret
+normallight ENDP
+
+checknormalhidden PROC NEAR
+	;ds=cs
+	;bx=normal vertex number,di=vertex number from tested polygon
+	;^both above should be preshifted by pointshl
+	;ret: carry=1=hidden
+	mov	eax,dword ptr ds:point[di+PX]
+	movsx	edx,word ptr ds:point[bx+PX]
+	imul	edx
+	mov	ebp,eax
+	mov	ecx,edx
+	mov	eax,dword ptr ds:point[di+PY]
+	movsx	edx,word ptr ds:point[bx+PY]
+	imul	edx
+	add	ebp,eax
+	adc	ecx,edx
+	mov	eax,dword ptr ds:point[di+PZ]
+	movsx	edx,word ptr ds:point[bx+PZ]
+	imul	edx
+	add	ebp,eax
+	adc	ecx,edx
+	rcl	ecx,1 ;if cx<0, carry=1=visible
+	cmc	;now carry=1 when invisible
+	ret
+checknormalhidden ENDP
+
+ALIGN 4
+_texturexy LABEL DWORD
+dd 00000000h,0000003fh,003f003fh,003f0000h
+dd 00000000h,0000003fh,003f003fh,003f0000h
+dd 00000000h,0000003fh,003f003fh,003f0000h
+dd 00000000h,0000003fh,003f003fh,003f0000h
+
+nrs_poly PROC NEAR
+	test	cs:noflags,1
+	jnz	nrsnewpoly
+	mov	si,OFFSET m_oldpoly
+	jmp	fatalexit
+nrsnewpoly: ;new polys are created by OC, so some user features done by OC
+	;are disabled for (minimum :-) speed gains.
+	sub	si,2 ;point si to command
+	push	si
+	;single polygon
+	mov	ax,ds:[si+4]
+	mov	cs:color,ax
+	mov	ax,ds:[si+0]
+	and	ah,not 1
+	mov	byte ptr cs:groupflags,ah ;+2=always show, +4=texture, +8=dim
+	mov	cl,al
+	xor	ch,ch ;cx=sides
+	mov	byte ptr cs:polysides,cl
+	mov	ax,ds:[si+2] ;normal
+	mov	cs:polynormal,ax
+	add	si,6
+
+	;normal vector selfhidden? (for dot/line, always visible flag should be on)
+	test	byte ptr cs:groupflags,2
+	jnz	nrp15
+	mov	di,ds:[si]
+	push	ds
+	mov	ax,cs
+	mov	ds,ax
+	mov	bx,ds:polynormal
+	shl	bx,pointshl
+	shl	di,pointshl
+	push	cx
+	call	checknormalhidden
+	pop	cx ;cx=polysides
+	jc	nrp19 ;hidden by culling (pop ds also at nrp19)
+	pop	ds
+
+nrp15:	mov	di,OFFSET polyxy
+	xor	bp,bp
+	mov	dx,0ff00h
+nrp4:	mov	bx,ds:[si]
+	shl	bx,pointshl
+	mov	cs:pointlist[bp],bx
+	add	bp,2
+	mov	al,byte ptr cs:point[bx+PFL]
+	and	dh,al
+	or	dl,al
+	mov	eax,DWORD PTR cs:point[bx+PPX]
+	mov	cs:[di],eax
+	add	di,4
+	add	si,2
+	loop	nrp4
+	test	cs:groupflags,4
+	jz	nrp9
+	;texture
+	push	dx
+	add	si,2 ;pic segment
+	mov	cx,cs:polysides
+	xor	di,di
+nrpt1:	mov	dx,ds:[si]
+	movzx	ax,dh
+	shl	eax,16
+	movzx	ax,dl
+	mov	bx,cs:pointlist[di]
+	;shl	eax,5
+	add	si,2
+	mov	dword ptr cs:point[bx+PTX],eax
+	shl	di,1
+	mov	dword ptr cs:polyxy[POLYTXY+di],eax
+	mov	eax,dword ptr cs:point[bx+PZ]
+	mov	dword ptr cs:polyxy[POLYZ+di],eax
+	shr	di,1
+	add	di,2
+	loop	nrpt1
+	pop	dx
+
+nrp9:	push	ds
+	mov	ax,cs
+	mov	ds,ax
+	;
+	;check polygon visibility / do 3D clip if required
+	cmp	dh,0
+	jnz	nrp19 ;hidden, beside screen
+	test	cs:groupflags,4
+	jnz	nrp7
+	test	dl,16
+	jz	nrp2
+	;3D-clip
+	cmp	ds:polysides,1
+	je	nrp19 ;hidden automaticly
+	mov	ax,ds:pointlist[0]
+	mov	ds:pointlist[bp],ax
+	call	d3clip
+	jmp	nrp2
+nrp7:	test	dl,31
+	jz	nrp2
+	mov	ax,ds:pointlist[0]
+	mov	ds:pointlist[bp],ax
+	call	td3clip2 ;clip point=>cpoint
+	call	td3clip ;clip cpoint=>polyxy texture
+nrp2:	;
+	;polygon visible!
+	mov	ax,ds:color
+	test	ax,256+512
+	jz	nrp16
+	push	ax
+	mov	bx,ds:polynormal
+	shl	bx,pointshl
+	call	normallight
+	pop	dx
+	mov	cl,dh
+	add	cl,2
+	shr	ax,cl ;256=0..31, 512=0..15, 768=0..7
+	add	dx,ax
+	mov	ds:color,dx
+nrp16:	jmp	nrp17 ;no antialiasing
+	test	ds:groupflags,4
+	jz	nrp17
+	;antialiaising
+
+	mov	eax,dword ptr ds:polyxy[POLYZ+0]
+	cmp	eax,20000h
+	ja	nr17d4
+	cmp	eax,10000h
+	ja	nr17d3
+	cmp	eax,8000h
+	ja	nr17d2
+	cmp	eax,4000h
+	ja	nr17d1
+	jmp	nrp17
+
+nr17d1:	mov	cl,1
+	mov	bx,not (8000h)
+	mov	edx,800000h
+	jmp	nr17d0
+nr17d2:	mov	cl,2
+	mov	bx,not (8000h+4000h)
+	mov	edx,800080h
+	jmp	nr17d0
+nr17d3:	mov	cl,3
+	mov	bx,not (8000h+4000h+2000h)
+	mov	edx,8000c0h
+	jmp	nr17d0
+nr17d4:	mov	cl,4
+	mov	bx,not (8000h+4000h+2000h+1000h)
+	mov	edx,8000e0h
+	jmp	nr17d0
+
+nr17d0:	xor	si,si
+	mov	di,cs:polysides
+	cmp	di,0
+	je	nrp19
+nrp17b:	mov	eax,dword ptr ds:polyxy[POLYTXY+si]
+	shr	eax,cl
+	and	ax,bx
+	add	eax,edx
+	mov	dword ptr ds:polyxy[POLYTXY+si],eax
+	add	si,4
+	dec	di
+	jnz	nrp17b
+	;
+nrp17:	call	poly ;draw - tests groupflags&4 for texture
+	
+nrp19:	;polygon invisible/done!
+	pop	ds
+	pop	si
+nrxxx:	mov	dx,ds:[si]
+	movzx	ax,dl
+	test	dh,4
+	jz	nrp20
+	;textured polygon
+	add	ax,ax
+	inc	ax
+nrp20:	add	ax,3
+	shl	ax,1
+	add	si,ax
+	ret
+nrs_poly ENDP
+
+ALIGN 2
+npcount	dw	0
+npandflag dw	0
+
+overflb: jmp overfl
+
+ncalcpoints PROC NEAR
+	;CX=count, DS:SI=pointsource
+	mov	ax,ds
+	mov	es,ax
+	mov	ax,cs
+	mov	ds,ax
+	mov	cs:npcount,cx
+	mov	cs:npandflag,0ffffh
+	mov	di,ds:np0
+	shl	di,pointshl
+	add	di,OFFSET point
+	add	ds:np0,cx
+	;
+	mov	ax,cx
+	shl	ax,pointshl
+	add	ax,di
+	jc	overflb
+	cmp	ax,OFFSET pointend
+	jae	overflb
+
+nrtp1:	;rotate with matrix
+	push	si
+	push	di
+	push	bp
+	mov	bp,es:[si+4]
+	mov	di,es:[si+2]
+	mov	si,es:[si+0]
+	
+mtrn00:	mov	ax,1234h
+	imul	si
+	mov	bx,ax
+	mov	cx,dx
+mtrn02:	mov	ax,1234h
+	imul	di
+	add	bx,ax
+	adc	cx,dx
+mtrn04:	mov	ax,1234h
+	imul	bp
+	add	bx,ax
+	adc	cx,dx
+	shld	cx,bx,1
+	push	cx
+mtrn06:	mov	ax,1234h
+	imul	si
+	mov	bx,ax
+	mov	cx,dx
+mtrn08:	mov	ax,1234h
+	imul	di
+	add	bx,ax
+	adc	cx,dx
+mtrn10:	mov	ax,1234h
+	imul	bp
+	add	bx,ax
+	adc	cx,dx
+	shld	cx,bx,1
+	push	cx
+mtrn12:	mov	ax,1234h
+	imul	si
+	mov	bx,ax
+	mov	cx,dx
+mtrn14:	mov	ax,1234h
+	imul	di
+	add	bx,ax
+	adc	cx,dx
+mtrn16:	mov	ax,1234h
+	imul	bp
+	add	bx,ax
+	adc	cx,dx
+	shld	cx,bx,1
+	pop	dx
+	pop	ax
+	pop	bp
+	pop	di
+	pop	si
+	
+	mov	ds:[di+PX],ax
+	mov	ds:[di+PY],dx
+	;mov	ds:[di+PZ],cx
+	
+	;project
+
+	xor	bp,bp
+	movsx	ebx,cx ;word ptr ds:[di+PZ]
+	add	ebx,ds:nzpos
+	mov	dword ptr ds:[di+PZ],ebx
+	cmp	ebx,ds:projminz
+	jge	nprp2
+	mov	ebx,ds:projminz
+	or	bp,16
+nprp2:	;
+	movsx	eax,word ptr ds:[di+PY]
+	add	eax,ds:nypos
+	mov	dword ptr ds:[di+PY],eax
+	imul	ds:projymul
+	idiv	ebx
+	add	ax,ds:projyadd
+	cmp	ax,ds:WMAXY ;projymax
+	jng	nprp41
+	or	bp,8
+nprp41:	cmp	ax,ds:WMINY ;projymin
+	jnl	nprp42
+	or	bp,4
+nprp42:	mov	ds:[di+PPY],ax ;store Y
+	;
+	movsx	eax,word ptr ds:[di+PX]
+	add	eax,ds:nxpos
+	mov	dword ptr ds:[di+PX],eax
+	imul	ds:projxmul
+	idiv	ebx
+	add	ax,ds:projxadd
+	cmp	ax,ds:WMAXX ;projxmax
+	jng	nprp43
+	or	bp,2
+nprp43:	cmp	ax,ds:WMINX ;projxmin
+	jnl	nprp44
+	or	bp,1
+nprp44:	mov	ds:[di+PPX],ax ;store X
+
+nprp5:	mov	ds:[di+PFL],bp ;store flags, only Zbehind set for now
+
+	;and	ds:npandflag,bp
+	;next point
+	add	si,6
+	add	di,pointadd
+	dec	ds:npcount
+	jz	nrtp2
+	jmp	nrtp1
+nrtp2:	ret
+ncalcpoints ENDP
+
+overfl PROC NEAR
+	mov	si,OFFSET m_outofvx
+	jmp	fatalexit
+overfl ENDP
+
+ncalcpoints2 PROC NEAR
+	;normals etc, only rotate
+	;CX=count, DS:SI=pointsource
+	mov	ax,ds
+	mov	es,ax
+	mov	ax,cs
+	mov	ds,ax
+	mov	cs:npcount,cx
+	mov	di,ds:np0
+	shl	di,pointshl
+	add	di,OFFSET point
+	add	ds:np0,cx
+	;
+	mov	ax,cx
+	shl	ax,pointshl
+	add	ax,di
+	jc	overfl
+	cmp	ax,OFFSET pointend
+	jae	overfl
+
+nrup1:	;rotate with matrix
+	push	si
+	push	di
+	push	bp
+	mov	bp,es:[si+4]
+	mov	di,es:[si+2]
+	mov	si,es:[si+0]
+	
+mtrm00:	mov	ax,1234h
+	imul	si
+	mov	bx,ax
+	mov	cx,dx
+mtrm02:	mov	ax,1234h
+	imul	di
+	add	bx,ax
+	adc	cx,dx
+mtrm04:	mov	ax,1234h
+	imul	bp
+	add	bx,ax
+	adc	cx,dx
+	shld	cx,bx,1
+	push	cx
+mtrm06:	mov	ax,1234h
+	imul	si
+	mov	bx,ax
+	mov	cx,dx
+mtrm08:	mov	ax,1234h
+	imul	di
+	add	bx,ax
+	adc	cx,dx
+mtrm10:	mov	ax,1234h
+	imul	bp
+	add	bx,ax
+	adc	cx,dx
+	shld	cx,bx,1
+	push	cx
+mtrm12:	mov	ax,1234h
+	imul	si
+	mov	bx,ax
+	mov	cx,dx
+mtrm14:	mov	ax,1234h
+	imul	di
+	add	bx,ax
+	adc	cx,dx
+mtrm16:	mov	ax,1234h
+	imul	bp
+	add	bx,ax
+	adc	cx,dx
+	shld	cx,bx,1
+	pop	dx
+	pop	ax
+	pop	bp
+	pop	di
+	pop	si
+	
+	mov	ds:[di+PZ],cx
+	mov	ds:[di+PY],dx
+	mov	ds:[di+PX],ax
+	
+	;next point
+	add	si,6
+	add	di,pointadd
+	dec	ds:npcount
+	jz	nrup2
+	jmp	nrup1
+nrup2:	ret
+ncalcpoints2 ENDP
+
+initnrsobj PROC NEAR
+	push	ds
+	push	si
+	
+	mov	ax,cs
+	mov	ds,ax
+	mov	ds:np0,0
+	
+	pop	si
+	pop	ds
+	ret
+
+	mov	ebx,ds:nxpos
+	mov	eax,ds:nypos
+	mov	edx,ds:nzpos
+	mov	cx,globalshr
+	mov	bp,cx
+	sar	ebx,cl
+	sar	eax,cl
+	sar	edx,cl
+ino3:	cmp	edx,16000
+	jg	ino1
+	cmp	edx,-16000
+	jl	ino1
+	cmp	ebx,16000
+	jg	ino1
+	cmp	ebx,-16000
+	jl	ino1
+	cmp	eax,16000
+	jg	ino1
+	cmp	eax,-16000
+	jl	ino1
+	jmp	ino2
+ino1:	inc	bp
+	sar	ebx,1
+	sar	eax,1
+	sar	edx,1
+	jmp	ino3
+	
+ino2:	mov	ds:addx,bx
+	mov	ds:addy,ax
+	mov	ds:addz,dx
+	mov	ds:addshr,bp
+
+	pop	si
+	pop	ds
+	ret
+initnrsobj ENDP
+
+include veccmd.asm
+
+ALIGN 4
+objdoffs LABEL WORD
+	dw	256 dup(0)
+sentinel1 db	'FCRZ'
+objdarea LABEL WORD
+	db	4096 dup(0)
+sentinel2 db	'FCRZ'
+odpnt	dw	?
+oopnt 	dw	?
+tmpoo	dw	?
+
+pushnstuff MACRO
+	push	dword ptr cs:nxpos
+	push	dword ptr cs:nypos
+	push	dword ptr cs:nzpos
+	push	dword ptr cs:nmatrix[0]
+	push	dword ptr cs:nmatrix[4]
+	push	dword ptr cs:nmatrix[8]
+	push	dword ptr cs:nmatrix[12]
+	push	word ptr cs:nmatrix[16]
+	push	word ptr cs:np0
+	ENDM
+
+popnstuff MACRO
+	pop	word ptr cs:np0
+	pop	word ptr cs:nmatrix[16]
+	pop	dword ptr cs:nmatrix[12]
+	pop	dword ptr cs:nmatrix[8]
+	pop	dword ptr cs:nmatrix[4]
+	pop	dword ptr cs:nmatrix[0]
+	pop	dword ptr cs:nzpos
+	pop	dword ptr cs:nypos
+	pop	dword ptr cs:nxpos
+	ENDM
+	
+OBJDSIZE equ	40 ;nstuff size
+	
+loadnstuffdi PROC NEAR
+	mov	eax,cs:[di+8]
+	mov	cs:nxpos,eax
+	mov	eax,cs:[di+12]
+	mov	cs:nypos,eax
+	mov	eax,cs:[di+16]
+	mov	cs:nzpos,eax
+	mov	eax,dword ptr cs:[di+20]
+	mov	dword ptr cs:nmatrix[0],eax
+	mov	eax,dword ptr cs:[di+24]
+	mov	dword ptr cs:nmatrix[4],eax
+	mov	eax,dword ptr cs:[di+28]
+	mov	dword ptr cs:nmatrix[8],eax
+	mov	eax,dword ptr cs:[di+32]
+	mov	dword ptr cs:nmatrix[12],eax
+	mov	ax,cs:[di+36]
+	mov	cs:nmatrix[16],ax
+	mov	ax,cs:[di+38]
+	mov	cs:noflags,ax
+	ret
+loadnstuffdi ENDP
+
+savenstuffdi PROC NEAR
+	mov	eax,cs:nxpos
+	mov	cs:[di+8],eax
+	mov	eax,cs:nypos
+	mov	cs:[di+12],eax
+	mov	eax,cs:nzpos
+	mov	cs:[di+16],eax
+	mov	eax,dword ptr cs:nmatrix[0]
+	mov	dword ptr cs:[di+20],eax
+	mov	eax,dword ptr cs:nmatrix[4]
+	mov	dword ptr cs:[di+24],eax
+	mov	eax,dword ptr cs:nmatrix[8]
+	mov	dword ptr cs:[di+28],eax
+	mov	eax,dword ptr cs:nmatrix[12]
+	mov	dword ptr cs:[di+32],eax
+	mov	word ptr ax,cs:nmatrix[16]
+	mov	word ptr cs:[di+36],ax
+	mov	ax,cs:noflags
+	mov	cs:[di+38],ax
+	ret
+savenstuffdi ENDP
+
+visibledi PROC NEAR
+;di=element offset in OBJD struct
+;return carry if object invisible
+	clc
+	ret
+visibledi ENDP
+
+comparebxbp PROC NEAR 
+;bx=first element, bp=second element (both offsets to the OBJD structs)
+;return carry if these should be swapped
+	mov	eax,dword ptr cs:[bp+16] ;zadd
+	cmp	eax,dword ptr cs:[bx+16] ;zadd
+	ret
+comparebxbp ENDP
+	
+nrsproc PROC NEAR
+donrswheader:
+;initalize/dobj nodess
+	push	cs:odpnt
+	push	cs:oopnt
+	;set partial OBJD area for this 'father' node
+	mov	di,cs:odpnt
+	call	savenstuffdi
+	add	di,OBJDSIZE ;OBJD structure size
+	mov	cs:odpnt,di
+	sub	di,OBJDSIZE
+	push	cs:oopnt
+	push	cs:oopnt
+dnh1:	;do initialization
+	push	di
+	push	ds
+	push	si
+	mov	ax,ds:[si]
+	and	ax,255
+	add	si,ax
+	mov	ax,MAXCMD
+	call	docmd_dssi
+	mov	dx,si ;current command pos=drawing commands start
+	pop	si
+	pop	ds
+	;check visibility 1
+	cmp	ax,0
+	je	dnh4 ;initialization command returned, don't draw
+	;allocate OBJD area
+	mov	bx,cs:oopnt
+	mov	di,cs:odpnt
+	mov	cs:[bx],di
+	;set OBJD area
+	mov	al,ds:[si+1] ;type
+	mov	cs:[di+0],al
+	mov	cs:[di+2],dx ;offset to draw commands
+	mov	cs:[di+4],ds ;segment to draw commands
+	call	savenstuffdi
+	add	di,OBJDSIZE ;OBJD structure size
+	mov	cs:odpnt,di
+	;check for visibility 2
+	call	visibledi
+	jc	dnh4
+	;accept the entry in the OBJDoffset list
+	add	bx,2
+	mov	cs:oopnt,bx
+dnh4:	;next
+	pop	di
+	call	loadnstuffdi
+	mov	si,ds:[si+4]
+	cmp	si,0
+	jne	dnh1
+;sort.. not yet :-)
+	pop	cs:tmpoo
+	mov	si,cs:tmpoo
+dns2:	cmp	si,cs:oopnt
+	jae	dns1
+	mov	bx,cs:[si]
+	mov	di,si
+dns4:	sub	di,2
+	cmp	di,cs:tmpoo
+	jb	dns3
+	mov	bp,cs:[di]
+	call	comparebxbp ;carry=switch bx/bp
+	jnc	dns3
+	mov	cs:[di+2],bp
+	jmp	dns4
+dns3:	mov	cs:[di+2],bx
+	add	si,2	
+	jmp	dns2
+dns1:	;
+;display what's in OBJD list
+	pop	bx ;original oopnt
+dnh3:	cmp	bx,cs:oopnt
+	jae	dnh2
+	push	bx
+	mov	bx,cs:[bx]
+	
+	;load pos/matrix
+	mov	di,bx
+	call	loadnstuffdi
+	test	cs:noflags,2
+	jz	dnh5
+	;??Shadow?? Doesn't work ok.
+	push	bx
+	;load command offset
+	mov	si,cs:[bx+2]
+	mov	ds,cs:[bx+4]
+	;do drawing
+	mov	ax,MAXCMD
+	mov	cs:shadow,1
+	call	docmd_dssi
+	pop	bx
+	;load pos/matrix
+	mov	di,bx
+	call	loadnstuffdi
+dnh5:	;load command offset
+	mov	si,cs:[bx+2]
+	mov	ds,cs:[bx+4]
+	;do drawing
+	mov	ax,MAXCMD
+	mov	cs:shadow,0
+	call	docmd_dssi
+	;
+	pop	bx
+	add	bx,2
+	jmp	dnh3
+dnh2:;done!
+	pop	cs:oopnt
+	pop	cs:odpnt
+	mov	di,cs:odpnt
+	call	loadnstuffdi
+	ret
+
+donrsnode: ;temp for older structs
+	pushnstuff
+	mov	ax,MAXCMD
+	call	docmd_dssi
+	popnstuff
+	ret
+nrsproc ENDP

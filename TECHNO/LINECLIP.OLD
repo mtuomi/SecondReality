@@ -1,0 +1,101 @@
+
+CYMIN	equ	0
+CYMAX	equ	199
+CXMIN	equ	0
+CXMAX	equ	319
+
+clipline PROC NEAR
+	;entry: (ax,bx)-(dx,cx)
+	;exit: (ax,bx)-(dx,cx) [clipped]
+	;(si,bx)-(di,cx)
+	mov	cs:clipleft,0
+	cmp	bx,cx
+	jle	@@2
+	mov	si,dx
+	mov	di,ax
+	xchg	bx,cx
+	jmp	@@1
+@@2:	mov	si,ax
+	mov	di,dx
+@@1:	;--- bx<=cx
+	cmp	bx,CYMIN
+	jge	@@3
+	cmp	cx,CYMIN
+	jl	@@hid
+	mov	ax,di
+	sub	ax,si
+	mov	bp,CYMIN
+	sub	bp,bx
+	imul	bp
+	mov	bp,cx
+	sub	bp,bx
+	idiv	bp
+	mov	bx,CYMIN
+	add	si,ax
+@@3:	cmp	cx,CYMAX
+	jle	@@4
+	cmp	bx,CYMAX
+	jg	@@hid
+	mov	ax,si
+	sub	ax,di
+	mov	bp,cx
+	sub	bp,CYMAX
+	imul	bp
+	mov	bp,cx
+	sub	bp,bx
+	idiv	bp
+	mov	cx,CYMAX
+	add	di,ax
+@@4:	;--- si<=di
+	cmp	si,di
+	jle	@@5
+	xchg	si,di
+	xchg	bx,cx
+@@5:	cmp	si,CXMIN
+	jge	@@6
+	cmp	di,CXMIN
+	jl	@@hid2
+	mov	ax,cx
+	sub	ax,bx
+	mov	bp,CXMIN
+	sub	bp,si
+	imul	bp
+	mov	bp,di
+	sub	bp,si
+	idiv	bp
+	mov	si,CXMIN
+	add	bx,ax
+	mov	cs:clipleft,ax
+@@6:	cmp	di,CXMAX
+	jle	@@7
+	cmp	si,CXMAX
+	jg	@@hid
+	mov	ax,bx
+	sub	ax,cx
+	mov	bp,di
+	sub	bp,CXMAX
+	imul	bp
+	mov	bp,di
+	sub	bp,si
+	idiv	bp
+	mov	di,CXMAX
+	add	cx,ax
+@@7:	mov	ax,si
+	mov	dx,di
+	cmp	bx,cx
+	je	@@hid
+	clc
+	ret
+@@hid:	stc
+	ret
+@@hid2:	;hidden to left
+	mov	bp,cx
+	sub	bp,bx
+	mov	cs:clipleft,bp
+	mov	ax,si
+	mov	dx,di
+	mov	cx,bx
+	clc
+	ret
+clipline ENDP
+

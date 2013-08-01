@@ -1,0 +1,27 @@
+checkhiddenbx PROC NEAR
+	push	si
+	mov	ax,es:[bx]
+	mov	si,es:[bx+2]
+	sub	ax,es:[bx+4]
+	sub	si,es:[bx+8+2]
+	imul	si
+	push	ax
+	push	dx
+	mov	ax,es:[bx+2]
+	mov	si,es:[bx]
+	sub	ax,es:[bx+4+2]
+	sub	si,es:[bx+8]
+	imul	si
+	pop	cx
+	pop	si
+	sub	ax,si
+	sbb	dx,cx
+	pop	si
+	cmp	dx,0
+	jl	@@1
+	clc
+	ret
+@@1:	stc
+	ret
+checkhiddenbx ENDP
+

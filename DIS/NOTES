@@ -1,0 +1,10 @@
+0 version
+1 waitborder, returns number frames
+2 keybhit 0 ei, 1=quit
+3 indemo
+
+. set framecounter
+. get framecounter
+. insert copper routine
+. remove copper routine
+. get equpointer

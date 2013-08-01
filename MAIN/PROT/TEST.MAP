@@ -1,0 +1,8 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 04E6AH 04E6BH LERSSICODE         
+
+Program entry point at 0000:4E3A
+Warning: No stack
+

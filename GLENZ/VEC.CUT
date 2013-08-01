@@ -1,0 +1,164 @@
+	push	si
+	push	di
+	mov	si,cx
+	mov	di,bx
+	setpalxxx
+	
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	add	cl,cs:back4[0]
+	add	bl,cs:back4[1]
+	add	bh,cs:back4[2]
+	add	cl,cs:back3[0]
+	add	bl,cs:back3[1]
+	add	bh,cs:back3[2]
+	add	cl,cs:back2[0]
+	add	bl,cs:back2[1]
+	add	bh,cs:back2[2]
+	add	cl,cs:back1[0]
+	add	bl,cs:back1[1]
+	add	bh,cs:back1[2]
+	setpalxxx		
+	mov	bx,di
+	mov	cx,si
+	
+	pop	di
+	pop	si

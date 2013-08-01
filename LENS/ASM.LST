@@ -1,0 +1,1290 @@
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 1
+asm.asm
+
+
+
+      1	    0000			 code SEGMENT para public 'CODE'
+      2					 ASSUME	cs:code
+      3					 .386
+      4					 LOCALS
+      5
+      6					 PUBLIC	_back
+      7	    0000  0000 0000		 _back	 dw	 0,0
+      8					 PUBLIC	_rotpic
+      9	    0004  0000 0000		 _rotpic dw	 0,0
+     10
+     11					 DOWORD	 MACRO	 diadd,siadd
+     12						 mov	 bx,ds:[si+(siadd)]	 ;4
+     13						 mov	 al,fs:[bx+di]		 ;3
+     14						 mov	 bx,ds:[si+(siadd)+2]	 ;4
+     15						 mov	 ah,fs:[bx+di]		 ;3
+     16						 or	 ax,dx			 ;2
+     17						 mov	 es:[bp+(diadd)],ax	 ;5
+     18						 ENDM				 ;=21
+     19
+     20					 PUBLIC	_dorow
+     21	    0008			 _dorow	 PROC FAR
+     22	    0008  55				 push	 bp
+     23	    0009  8B EC				 mov	 bp,sp
+     24	    000B  56				 push	 si
+     25	    000C  57				 push	 di
+     26	    000D  1E				 push	 ds
+     27
+     28	    000E  2E: 8E 26 0002r		 mov	 fs,cs:_back[2]
+     29	    0013  B8 A000			 mov	 ax,0a000h
+     30	    0016  8E C0				 mov	 es,ax
+     31	    0018  8E 5E	08			 mov	 ds,[bp+8]
+     32	    001B  8B 56	0E			 mov	 dx,[bp+14]
+     33	    001E  8A F2				 mov	 dh,dl
+     34	    0020  8B 7E	0A			 mov	 di,[bp+10]
+     35	    0023  8B 76	0C			 mov	 si,[bp+12]
+     36	    0026  C1 E6	02			 shl	 si,2
+     37	    0029  8B 4C	02			 mov	 cx,ds:[si+2]
+     38	    002C  8B 34				 mov	 si,ds:[si]
+     39	    002E  83 F9	04			 cmp	 cx,4
+     40	    0031  7D 05	90 90			 jge	 @@2
+     41	    0035  E9 059D			 jmp	 @@0
+     42	    0038  03 3C			 @@2:	 add	 di,ds:[si]
+     43	    003A  8B EF				 mov	 bp,di
+     44	    003C  83 C6	02			 add	 si,2
+     45	    003F  F7 C5	0001			 test	 bp,1
+     46	    0043  74 12	90 90			 jz	 @@1
+     47	    0047  8B 1C				 mov	 bx,ds:[si]
+     48	    0049  83 C6	02			 add	 si,2
+     49	    004C  64: 8A 01			 mov	 al,fs:[bx+di]
+     50	    004F  0B C2				 or	 ax,dx
+     51	    0051  26: 88 46 00			 mov	 es:[bp],al
+     52	    0055  45				 inc	 bp
+     53	    0056  49				 dec	 cx
+     54	    0057  51			 @@1:	 push	 cx
+     55	    0058  D1 E9				 shr	 cx,1
+     56	    005A  81 EE	0140			 sub	 si,320
+     57	    005E  81 ED	0140			 sub	 bp,320
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 2
+asm.asm
+
+
+
+     58	    0062  8B C1				 mov	 ax,cx ;*1
+     59	    0064  C1 E1	02			 shl	 cx,2
+     60	    0067  03 C1				 add	 ax,cx ;*4
+     61	    0069  C1 E1	02			 shl	 cx,2
+     62	    006C  03 C1				 add	 ax,cx ;*16
+     63	    006E  F7 D8				 neg	 ax
+     64						 ;bx=-count*21
+     65	    0070  05 05B5r			 add	 ax,OFFSET @@l
+     66	    0073  FF E0				 jmp	 ax
+     67		  = 0040			 zzz=64
+     68						 REPT	 64
+     69						 zzz=zzz-1
+     70						 DOWORD	 320+zzz*2,320+zzz*4
+     71						 ENDM
+1    72		  = 003F			 zzz=zzz-1
+1    73						 DOWORD	 320+zzz*2,320+zzz*4
+2    74	    0075  8B 9C	023C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2    75	    0079  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2    76	    007C  8B 9C	023E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2    77	    0080  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2    78	    0083  0B C2				 or	 ax,dx			 ;2
+2    79	    0085  26: 89 86 01BE		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1    80		  = 003E			 zzz=zzz-1
+1    81						 DOWORD	 320+zzz*2,320+zzz*4
+2    82	    008A  8B 9C	0238			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2    83	    008E  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2    84	    0091  8B 9C	023A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2    85	    0095  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2    86	    0098  0B C2				 or	 ax,dx			 ;2
+2    87	    009A  26: 89 86 01BC		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1    88		  = 003D			 zzz=zzz-1
+1    89						 DOWORD	 320+zzz*2,320+zzz*4
+2    90	    009F  8B 9C	0234			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2    91	    00A3  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2    92	    00A6  8B 9C	0236			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2    93	    00AA  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2    94	    00AD  0B C2				 or	 ax,dx			 ;2
+2    95	    00AF  26: 89 86 01BA		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1    96		  = 003C			 zzz=zzz-1
+1    97						 DOWORD	 320+zzz*2,320+zzz*4
+2    98	    00B4  8B 9C	0230			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2    99	    00B8  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   100	    00BB  8B 9C	0232			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   101	    00BF  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   102	    00C2  0B C2				 or	 ax,dx			 ;2
+2   103	    00C4  26: 89 86 01B8		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   104		  = 003B			 zzz=zzz-1
+1   105						 DOWORD	 320+zzz*2,320+zzz*4
+2   106	    00C9  8B 9C	022C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   107	    00CD  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   108	    00D0  8B 9C	022E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   109	    00D4  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   110	    00D7  0B C2				 or	 ax,dx			 ;2
+2   111	    00D9  26: 89 86 01B6		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   112		  = 003A			 zzz=zzz-1
+1   113						 DOWORD	 320+zzz*2,320+zzz*4
+2   114	    00DE  8B 9C	0228			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 3
+asm.asm
+
+
+
+2   115	    00E2  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   116	    00E5  8B 9C	022A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   117	    00E9  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   118	    00EC  0B C2				 or	 ax,dx			 ;2
+2   119	    00EE  26: 89 86 01B4		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   120		  = 0039			 zzz=zzz-1
+1   121						 DOWORD	 320+zzz*2,320+zzz*4
+2   122	    00F3  8B 9C	0224			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   123	    00F7  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   124	    00FA  8B 9C	0226			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   125	    00FE  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   126	    0101  0B C2				 or	 ax,dx			 ;2
+2   127	    0103  26: 89 86 01B2		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   128		  = 0038			 zzz=zzz-1
+1   129						 DOWORD	 320+zzz*2,320+zzz*4
+2   130	    0108  8B 9C	0220			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   131	    010C  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   132	    010F  8B 9C	0222			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   133	    0113  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   134	    0116  0B C2				 or	 ax,dx			 ;2
+2   135	    0118  26: 89 86 01B0		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   136		  = 0037			 zzz=zzz-1
+1   137						 DOWORD	 320+zzz*2,320+zzz*4
+2   138	    011D  8B 9C	021C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   139	    0121  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   140	    0124  8B 9C	021E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   141	    0128  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   142	    012B  0B C2				 or	 ax,dx			 ;2
+2   143	    012D  26: 89 86 01AE		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   144		  = 0036			 zzz=zzz-1
+1   145						 DOWORD	 320+zzz*2,320+zzz*4
+2   146	    0132  8B 9C	0218			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   147	    0136  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   148	    0139  8B 9C	021A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   149	    013D  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   150	    0140  0B C2				 or	 ax,dx			 ;2
+2   151	    0142  26: 89 86 01AC		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   152		  = 0035			 zzz=zzz-1
+1   153						 DOWORD	 320+zzz*2,320+zzz*4
+2   154	    0147  8B 9C	0214			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   155	    014B  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   156	    014E  8B 9C	0216			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   157	    0152  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   158	    0155  0B C2				 or	 ax,dx			 ;2
+2   159	    0157  26: 89 86 01AA		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   160		  = 0034			 zzz=zzz-1
+1   161						 DOWORD	 320+zzz*2,320+zzz*4
+2   162	    015C  8B 9C	0210			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   163	    0160  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   164	    0163  8B 9C	0212			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   165	    0167  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   166	    016A  0B C2				 or	 ax,dx			 ;2
+2   167	    016C  26: 89 86 01A8		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   168		  = 0033			 zzz=zzz-1
+1   169						 DOWORD	 320+zzz*2,320+zzz*4
+2   170	    0171  8B 9C	020C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   171	    0175  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 4
+asm.asm
+
+
+
+2   172	    0178  8B 9C	020E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   173	    017C  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   174	    017F  0B C2				 or	 ax,dx			 ;2
+2   175	    0181  26: 89 86 01A6		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   176		  = 0032			 zzz=zzz-1
+1   177						 DOWORD	 320+zzz*2,320+zzz*4
+2   178	    0186  8B 9C	0208			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   179	    018A  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   180	    018D  8B 9C	020A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   181	    0191  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   182	    0194  0B C2				 or	 ax,dx			 ;2
+2   183	    0196  26: 89 86 01A4		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   184		  = 0031			 zzz=zzz-1
+1   185						 DOWORD	 320+zzz*2,320+zzz*4
+2   186	    019B  8B 9C	0204			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   187	    019F  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   188	    01A2  8B 9C	0206			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   189	    01A6  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   190	    01A9  0B C2				 or	 ax,dx			 ;2
+2   191	    01AB  26: 89 86 01A2		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   192		  = 0030			 zzz=zzz-1
+1   193						 DOWORD	 320+zzz*2,320+zzz*4
+2   194	    01B0  8B 9C	0200			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   195	    01B4  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   196	    01B7  8B 9C	0202			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   197	    01BB  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   198	    01BE  0B C2				 or	 ax,dx			 ;2
+2   199	    01C0  26: 89 86 01A0		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   200		  = 002F			 zzz=zzz-1
+1   201						 DOWORD	 320+zzz*2,320+zzz*4
+2   202	    01C5  8B 9C	01FC			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   203	    01C9  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   204	    01CC  8B 9C	01FE			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   205	    01D0  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   206	    01D3  0B C2				 or	 ax,dx			 ;2
+2   207	    01D5  26: 89 86 019E		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   208		  = 002E			 zzz=zzz-1
+1   209						 DOWORD	 320+zzz*2,320+zzz*4
+2   210	    01DA  8B 9C	01F8			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   211	    01DE  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   212	    01E1  8B 9C	01FA			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   213	    01E5  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   214	    01E8  0B C2				 or	 ax,dx			 ;2
+2   215	    01EA  26: 89 86 019C		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   216		  = 002D			 zzz=zzz-1
+1   217						 DOWORD	 320+zzz*2,320+zzz*4
+2   218	    01EF  8B 9C	01F4			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   219	    01F3  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   220	    01F6  8B 9C	01F6			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   221	    01FA  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   222	    01FD  0B C2				 or	 ax,dx			 ;2
+2   223	    01FF  26: 89 86 019A		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   224		  = 002C			 zzz=zzz-1
+1   225						 DOWORD	 320+zzz*2,320+zzz*4
+2   226	    0204  8B 9C	01F0			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   227	    0208  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   228	    020B  8B 9C	01F2			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 5
+asm.asm
+
+
+
+2   229	    020F  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   230	    0212  0B C2				 or	 ax,dx			 ;2
+2   231	    0214  26: 89 86 0198		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   232		  = 002B			 zzz=zzz-1
+1   233						 DOWORD	 320+zzz*2,320+zzz*4
+2   234	    0219  8B 9C	01EC			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   235	    021D  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   236	    0220  8B 9C	01EE			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   237	    0224  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   238	    0227  0B C2				 or	 ax,dx			 ;2
+2   239	    0229  26: 89 86 0196		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   240		  = 002A			 zzz=zzz-1
+1   241						 DOWORD	 320+zzz*2,320+zzz*4
+2   242	    022E  8B 9C	01E8			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   243	    0232  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   244	    0235  8B 9C	01EA			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   245	    0239  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   246	    023C  0B C2				 or	 ax,dx			 ;2
+2   247	    023E  26: 89 86 0194		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   248		  = 0029			 zzz=zzz-1
+1   249						 DOWORD	 320+zzz*2,320+zzz*4
+2   250	    0243  8B 9C	01E4			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   251	    0247  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   252	    024A  8B 9C	01E6			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   253	    024E  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   254	    0251  0B C2				 or	 ax,dx			 ;2
+2   255	    0253  26: 89 86 0192		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   256		  = 0028			 zzz=zzz-1
+1   257						 DOWORD	 320+zzz*2,320+zzz*4
+2   258	    0258  8B 9C	01E0			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   259	    025C  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   260	    025F  8B 9C	01E2			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   261	    0263  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   262	    0266  0B C2				 or	 ax,dx			 ;2
+2   263	    0268  26: 89 86 0190		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   264		  = 0027			 zzz=zzz-1
+1   265						 DOWORD	 320+zzz*2,320+zzz*4
+2   266	    026D  8B 9C	01DC			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   267	    0271  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   268	    0274  8B 9C	01DE			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   269	    0278  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   270	    027B  0B C2				 or	 ax,dx			 ;2
+2   271	    027D  26: 89 86 018E		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   272		  = 0026			 zzz=zzz-1
+1   273						 DOWORD	 320+zzz*2,320+zzz*4
+2   274	    0282  8B 9C	01D8			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   275	    0286  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   276	    0289  8B 9C	01DA			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   277	    028D  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   278	    0290  0B C2				 or	 ax,dx			 ;2
+2   279	    0292  26: 89 86 018C		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   280		  = 0025			 zzz=zzz-1
+1   281						 DOWORD	 320+zzz*2,320+zzz*4
+2   282	    0297  8B 9C	01D4			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   283	    029B  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   284	    029E  8B 9C	01D6			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   285	    02A2  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 6
+asm.asm
+
+
+
+2   286	    02A5  0B C2				 or	 ax,dx			 ;2
+2   287	    02A7  26: 89 86 018A		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   288		  = 0024			 zzz=zzz-1
+1   289						 DOWORD	 320+zzz*2,320+zzz*4
+2   290	    02AC  8B 9C	01D0			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   291	    02B0  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   292	    02B3  8B 9C	01D2			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   293	    02B7  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   294	    02BA  0B C2				 or	 ax,dx			 ;2
+2   295	    02BC  26: 89 86 0188		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   296		  = 0023			 zzz=zzz-1
+1   297						 DOWORD	 320+zzz*2,320+zzz*4
+2   298	    02C1  8B 9C	01CC			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   299	    02C5  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   300	    02C8  8B 9C	01CE			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   301	    02CC  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   302	    02CF  0B C2				 or	 ax,dx			 ;2
+2   303	    02D1  26: 89 86 0186		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   304		  = 0022			 zzz=zzz-1
+1   305						 DOWORD	 320+zzz*2,320+zzz*4
+2   306	    02D6  8B 9C	01C8			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   307	    02DA  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   308	    02DD  8B 9C	01CA			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   309	    02E1  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   310	    02E4  0B C2				 or	 ax,dx			 ;2
+2   311	    02E6  26: 89 86 0184		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   312		  = 0021			 zzz=zzz-1
+1   313						 DOWORD	 320+zzz*2,320+zzz*4
+2   314	    02EB  8B 9C	01C4			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   315	    02EF  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   316	    02F2  8B 9C	01C6			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   317	    02F6  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   318	    02F9  0B C2				 or	 ax,dx			 ;2
+2   319	    02FB  26: 89 86 0182		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   320		  = 0020			 zzz=zzz-1
+1   321						 DOWORD	 320+zzz*2,320+zzz*4
+2   322	    0300  8B 9C	01C0			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   323	    0304  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   324	    0307  8B 9C	01C2			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   325	    030B  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   326	    030E  0B C2				 or	 ax,dx			 ;2
+2   327	    0310  26: 89 86 0180		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   328		  = 001F			 zzz=zzz-1
+1   329						 DOWORD	 320+zzz*2,320+zzz*4
+2   330	    0315  8B 9C	01BC			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   331	    0319  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   332	    031C  8B 9C	01BE			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   333	    0320  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   334	    0323  0B C2				 or	 ax,dx			 ;2
+2   335	    0325  26: 89 86 017E		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   336		  = 001E			 zzz=zzz-1
+1   337						 DOWORD	 320+zzz*2,320+zzz*4
+2   338	    032A  8B 9C	01B8			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   339	    032E  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   340	    0331  8B 9C	01BA			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   341	    0335  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   342	    0338  0B C2				 or	 ax,dx			 ;2
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 7
+asm.asm
+
+
+
+2   343	    033A  26: 89 86 017C		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   344		  = 001D			 zzz=zzz-1
+1   345						 DOWORD	 320+zzz*2,320+zzz*4
+2   346	    033F  8B 9C	01B4			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   347	    0343  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   348	    0346  8B 9C	01B6			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   349	    034A  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   350	    034D  0B C2				 or	 ax,dx			 ;2
+2   351	    034F  26: 89 86 017A		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   352		  = 001C			 zzz=zzz-1
+1   353						 DOWORD	 320+zzz*2,320+zzz*4
+2   354	    0354  8B 9C	01B0			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   355	    0358  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   356	    035B  8B 9C	01B2			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   357	    035F  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   358	    0362  0B C2				 or	 ax,dx			 ;2
+2   359	    0364  26: 89 86 0178		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   360		  = 001B			 zzz=zzz-1
+1   361						 DOWORD	 320+zzz*2,320+zzz*4
+2   362	    0369  8B 9C	01AC			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   363	    036D  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   364	    0370  8B 9C	01AE			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   365	    0374  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   366	    0377  0B C2				 or	 ax,dx			 ;2
+2   367	    0379  26: 89 86 0176		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   368		  = 001A			 zzz=zzz-1
+1   369						 DOWORD	 320+zzz*2,320+zzz*4
+2   370	    037E  8B 9C	01A8			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   371	    0382  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   372	    0385  8B 9C	01AA			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   373	    0389  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   374	    038C  0B C2				 or	 ax,dx			 ;2
+2   375	    038E  26: 89 86 0174		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   376		  = 0019			 zzz=zzz-1
+1   377						 DOWORD	 320+zzz*2,320+zzz*4
+2   378	    0393  8B 9C	01A4			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   379	    0397  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   380	    039A  8B 9C	01A6			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   381	    039E  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   382	    03A1  0B C2				 or	 ax,dx			 ;2
+2   383	    03A3  26: 89 86 0172		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   384		  = 0018			 zzz=zzz-1
+1   385						 DOWORD	 320+zzz*2,320+zzz*4
+2   386	    03A8  8B 9C	01A0			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   387	    03AC  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   388	    03AF  8B 9C	01A2			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   389	    03B3  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   390	    03B6  0B C2				 or	 ax,dx			 ;2
+2   391	    03B8  26: 89 86 0170		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   392		  = 0017			 zzz=zzz-1
+1   393						 DOWORD	 320+zzz*2,320+zzz*4
+2   394	    03BD  8B 9C	019C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   395	    03C1  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   396	    03C4  8B 9C	019E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   397	    03C8  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   398	    03CB  0B C2				 or	 ax,dx			 ;2
+2   399	    03CD  26: 89 86 016E		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 8
+asm.asm
+
+
+
+1   400		  = 0016			 zzz=zzz-1
+1   401						 DOWORD	 320+zzz*2,320+zzz*4
+2   402	    03D2  8B 9C	0198			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   403	    03D6  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   404	    03D9  8B 9C	019A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   405	    03DD  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   406	    03E0  0B C2				 or	 ax,dx			 ;2
+2   407	    03E2  26: 89 86 016C		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   408		  = 0015			 zzz=zzz-1
+1   409						 DOWORD	 320+zzz*2,320+zzz*4
+2   410	    03E7  8B 9C	0194			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   411	    03EB  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   412	    03EE  8B 9C	0196			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   413	    03F2  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   414	    03F5  0B C2				 or	 ax,dx			 ;2
+2   415	    03F7  26: 89 86 016A		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   416		  = 0014			 zzz=zzz-1
+1   417						 DOWORD	 320+zzz*2,320+zzz*4
+2   418	    03FC  8B 9C	0190			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   419	    0400  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   420	    0403  8B 9C	0192			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   421	    0407  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   422	    040A  0B C2				 or	 ax,dx			 ;2
+2   423	    040C  26: 89 86 0168		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   424		  = 0013			 zzz=zzz-1
+1   425						 DOWORD	 320+zzz*2,320+zzz*4
+2   426	    0411  8B 9C	018C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   427	    0415  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   428	    0418  8B 9C	018E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   429	    041C  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   430	    041F  0B C2				 or	 ax,dx			 ;2
+2   431	    0421  26: 89 86 0166		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   432		  = 0012			 zzz=zzz-1
+1   433						 DOWORD	 320+zzz*2,320+zzz*4
+2   434	    0426  8B 9C	0188			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   435	    042A  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   436	    042D  8B 9C	018A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   437	    0431  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   438	    0434  0B C2				 or	 ax,dx			 ;2
+2   439	    0436  26: 89 86 0164		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   440		  = 0011			 zzz=zzz-1
+1   441						 DOWORD	 320+zzz*2,320+zzz*4
+2   442	    043B  8B 9C	0184			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   443	    043F  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   444	    0442  8B 9C	0186			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   445	    0446  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   446	    0449  0B C2				 or	 ax,dx			 ;2
+2   447	    044B  26: 89 86 0162		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   448		  = 0010			 zzz=zzz-1
+1   449						 DOWORD	 320+zzz*2,320+zzz*4
+2   450	    0450  8B 9C	0180			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   451	    0454  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   452	    0457  8B 9C	0182			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   453	    045B  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   454	    045E  0B C2				 or	 ax,dx			 ;2
+2   455	    0460  26: 89 86 0160		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   456		  = 000F			 zzz=zzz-1
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 9
+asm.asm
+
+
+
+1   457						 DOWORD	 320+zzz*2,320+zzz*4
+2   458	    0465  8B 9C	017C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   459	    0469  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   460	    046C  8B 9C	017E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   461	    0470  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   462	    0473  0B C2				 or	 ax,dx			 ;2
+2   463	    0475  26: 89 86 015E		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   464		  = 000E			 zzz=zzz-1
+1   465						 DOWORD	 320+zzz*2,320+zzz*4
+2   466	    047A  8B 9C	0178			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   467	    047E  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   468	    0481  8B 9C	017A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   469	    0485  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   470	    0488  0B C2				 or	 ax,dx			 ;2
+2   471	    048A  26: 89 86 015C		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   472		  = 000D			 zzz=zzz-1
+1   473						 DOWORD	 320+zzz*2,320+zzz*4
+2   474	    048F  8B 9C	0174			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   475	    0493  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   476	    0496  8B 9C	0176			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   477	    049A  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   478	    049D  0B C2				 or	 ax,dx			 ;2
+2   479	    049F  26: 89 86 015A		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   480		  = 000C			 zzz=zzz-1
+1   481						 DOWORD	 320+zzz*2,320+zzz*4
+2   482	    04A4  8B 9C	0170			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   483	    04A8  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   484	    04AB  8B 9C	0172			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   485	    04AF  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   486	    04B2  0B C2				 or	 ax,dx			 ;2
+2   487	    04B4  26: 89 86 0158		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   488		  = 000B			 zzz=zzz-1
+1   489						 DOWORD	 320+zzz*2,320+zzz*4
+2   490	    04B9  8B 9C	016C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   491	    04BD  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   492	    04C0  8B 9C	016E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   493	    04C4  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   494	    04C7  0B C2				 or	 ax,dx			 ;2
+2   495	    04C9  26: 89 86 0156		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   496		  = 000A			 zzz=zzz-1
+1   497						 DOWORD	 320+zzz*2,320+zzz*4
+2   498	    04CE  8B 9C	0168			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   499	    04D2  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   500	    04D5  8B 9C	016A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   501	    04D9  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   502	    04DC  0B C2				 or	 ax,dx			 ;2
+2   503	    04DE  26: 89 86 0154		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   504		  = 0009			 zzz=zzz-1
+1   505						 DOWORD	 320+zzz*2,320+zzz*4
+2   506	    04E3  8B 9C	0164			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   507	    04E7  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   508	    04EA  8B 9C	0166			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   509	    04EE  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   510	    04F1  0B C2				 or	 ax,dx			 ;2
+2   511	    04F3  26: 89 86 0152		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   512		  = 0008			 zzz=zzz-1
+1   513						 DOWORD	 320+zzz*2,320+zzz*4
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 10
+asm.asm
+
+
+
+2   514	    04F8  8B 9C	0160			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   515	    04FC  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   516	    04FF  8B 9C	0162			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   517	    0503  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   518	    0506  0B C2				 or	 ax,dx			 ;2
+2   519	    0508  26: 89 86 0150		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   520		  = 0007			 zzz=zzz-1
+1   521						 DOWORD	 320+zzz*2,320+zzz*4
+2   522	    050D  8B 9C	015C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   523	    0511  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   524	    0514  8B 9C	015E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   525	    0518  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   526	    051B  0B C2				 or	 ax,dx			 ;2
+2   527	    051D  26: 89 86 014E		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   528		  = 0006			 zzz=zzz-1
+1   529						 DOWORD	 320+zzz*2,320+zzz*4
+2   530	    0522  8B 9C	0158			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   531	    0526  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   532	    0529  8B 9C	015A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   533	    052D  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   534	    0530  0B C2				 or	 ax,dx			 ;2
+2   535	    0532  26: 89 86 014C		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   536		  = 0005			 zzz=zzz-1
+1   537						 DOWORD	 320+zzz*2,320+zzz*4
+2   538	    0537  8B 9C	0154			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   539	    053B  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   540	    053E  8B 9C	0156			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   541	    0542  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   542	    0545  0B C2				 or	 ax,dx			 ;2
+2   543	    0547  26: 89 86 014A		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   544		  = 0004			 zzz=zzz-1
+1   545						 DOWORD	 320+zzz*2,320+zzz*4
+2   546	    054C  8B 9C	0150			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   547	    0550  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   548	    0553  8B 9C	0152			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   549	    0557  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   550	    055A  0B C2				 or	 ax,dx			 ;2
+2   551	    055C  26: 89 86 0148		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   552		  = 0003			 zzz=zzz-1
+1   553						 DOWORD	 320+zzz*2,320+zzz*4
+2   554	    0561  8B 9C	014C			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   555	    0565  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   556	    0568  8B 9C	014E			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   557	    056C  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   558	    056F  0B C2				 or	 ax,dx			 ;2
+2   559	    0571  26: 89 86 0146		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   560		  = 0002			 zzz=zzz-1
+1   561						 DOWORD	 320+zzz*2,320+zzz*4
+2   562	    0576  8B 9C	0148			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   563	    057A  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   564	    057D  8B 9C	014A			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   565	    0581  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   566	    0584  0B C2				 or	 ax,dx			 ;2
+2   567	    0586  26: 89 86 0144		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   568		  = 0001			 zzz=zzz-1
+1   569						 DOWORD	 320+zzz*2,320+zzz*4
+2   570	    058B  8B 9C	0144			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 11
+asm.asm
+
+
+
+2   571	    058F  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   572	    0592  8B 9C	0146			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   573	    0596  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   574	    0599  0B C2				 or	 ax,dx			 ;2
+2   575	    059B  26: 89 86 0142		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+1   576		  = 0000			 zzz=zzz-1
+1   577						 DOWORD	 320+zzz*2,320+zzz*4
+2   578	    05A0  8B 9C	0140			 mov	 bx,ds:[si+(320+zzz*4)]	 ;4
+2   579	    05A4  64: 8A 01			 mov	 al,fs:[bx+di]		 ;3
+2   580	    05A7  8B 9C	0142			 mov	 bx,ds:[si+(320+zzz*4)+2]	 ;4
+2   581	    05AB  64: 8A 21			 mov	 ah,fs:[bx+di]		 ;3
+2   582	    05AE  0B C2				 or	 ax,dx			 ;2
+2   583	    05B0  26: 89 86 0140		 mov	 es:[bp+(320+zzz*2)],ax	 ;5
+    584	    05B5  59			 @@l:	 pop	 cx
+    585	    05B6  F7 C1	0001			 test	 cx,1
+    586	    05BA  74 19	90 90			 jz	 @@0
+    587	    05BE  83 E1	FE			 and	 cx,not	1
+    588	    05C1  03 E9				 add	 bp,cx
+    589	    05C3  03 C9				 add	 cx,cx
+    590	    05C5  03 F1				 add	 si,cx
+    591	    05C7  8B 9C	0140			 mov	 bx,ds:[si+320]
+    592	    05CB  64: 8A 01			 mov	 al,fs:[bx+di]
+    593	    05CE  0B C2				 or	 ax,dx
+    594	    05D0  26: 88 86 0140		 mov	 es:[bp+320],al
+    595	    05D5  1F			 @@0:	 pop	 ds
+    596	    05D6  5F				 pop	 di
+    597	    05D7  5E				 pop	 si
+    598	    05D8  5D				 pop	 bp
+    599	    05D9  CB				 ret
+    600	    05DA			 _dorow	 ENDP
+    601
+    602					 PUBLIC	_dorow2
+    603	    05DA			 _dorow2 PROC FAR
+    604	    05DA  55				 push	 bp
+    605	    05DB  8B EC				 mov	 bp,sp
+    606	    05DD  56				 push	 si
+    607	    05DE  57				 push	 di
+    608	    05DF  1E				 push	 ds
+    609
+    610	    05E0  8E 66	08			 mov	 fs,[bp+8]
+    611	    05E3  8B 76	0C			 mov	 si,[bp+12]
+    612	    05E6  C1 E6	02			 shl	 si,2
+    613	    05E9  64: 8B 4C 02			 mov	 cx,fs:[si+2]
+    614	    05ED  64: 8B 34			 mov	 si,fs:[si]
+    615	    05F0  0B C9				 or	 cx,cx
+    616	    05F2  E3 31				 jcxz	 @@0
+    617	    05F4  2E: 8E 1E 0002r		 mov	 ds,cs:_back[2]
+    618	    05F9  B8 A000			 mov	 ax,0a000h
+    619	    05FC  8E C0				 mov	 es,ax
+    620	    05FE  8B 56	0E			 mov	 dx,[bp+14]
+    621	    0601  8A F2				 mov	 dh,dl
+    622	    0603  8B 7E	0A			 mov	 di,[bp+10]
+    623	    0606  64: 03 3C			 add	 di,fs:[si]
+    624	    0609  8B C7				 mov	 ax,di
+    625	    060B  8D 6C	02			 lea	 bp,[si+2]
+    626	    060E  8B F0				 mov	 si,ax
+    627
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 12
+asm.asm
+
+
+
+    628	    0610  64: 8B 5E 02		 @@3:	 mov	 bx,fs:[bp+2]
+    629	    0614  8A 01				 mov	 al,ds:[bx+di]
+    630	    0616  0A C2				 or	 al,dl
+    631	    0618  64: 8B 5E 00			 mov	 bx,fs:[bp]
+    632	    061C  83 C5	04			 add	 bp,4
+    633	    061F  26: 88 00			 mov	 es:[bx+si],al
+    634	    0622  49				 dec	 cx
+    635	    0623  75 EB				 jnz	 @@3
+    636
+    637	    0625  1F			 @@0:	 pop	 ds
+    638	    0626  5F				 pop	 di
+    639	    0627  5E				 pop	 si
+    640	    0628  5D				 pop	 bp
+    641	    0629  CB				 ret
+    642	    062A			 _dorow2 ENDP
+    643
+    644					 PUBLIC	_dorow3
+    645	    062A			 _dorow3 PROC FAR
+    646	    062A  55				 push	 bp
+    647	    062B  8B EC				 mov	 bp,sp
+    648	    062D  56				 push	 si
+    649	    062E  57				 push	 di
+    650	    062F  1E				 push	 ds
+    651
+    652	    0630  8E 66	08			 mov	 fs,[bp+8]
+    653	    0633  8B 76	0C			 mov	 si,[bp+12]
+    654	    0636  C1 E6	02			 shl	 si,2
+    655	    0639  64: 8B 4C 02			 mov	 cx,fs:[si+2]
+    656	    063D  64: 8B 34			 mov	 si,fs:[si]
+    657	    0640  0B C9				 or	 cx,cx
+    658	    0642  E3 21				 jcxz	 @@0
+    659	    0644  2E: 8E 1E 0002r		 mov	 ds,cs:_back[2]
+    660	    0649  B8 A000			 mov	 ax,0a000h
+    661	    064C  8E C0				 mov	 es,ax
+    662	    064E  8B 7E	0A			 mov	 di,[bp+10]
+    663	    0651  64: 03 3C			 add	 di,fs:[si]
+    664	    0654  83 C6	02			 add	 si,2
+    665
+    666	    0657  64: 8B 1C		 @@3:	 mov	 bx,fs:[si]
+    667	    065A  83 C6	02			 add	 si,2
+    668	    065D  8A 01				 mov	 al,ds:[bx+di]
+    669	    065F  26: 88 01			 mov	 es:[bx+di],al
+    670	    0662  49				 dec	 cx
+    671	    0663  75 F2				 jnz	 @@3
+    672
+    673	    0665  1F			 @@0:	 pop	 ds
+    674	    0666  5F				 pop	 di
+    675	    0667  5E				 pop	 si
+    676	    0668  5D				 pop	 bp
+    677	    0669  CB				 ret
+    678	    066A			 _dorow3 ENDP
+    679
+    680					 PUBLIC	_setborder
+    681	    066A			 _setborder PROC FAR
+    682	    066A  55				 push	 bp
+    683	    066B  8B EC				 mov	 bp,sp
+    684	    066D  BA 03DA			 mov	 dx,3dah
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 13
+asm.asm
+
+
+
+    685	    0670  EC				 in	 al,dx
+    686	    0671  BA 03C0			 mov	 dx,3c0h
+    687	    0674  B0 31				 mov	 al,11h+32
+    688	    0676  EE				 out	 dx,al
+    689	    0677  8A 46	06			 mov	 al,[bp+6]
+    690	    067A  EE				 out	 dx,al
+    691	    067B  5D				 pop	 bp
+    692	    067C  CB				 ret
+    693	    067D			 _setborder ENDP
+    694
+    695					 PUBLIC	_inittwk
+    696	    067D			 _inittwk PROC FAR
+    697	    067D  55				 push	 bp
+    698	    067E  8B EC				 mov	 bp,sp
+    699	    0680  56				 push	 si
+    700	    0681  57				 push	 di
+    701	    0682  1E				 push	 ds
+    702	    0683  B8 0013			 mov	 ax,13h
+    703	    0686  CD 10				 int	 10h
+    704						 ;call	 waitb
+    705						 ;clear	palette
+    706	    0688  BA 03C8			 mov	 dx,3c8h
+    707	    068B  32 C0				 xor	 al,al
+    708	    068D  EE				 out	 dx,al
+    709	    068E  42				 inc	 dx
+    710	    068F  B9 0300			 mov	 cx,768
+    711	    0692  EE			 @@1:	 out	 dx,al
+    712	    0693  E2 FD				 loop	 @@1
+    713						 ;400 rows
+    714	    0695  BA 03D4			 mov	 dx,3d4h
+    715	    0698  B8 0009			 mov	 ax,00009h
+    716	    069B  EF				 out	 dx,ax
+    717						 ;tweak
+    718	    069C  B8 0014			 mov	 ax,00014h
+    719	    069F  EF				 out	 dx,ax
+    720	    06A0  B8 E317			 mov	 ax,0e317h
+    721	    06A3  EF				 out	 dx,ax
+    722	    06A4  BA 03C4			 mov	 dx,3c4h
+    723	    06A7  B8 0604			 mov	 ax,0604h
+    724	    06AA  EF				 out	 dx,ax
+    725						 ;
+    726	    06AB  BA 03C4			 mov	 dx,3c4h
+    727	    06AE  B8 0F02			 mov	 ax,0f02h
+    728	    06B1  EF				 out	 dx,ax
+    729	    06B2  B8 A000			 mov	 ax,0a000h
+    730	    06B5  8E C0				 mov	 es,ax
+    731	    06B7  33 FF				 xor	 di,di
+    732	    06B9  B9 8000			 mov	 cx,32768
+    733	    06BC  33 C0				 xor	 ax,ax
+    734	    06BE  F3> AB			 rep	 stosw
+    735						 ;
+    736						 ;set 4	x vertical
+    737						 ;
+    738	    06C0  1F				 pop	 ds
+    739	    06C1  5F				 pop	 di
+    740	    06C2  5E				 pop	 si
+    741	    06C3  5D				 pop	 bp
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 14
+asm.asm
+
+
+
+    742	    06C4  CB				 ret
+    743	    06C5			 _inittwk ENDP
+    744
+    745	    06C5  87 DB	87 DB 87 DB 87+	 ALIGN 16
+    746		  DB 87	DB 90
+    747	    06D0  00000000		 xpos	 dd	 0
+    748	    06D4  00000000		 ypos	 dd	 0
+    749	    06D8  00000000		 xadd	 dd	 0
+*Warning* asm.asm(236) Reserved	word used as symbol: XADD
+    750	    06DC  00000000		 yadd	 dd	 0
+    751
+    752					 PUBLIC	_rotate
+    753	    06E0			 _rotate PROC FAR
+    754	    06E0  55				 push	 bp
+    755	    06E1  8B EC				 mov	 bp,sp
+    756	    06E3  56				 push	 si
+    757	    06E4  57				 push	 di
+    758	    06E5  1E				 push	 ds
+    759
+    760	    06E6  8B 46	06			 mov	 ax,[bp+6]
+    761	    06E9  66| C1 E0 10			 shl	 eax,16
+    762	    06ED  66| 2E: A3 06D0r		 mov	 cs:xpos,eax
+    763	    06F2  8B 46	08			 mov	 ax,[bp+8]
+    764	    06F5  66| C1 E0 10			 shl	 eax,16
+    765	    06F9  66| 2E: A3 06D4r		 mov	 cs:ypos,eax
+    766
+    767	    06FE  8B 46	0A			 mov	 ax,[bp+10]
+    768	    0701  66| 98			 cwde
+    769	    0703  66| C1 E0 02			 shl	 eax,2
+    770	    0707  66| 2E: A3 06D8r		 mov	 cs:xadd,eax
+    771	    070C  8B 46	0C			 mov	 ax,[bp+12]
+    772	    070F  66| 98			 cwde
+    773	    0711  66| C1 E0 02			 shl	 eax,2
+    774	    0715  66| 2E: A3 06DCr		 mov	 cs:yadd,eax
+    775
+    776	    071A  2E: 8E 1E 0006r		 mov	 ds,cs:_rotpic[2]
+    777	    071F  B8 A000			 mov	 ax,0a000h
+    778	    0722  8E C0				 mov	 es,ax
+    779	    0724  BF F000			 mov	 di,-1000h
+    780
+    781	    0727  B9 0064			 mov	 cx,100
+    782	    072A  = 1000		 @@2:	 zzz=1000h
+    783						 REPT	 80
+    784						 mov	 al,ds:[si+1234h]
+    785						 mov	 ah,ds:[si+1234h]
+    786						 mov	 es:[di+zzz],ax
+    787						 zzz=zzz+2
+    788						 ENDM
+1   789	    072A  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   790	    072E  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   791	    0732  26: 89 85 1000		 mov	 es:[di+zzz],ax
+1   792		  = 1002			 zzz=zzz+2
+1   793	    0737  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   794	    073B  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   795	    073F  26: 89 85 1002		 mov	 es:[di+zzz],ax
+1   796		  = 1004			 zzz=zzz+2
+1   797	    0744  8A 84	1234			 mov	 al,ds:[si+1234h]
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 15
+asm.asm
+
+
+
+1   798	    0748  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   799	    074C  26: 89 85 1004		 mov	 es:[di+zzz],ax
+1   800		  = 1006			 zzz=zzz+2
+1   801	    0751  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   802	    0755  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   803	    0759  26: 89 85 1006		 mov	 es:[di+zzz],ax
+1   804		  = 1008			 zzz=zzz+2
+1   805	    075E  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   806	    0762  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   807	    0766  26: 89 85 1008		 mov	 es:[di+zzz],ax
+1   808		  = 100A			 zzz=zzz+2
+1   809	    076B  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   810	    076F  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   811	    0773  26: 89 85 100A		 mov	 es:[di+zzz],ax
+1   812		  = 100C			 zzz=zzz+2
+1   813	    0778  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   814	    077C  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   815	    0780  26: 89 85 100C		 mov	 es:[di+zzz],ax
+1   816		  = 100E			 zzz=zzz+2
+1   817	    0785  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   818	    0789  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   819	    078D  26: 89 85 100E		 mov	 es:[di+zzz],ax
+1   820		  = 1010			 zzz=zzz+2
+1   821	    0792  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   822	    0796  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   823	    079A  26: 89 85 1010		 mov	 es:[di+zzz],ax
+1   824		  = 1012			 zzz=zzz+2
+1   825	    079F  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   826	    07A3  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   827	    07A7  26: 89 85 1012		 mov	 es:[di+zzz],ax
+1   828		  = 1014			 zzz=zzz+2
+1   829	    07AC  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   830	    07B0  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   831	    07B4  26: 89 85 1014		 mov	 es:[di+zzz],ax
+1   832		  = 1016			 zzz=zzz+2
+1   833	    07B9  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   834	    07BD  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   835	    07C1  26: 89 85 1016		 mov	 es:[di+zzz],ax
+1   836		  = 1018			 zzz=zzz+2
+1   837	    07C6  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   838	    07CA  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   839	    07CE  26: 89 85 1018		 mov	 es:[di+zzz],ax
+1   840		  = 101A			 zzz=zzz+2
+1   841	    07D3  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   842	    07D7  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   843	    07DB  26: 89 85 101A		 mov	 es:[di+zzz],ax
+1   844		  = 101C			 zzz=zzz+2
+1   845	    07E0  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   846	    07E4  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   847	    07E8  26: 89 85 101C		 mov	 es:[di+zzz],ax
+1   848		  = 101E			 zzz=zzz+2
+1   849	    07ED  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   850	    07F1  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   851	    07F5  26: 89 85 101E		 mov	 es:[di+zzz],ax
+1   852		  = 1020			 zzz=zzz+2
+1   853	    07FA  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   854	    07FE  8A A4	1234			 mov	 ah,ds:[si+1234h]
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 16
+asm.asm
+
+
+
+1   855	    0802  26: 89 85 1020		 mov	 es:[di+zzz],ax
+1   856		  = 1022			 zzz=zzz+2
+1   857	    0807  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   858	    080B  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   859	    080F  26: 89 85 1022		 mov	 es:[di+zzz],ax
+1   860		  = 1024			 zzz=zzz+2
+1   861	    0814  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   862	    0818  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   863	    081C  26: 89 85 1024		 mov	 es:[di+zzz],ax
+1   864		  = 1026			 zzz=zzz+2
+1   865	    0821  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   866	    0825  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   867	    0829  26: 89 85 1026		 mov	 es:[di+zzz],ax
+1   868		  = 1028			 zzz=zzz+2
+1   869	    082E  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   870	    0832  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   871	    0836  26: 89 85 1028		 mov	 es:[di+zzz],ax
+1   872		  = 102A			 zzz=zzz+2
+1   873	    083B  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   874	    083F  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   875	    0843  26: 89 85 102A		 mov	 es:[di+zzz],ax
+1   876		  = 102C			 zzz=zzz+2
+1   877	    0848  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   878	    084C  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   879	    0850  26: 89 85 102C		 mov	 es:[di+zzz],ax
+1   880		  = 102E			 zzz=zzz+2
+1   881	    0855  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   882	    0859  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   883	    085D  26: 89 85 102E		 mov	 es:[di+zzz],ax
+1   884		  = 1030			 zzz=zzz+2
+1   885	    0862  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   886	    0866  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   887	    086A  26: 89 85 1030		 mov	 es:[di+zzz],ax
+1   888		  = 1032			 zzz=zzz+2
+1   889	    086F  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   890	    0873  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   891	    0877  26: 89 85 1032		 mov	 es:[di+zzz],ax
+1   892		  = 1034			 zzz=zzz+2
+1   893	    087C  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   894	    0880  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   895	    0884  26: 89 85 1034		 mov	 es:[di+zzz],ax
+1   896		  = 1036			 zzz=zzz+2
+1   897	    0889  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   898	    088D  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   899	    0891  26: 89 85 1036		 mov	 es:[di+zzz],ax
+1   900		  = 1038			 zzz=zzz+2
+1   901	    0896  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   902	    089A  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   903	    089E  26: 89 85 1038		 mov	 es:[di+zzz],ax
+1   904		  = 103A			 zzz=zzz+2
+1   905	    08A3  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   906	    08A7  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   907	    08AB  26: 89 85 103A		 mov	 es:[di+zzz],ax
+1   908		  = 103C			 zzz=zzz+2
+1   909	    08B0  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   910	    08B4  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   911	    08B8  26: 89 85 103C		 mov	 es:[di+zzz],ax
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 17
+asm.asm
+
+
+
+1   912		  = 103E			 zzz=zzz+2
+1   913	    08BD  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   914	    08C1  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   915	    08C5  26: 89 85 103E		 mov	 es:[di+zzz],ax
+1   916		  = 1040			 zzz=zzz+2
+1   917	    08CA  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   918	    08CE  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   919	    08D2  26: 89 85 1040		 mov	 es:[di+zzz],ax
+1   920		  = 1042			 zzz=zzz+2
+1   921	    08D7  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   922	    08DB  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   923	    08DF  26: 89 85 1042		 mov	 es:[di+zzz],ax
+1   924		  = 1044			 zzz=zzz+2
+1   925	    08E4  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   926	    08E8  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   927	    08EC  26: 89 85 1044		 mov	 es:[di+zzz],ax
+1   928		  = 1046			 zzz=zzz+2
+1   929	    08F1  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   930	    08F5  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   931	    08F9  26: 89 85 1046		 mov	 es:[di+zzz],ax
+1   932		  = 1048			 zzz=zzz+2
+1   933	    08FE  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   934	    0902  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   935	    0906  26: 89 85 1048		 mov	 es:[di+zzz],ax
+1   936		  = 104A			 zzz=zzz+2
+1   937	    090B  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   938	    090F  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   939	    0913  26: 89 85 104A		 mov	 es:[di+zzz],ax
+1   940		  = 104C			 zzz=zzz+2
+1   941	    0918  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   942	    091C  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   943	    0920  26: 89 85 104C		 mov	 es:[di+zzz],ax
+1   944		  = 104E			 zzz=zzz+2
+1   945	    0925  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   946	    0929  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   947	    092D  26: 89 85 104E		 mov	 es:[di+zzz],ax
+1   948		  = 1050			 zzz=zzz+2
+1   949	    0932  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   950	    0936  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   951	    093A  26: 89 85 1050		 mov	 es:[di+zzz],ax
+1   952		  = 1052			 zzz=zzz+2
+1   953	    093F  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   954	    0943  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   955	    0947  26: 89 85 1052		 mov	 es:[di+zzz],ax
+1   956		  = 1054			 zzz=zzz+2
+1   957	    094C  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   958	    0950  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   959	    0954  26: 89 85 1054		 mov	 es:[di+zzz],ax
+1   960		  = 1056			 zzz=zzz+2
+1   961	    0959  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   962	    095D  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   963	    0961  26: 89 85 1056		 mov	 es:[di+zzz],ax
+1   964		  = 1058			 zzz=zzz+2
+1   965	    0966  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   966	    096A  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   967	    096E  26: 89 85 1058		 mov	 es:[di+zzz],ax
+1   968		  = 105A			 zzz=zzz+2
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 18
+asm.asm
+
+
+
+1   969	    0973  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   970	    0977  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   971	    097B  26: 89 85 105A		 mov	 es:[di+zzz],ax
+1   972		  = 105C			 zzz=zzz+2
+1   973	    0980  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   974	    0984  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   975	    0988  26: 89 85 105C		 mov	 es:[di+zzz],ax
+1   976		  = 105E			 zzz=zzz+2
+1   977	    098D  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   978	    0991  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   979	    0995  26: 89 85 105E		 mov	 es:[di+zzz],ax
+1   980		  = 1060			 zzz=zzz+2
+1   981	    099A  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   982	    099E  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   983	    09A2  26: 89 85 1060		 mov	 es:[di+zzz],ax
+1   984		  = 1062			 zzz=zzz+2
+1   985	    09A7  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   986	    09AB  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   987	    09AF  26: 89 85 1062		 mov	 es:[di+zzz],ax
+1   988		  = 1064			 zzz=zzz+2
+1   989	    09B4  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   990	    09B8  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   991	    09BC  26: 89 85 1064		 mov	 es:[di+zzz],ax
+1   992		  = 1066			 zzz=zzz+2
+1   993	    09C1  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   994	    09C5  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   995	    09C9  26: 89 85 1066		 mov	 es:[di+zzz],ax
+1   996		  = 1068			 zzz=zzz+2
+1   997	    09CE  8A 84	1234			 mov	 al,ds:[si+1234h]
+1   998	    09D2  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1   999	    09D6  26: 89 85 1068		 mov	 es:[di+zzz],ax
+1  1000		  = 106A			 zzz=zzz+2
+1  1001	    09DB  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1002	    09DF  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1003	    09E3  26: 89 85 106A		 mov	 es:[di+zzz],ax
+1  1004		  = 106C			 zzz=zzz+2
+1  1005	    09E8  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1006	    09EC  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1007	    09F0  26: 89 85 106C		 mov	 es:[di+zzz],ax
+1  1008		  = 106E			 zzz=zzz+2
+1  1009	    09F5  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1010	    09F9  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1011	    09FD  26: 89 85 106E		 mov	 es:[di+zzz],ax
+1  1012		  = 1070			 zzz=zzz+2
+1  1013	    0A02  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1014	    0A06  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1015	    0A0A  26: 89 85 1070		 mov	 es:[di+zzz],ax
+1  1016		  = 1072			 zzz=zzz+2
+1  1017	    0A0F  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1018	    0A13  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1019	    0A17  26: 89 85 1072		 mov	 es:[di+zzz],ax
+1  1020		  = 1074			 zzz=zzz+2
+1  1021	    0A1C  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1022	    0A20  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1023	    0A24  26: 89 85 1074		 mov	 es:[di+zzz],ax
+1  1024		  = 1076			 zzz=zzz+2
+1  1025	    0A29  8A 84	1234			 mov	 al,ds:[si+1234h]
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 19
+asm.asm
+
+
+
+1  1026	    0A2D  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1027	    0A31  26: 89 85 1076		 mov	 es:[di+zzz],ax
+1  1028		  = 1078			 zzz=zzz+2
+1  1029	    0A36  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1030	    0A3A  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1031	    0A3E  26: 89 85 1078		 mov	 es:[di+zzz],ax
+1  1032		  = 107A			 zzz=zzz+2
+1  1033	    0A43  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1034	    0A47  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1035	    0A4B  26: 89 85 107A		 mov	 es:[di+zzz],ax
+1  1036		  = 107C			 zzz=zzz+2
+1  1037	    0A50  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1038	    0A54  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1039	    0A58  26: 89 85 107C		 mov	 es:[di+zzz],ax
+1  1040		  = 107E			 zzz=zzz+2
+1  1041	    0A5D  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1042	    0A61  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1043	    0A65  26: 89 85 107E		 mov	 es:[di+zzz],ax
+1  1044		  = 1080			 zzz=zzz+2
+1  1045	    0A6A  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1046	    0A6E  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1047	    0A72  26: 89 85 1080		 mov	 es:[di+zzz],ax
+1  1048		  = 1082			 zzz=zzz+2
+1  1049	    0A77  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1050	    0A7B  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1051	    0A7F  26: 89 85 1082		 mov	 es:[di+zzz],ax
+1  1052		  = 1084			 zzz=zzz+2
+1  1053	    0A84  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1054	    0A88  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1055	    0A8C  26: 89 85 1084		 mov	 es:[di+zzz],ax
+1  1056		  = 1086			 zzz=zzz+2
+1  1057	    0A91  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1058	    0A95  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1059	    0A99  26: 89 85 1086		 mov	 es:[di+zzz],ax
+1  1060		  = 1088			 zzz=zzz+2
+1  1061	    0A9E  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1062	    0AA2  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1063	    0AA6  26: 89 85 1088		 mov	 es:[di+zzz],ax
+1  1064		  = 108A			 zzz=zzz+2
+1  1065	    0AAB  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1066	    0AAF  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1067	    0AB3  26: 89 85 108A		 mov	 es:[di+zzz],ax
+1  1068		  = 108C			 zzz=zzz+2
+1  1069	    0AB8  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1070	    0ABC  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1071	    0AC0  26: 89 85 108C		 mov	 es:[di+zzz],ax
+1  1072		  = 108E			 zzz=zzz+2
+1  1073	    0AC5  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1074	    0AC9  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1075	    0ACD  26: 89 85 108E		 mov	 es:[di+zzz],ax
+1  1076		  = 1090			 zzz=zzz+2
+1  1077	    0AD2  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1078	    0AD6  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1079	    0ADA  26: 89 85 1090		 mov	 es:[di+zzz],ax
+1  1080		  = 1092			 zzz=zzz+2
+1  1081	    0ADF  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1082	    0AE3  8A A4	1234			 mov	 ah,ds:[si+1234h]
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 20
+asm.asm
+
+
+
+1  1083	    0AE7  26: 89 85 1092		 mov	 es:[di+zzz],ax
+1  1084		  = 1094			 zzz=zzz+2
+1  1085	    0AEC  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1086	    0AF0  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1087	    0AF4  26: 89 85 1094		 mov	 es:[di+zzz],ax
+1  1088		  = 1096			 zzz=zzz+2
+1  1089	    0AF9  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1090	    0AFD  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1091	    0B01  26: 89 85 1096		 mov	 es:[di+zzz],ax
+1  1092		  = 1098			 zzz=zzz+2
+1  1093	    0B06  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1094	    0B0A  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1095	    0B0E  26: 89 85 1098		 mov	 es:[di+zzz],ax
+1  1096		  = 109A			 zzz=zzz+2
+1  1097	    0B13  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1098	    0B17  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1099	    0B1B  26: 89 85 109A		 mov	 es:[di+zzz],ax
+1  1100		  = 109C			 zzz=zzz+2
+1  1101	    0B20  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1102	    0B24  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1103	    0B28  26: 89 85 109C		 mov	 es:[di+zzz],ax
+1  1104		  = 109E			 zzz=zzz+2
+1  1105	    0B2D  8A 84	1234			 mov	 al,ds:[si+1234h]
+1  1106	    0B31  8A A4	1234			 mov	 ah,ds:[si+1234h]
+1  1107	    0B35  26: 89 85 109E		 mov	 es:[di+zzz],ax
+1  1108		  = 10A0			 zzz=zzz+2
+   1109						 ;
+   1110	    0B3A  66| 2E: 8B 1E	06D4r		 mov	 ebx,cs:ypos
+   1111	    0B40  66| 2E: 03 1E	06DCr		 add	 ebx,cs:yadd
+   1112	    0B46  66| 2E: 89 1E	06D4r		 mov	 cs:ypos,ebx
+   1113	    0B4C  66| C1 EB 08			 shr	 ebx,8
+   1114	    0B50  66| 2E: A1 06D0r		 mov	 eax,cs:xpos
+   1115	    0B55  66| 2E: 03 06	06D8r		 add	 eax,cs:xadd
+   1116	    0B5B  66| 2E: A3 06D0r		 mov	 cs:xpos,eax
+   1117	    0B60  66| C1 E8 10			 shr	 eax,16
+   1118	    0B64  8A D8				 mov	 bl,al
+   1119	    0B66  8B F3				 mov	 si,bx
+   1120						 ;
+   1121	    0B68  81 C7	0140			 add	 di,320
+   1122	    0B6C  49				 dec	 cx
+   1123	    0B6D  74 05	90 90			 jz	 @@1
+   1124	    0B71  E9 FBB6			 jmp	 @@2
+   1125	    0B74			 @@1:
+   1126	    0B74  1F				 pop	 ds
+   1127	    0B75  5F				 pop	 di
+   1128	    0B76  5E				 pop	 si
+   1129	    0B77  5D				 pop	 bp
+   1130	    0B78  CB				 ret
+   1131	    0B79			 _rotate ENDP
+   1132
+   1133	    0B79			 code ENDS
+   1134					 END
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 21
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "07/10/93"
+??FILENAME			  Text	 "asm	  "
+??TIME				  Text	 "18:38:15"
+??VERSION			  Number 0205
+@@0				  Near	 CODE:05D5
+@@0				  Near	 CODE:0625
+@@0				  Near	 CODE:0665
+@@1				  Near	 CODE:0057
+@@1				  Near	 CODE:0692
+@@1				  Near	 CODE:0B74
+@@2				  Near	 CODE:0038
+@@2				  Near	 CODE:072A
+@@3				  Near	 CODE:0610
+@@3				  Near	 CODE:0657
+@@L				  Near	 CODE:05B5
+@CPU				  Text	 0D0FH
+@CURSEG				  Text	 CODE
+@FILENAME			  Text	 ASM
+@WORDSIZE			  Text	 4
+XADD				  Dword	 CODE:06D8
+XPOS				  Dword	 CODE:06D0
+YADD				  Dword	 CODE:06DC
+YPOS				  Dword	 CODE:06D4
+ZZZ				  Number 10A0
+_BACK				  Word	 CODE:0000
+_DOROW				  Far	 CODE:0008
+_DOROW2				  Far	 CODE:05DA
+_DOROW3				  Far	 CODE:062A
+_INITTWK			  Far	 CODE:067D
+_ROTATE				  Far	 CODE:06E0
+_ROTPIC				  Word	 CODE:0004
+_SETBORDER			  Far	 CODE:066A
+
+Macro Name
+
+DOWORD
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+CODE				  16  0B79 Para	  Public  CODE
+Turbo Assembler	 Version 2.5	    07/10/93 18:38:15	    Page 22
+Error Summary
+
+
+
+*Warning* asm.asm(236) Reserved	word used as symbol: XADD
+

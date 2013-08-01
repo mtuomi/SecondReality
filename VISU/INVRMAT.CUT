@@ -1,0 +1,160 @@
+;used for matrix inverses
+invmacro MACRO	col1,col2,row1,row2
+	mov	ax,es:[di+col1+row1*6]
+	imul	word ptr es:[di+col2*2+row2*6]
+	mov	cx,dx
+	mov	bx,ax
+	mov	ax,es:[di+col1*2+row2*6]
+	imul	word ptr es:[di+col2*2+row1*6]
+	sub	cx,dx
+	sbb	bx,ax
+	shld	cx,bx,1
+	ENDM
+
+;entry: es:di=matrix1
+; exit: es:di=matrix1 (overwritten by it's inverse)
+invmatrix PROC NEAR
+	int 3
+
+	invmacro 1,2,1,2
+	push	cx ;(0,0)
+	mov	ax,es:[di+0*2+0*6]
+	imul	cx
+	shld	dx,ax,1
+	mov	si,dx
+	invmacro 2,0,1,2
+	neg	cx
+	push	cx ;(1,0)
+	mov	ax,es:[di+1*2+0*6]
+	imul	cx
+	shld	dx,ax,1
+	add	si,dx
+	invmacro 0,1,1,2
+	push	cx ;(2,0)
+	mov	ax,es:[di+2*2+0*6]
+	imul	cx
+	shld	dx,ax,1
+	add	si,dx
+	;si=determinant
+	
+	or	si,si
+	jnz	@@1
+	pop	cx
+	pop	cx
+	pop	cx
+	ret	;matrix can not be inversed
+@@1:
+	invmacro 1,2,0,2
+	neg	cx
+	push	cx ;(0,0)
+	invmacro 2,0,0,2
+	push	cx ;(1,0)
+	invmacro 0,1,0,2
+	neg	cx
+	push	cx ;(2,0)
+	
+	invmacro 1,2,0,1
+	push	cx ;(0,0)
+	invmacro 2,0,0,1
+	neg	cx
+	push	cx ;(1,0)
+	invmacro 0,1,0,1
+	push	cx ;(2,0)
+	
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+0*2+0*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+0*2+1*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+0*2+2*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+1*2+0*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+1*2+1*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+1*2+2*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+2*2+0*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+2*2+1*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+2*2+2*6],ax
+	
+	ret
+invmatrix ENDP
+
+IFDEF notdef
+;北北北北 _calc_invrmatrix(rmatrix *dest) 北北北北
+;entry: dest=destination matrix (matrix modified)
+; exit:	(data written to dest matrix)
+;descr: dest=dest^-1.
+_calc_invrmatrix PROC FAR
+	CBEG
+	lespar	di,0
+	call	invmatrix
+	CEND
+_calc_invrmatrix ENDP
+ENDIF

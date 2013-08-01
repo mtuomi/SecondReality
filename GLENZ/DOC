@@ -1,0 +1,32 @@
+pointlist:
+word	points in list
+word	-
+dword	x,y,z
+...
+
+projectedpointlist:
+word	points in list
+word	-
+.
+word	sx
+word	sy
+word	fl
+word	-
+dword	z
+
+polygroup:
+word sides (0=end)
+word color 
+word x,y
+...
+
+edgelist:
+word edges
+word -
+.
+word v1,v2,f,0 	f&8000:hidden edge
+
+hline list:
+word starty
+...
+word x1(-32767=end),x2

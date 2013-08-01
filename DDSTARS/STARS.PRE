@@ -1,0 +1,241 @@
+;included to koe.asm
+
+.386
+
+STARS	equ	4800
+
+rows1	dw	100 dup(0)
+	dw	2*28 dup(64000)
+	dw	100 dup(0)
+
+d1seg	dw	0
+d1segp	dw	4
+d2seg	dw	0
+d2segp	dw	4
+d3seg	dw	0
+d3segp	dw	4
+d4seg	dw	0
+d4segp	dw	4
+
+ALIGN 2
+seed1	dw	1234
+seed2	dw	1234h
+random	PROC	NEAR
+	push	bx
+	push	cx
+	push	dx
+	mov	ax,ds:seed1
+	mov	bx,ds:seed2
+	mov	cx,ax
+	mov	dx,bx
+	add	cx,bx
+	add	ax,bx
+	rol	ax,cl
+	xor	ax,dx
+	xchg	cl,ch
+	add	bx,cx
+	add	dx,bx
+	add	cx,ax
+	ror	bx,1
+	sbb	ax,dx
+	mov	ds:seed2,dx
+	mov	ds:seed1,ax
+	pop	dx
+	pop	cx
+	pop	bx
+	ret
+random	ENDP
+
+setborder PROC NEAR
+	push	ax
+	mov	dx,3dah
+	in	al,dx
+	mov	dx,3c0h
+	mov	al,11h+20h
+	out	dx,al
+	pop	ax
+	out	dx,al
+	ret	
+setborder ENDP
+
+brandom	PROC NEAR
+	call	random
+	mov	bx,ax
+	call	random
+	rol	ax,4
+	xor	ax,bx
+	ret
+brandom ENDP
+
+ALIGN 2
+tmpx	dw	0,0
+tmpy	dw	0,0
+
+init_stars_2 PROC NEAR
+@@6:	call	brandom
+	shr	ax,6
+	sub	ax,512
+	cwd
+	shld	dx,ax,7
+	shl	ax,7
+	mov	ds:tmpx[0],ax
+	mov	ds:tmpx[2],dx
+	
+	call	brandom
+	shr	ax,6
+	sub	ax,512
+	cwd
+	shld	dx,ax,7
+	shl	ax,7
+	mov	ds:tmpy[0],ax
+	mov	ds:tmpy[2],dx
+	
+	mov	cx,128
+	mov	bp,64+1024
+	mov	si,di
+@@5:	mov	ax,ds:tmpx[0]
+	mov	dx,ds:tmpx[2]
+	idiv	bp
+	add	ax,100
+	cmp	ax,199
+	ja	@@7
+	mov	bx,ax
+	shl	bx,1
+	mov	bx,ds:rows1[bx]
+	mov	ax,ds:tmpy[0]
+	mov	dx,ds:tmpy[2]
+	idiv	bp
+	add	ax,160
+	cmp	ax,319
+	ja	@@7
+	add	bx,ax
+	;mov	byte ptr fs:[bx],2
+	mov	es:[di],bx
+	add	di,2
+	jz	@@8
+	sub	bp,8
+	loop	@@5
+@@7:	jmp	@@6
+
+@@8:	mov	word ptr es:[si],64000
+	add	si,2
+	jnz	@@8
+	ret
+init_stars_2 ENDP
+
+init_stars PROC NEAR
+	mov	ax,13h
+	int	10h
+	;set screen width to 320-8 pixs
+	mov	dx,3d4h
+	mov	al,11h
+	out	dx,al
+	inc	dx
+	in	al,dx
+	and	al,127
+	out	dx,al
+	;
+	mov	ah,48h
+	mov	bx,4096
+	int	21h
+	mov	cs:d1seg,ax
+	mov	ah,48h
+	mov	bx,4096
+	int	21h
+	mov	cs:d2seg,ax
+	mov	ah,48h
+	mov	bx,4096
+	int	21h
+	mov	cs:d3seg,ax
+	mov	ah,48h
+	mov	bx,4096
+	int	21h
+	mov	cs:d4seg,ax
+
+	mov	cx,200
+	mov	ax,0
+	mov	dx,320
+	mov	bx,OFFSET rows1
+@@4:	mov	cs:[bx],ax
+	add	ax,dx
+	add	bx,2
+	loop	@@4
+
+	mov	ax,cs
+	mov	ds,ax
+	mov	ax,0a000h
+	mov	fs,ax
+
+	mov	es,ds:d1seg
+	xor	di,di
+	call	init_stars_2
+
+	mov	es,ds:d2seg
+	xor	di,di
+	call	init_stars_2
+
+	mov	es,ds:d3seg
+	xor	di,di
+	call	init_stars_2
+
+	mov	es,ds:d4seg
+	xor	di,di
+	call	init_stars_2
+
+	ret
+init_stars ENDP
+
+do_stars_2 PROC NEAR
+	mov	ax,7
+	zzz=0
+	REPT	256*4
+	mov	ebx,ds:[si+zzz+0]
+	mov	es:[bx],ah
+	shr	ebx,16
+	mov	es:[bx],al
+	zzz=zzz+64
+	ENDM
+	ret
+do_stars_2 ENDP
+
+do_stars PROC NEAR
+@@aga:	mov	al,0
+	call	setborder
+	call	waitb
+	mov	al,1
+	call	setborder
+	
+	mov	ax,0a000h
+	mov	es,ax
+
+	mov	ds,cs:d1seg
+	mov	si,cs:d1segp
+	add	si,2
+	mov	cs:d1segp,si
+;	call	do_stars_2	
+
+	mov	ds,cs:d2seg
+	mov	si,cs:d2segp
+	add	si,2
+	mov	cs:d2segp,si
+;	call	do_stars_2	
+
+	mov	ds,cs:d3seg
+	mov	si,cs:d3segp
+	add	si,2
+	mov	cs:d3segp,si
+;	call	do_stars_2	
+
+	mov	ds,cs:d4seg
+	mov	si,cs:d4segp
+	add	si,2
+	mov	cs:d4segp,si
+;	call	do_stars_2
+
+	mov	bx,2
+	int	0fch
+	or	ax,ax
+	jnz	@@end
+	jmp	@@aga
+@@end:	ret
+do_stars ENDP

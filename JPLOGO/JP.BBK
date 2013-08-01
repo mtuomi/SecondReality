@@ -1,0 +1,190 @@
+#include <stdio.h>
+#include <string.h>
+#include "..\dis\dis.h"
+
+FILE	*f1;
+
+#include "readp.c"
+
+extern char pic[];
+
+char *vram=(char *)0xa0000000L;
+
+char	rowdata1[200][184];
+char	rowdata2[200][184];
+char	*row[400];
+
+char	pal2[768];
+char	palette[768];
+char	rowbuf[640];
+
+extern int sin1024[];
+
+int	frameysz[512];
+int	frameysb[512];
+int	lasty[400];
+int	lasts[400];
+
+void	scrolly(int y)
+{
+	int	a;
+	a=y*80;
+	_asm
+	{
+		mov	dx,3d4h
+		mov	al,0dh
+		mov	ah,byte ptr a[0]
+		out	dx,ax
+		mov	dx,3d4h
+		mov	al,0ch
+		mov	ah,byte ptr a[1]
+		out	dx,ax
+	}
+}
+
+char	*shiftstatus=(char *)0x0417;
+int	waitb()
+{
+	return(dis_waitb());
+}
+
+int	calc(int y,int c)
+{
+	_asm
+	{
+		mov	ax,y
+		sub	ax,400
+		add	ax,c
+		mov	dx,400
+		imul	dx
+		mov	cx,c
+		idiv	cx
+	} 
+}
+
+void	doit(void)
+{
+	int	frame=0,halt=0,storea=0,ysb=0;
+	int	a,b,c,y,ysz,ysza,xsc,spd=10,la;
+	while(!dis_exit() && frame<700)
+	{
+		if(*shiftstatus&16) setborder(0);
+		c=waitb();
+		if(*shiftstatus&16) setborder(127);
+		frame+=c;
+		if(frame>511) c=400;
+		else 
+		{
+			c=frameysz[frame]/16;
+			ysb=frameysb[frame]/16;
+		}
+		xsc=(400-c)/2;
+		for(y=0;y<400;y++)
+		{
+			b=calc(y-ysb,c);
+			//b=(long)(y-400+c)*400L/(long)c;
+			if(b<0 || b>399)
+			{
+				linezoom(vram+y*80,NULL,0);
+			}
+			else 
+			{
+				a=184+(sin1024[(b<<5)/25]*xsc+32)/64;
+				a&=~1;
+				if(lasty[y]!=b || lasts[y]!=a)
+				{
+					linezoom(vram+y*80,row[b],a);
+					lasty[y]=b;
+					lasts[y]=a;
+				}
+			}
+		}
+	}
+}
+
+main()
+{
+	int	frame,halt=0,storea=0;
+	int	a,b,c,y,ya,ysz,ysza,xsc,spd=10,la;
+	dis_partstart();
+
+	for(a=0;a<200;a++) row[a]=rowdata1[a];
+	for(a=0;a<200;a++) row[a+200]=rowdata2[a];
+
+	frame=0;
+	ysz=400*16; ysza=-460/6;
+	y=0;
+	for(frame=0;frame<512;frame++)
+	{
+		if(halt<=10)
+		{
+			a=ysz-400*16;
+			if((a&0x8000)^(la&0x8000))
+			{
+				ysza=ysza*4/5;
+				if(halt++>10)
+				{
+					ysza=0;
+					ysz=400*16;
+				}
+				la=a;
+			}
+			else
+			{
+				ysza-=a/30;
+				ysz+=ysza;
+			}
+		}
+		frameysz[frame]=ysz;
+		a=ysz-400*16;
+		y-=a/4;
+		frameysb[frame]=y;
+	}
+
+	_asm mov ax,13h
+	_asm int 10h	
+	inittwk();
+	_asm
+	{
+		mov	dx,3c0h
+		mov	al,11h
+		out	dx,al
+		mov	al,255
+		out	dx,al
+		mov	al,20h
+		out	dx,al
+	}
+
+	readp(palette,-1,pic);
+	for(y=0;y<400;y++)
+	{
+		readp(rowbuf,y,pic);
+		memcpy(row[y],rowbuf+70,184);
+	}
+	setpalarea(palette,0,256);
+	
+	for(y=0;y<400;y++) lasty[y]=lasts[y]=-1;
+	dis_waitb();
+	scrolly(400);
+	dis_waitb();
+	for(y=0;y<400;y++)
+	{
+		linezoom(vram+y*80,row[y],184);
+	}
+	a=64; y=400*64;
+	while(y>0)
+	{
+		y-=a;
+		a+=6;
+		if(y<0) y=0;
+		scrolly(y/64);
+		dis_waitb();
+	}
+	storea=a;
+	dis_waitb();
+	doit();
+	//_asm mov ax,3
+	//_asm int 10h
+	//printf("%i\n",storea);
+	return(0);
+}

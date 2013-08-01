@@ -1,0 +1,3 @@
+asm.obj vec.obj + 
+b.obj ba.obj + 
+_dots1.obj _dots2.obj _dots3.obj _dots4.obj ..\dis\disc.obj,b.exe,nul; 

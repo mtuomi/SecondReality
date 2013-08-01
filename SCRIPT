@@ -1,0 +1,181 @@
+AARGH-copper sammutus moodinvaihtoihin
+
+	Second Reality - The Status
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+status: (%done(or -), P=works as a part (dis), !=Finished)	
+By	Part		Statuse	 
+WILDF	Alkutekstit I	-
+WILDF	3D-8-Palloa	5 ?
+WILDF	Panic-loppu	90
+WILDF	Plasma		80
+WILDF	Plasmacube	67
+TRG/WDF	Atxt3-anim	75
+TRUG	Dottitunneli	70
+TRUG	Vuoriscrolleri	80
+TRUG	Peilipalloscrl.	60
+PSI	Lens		99 P
+PSI	Rotazoomer	99 P
+PSI	Comanche	99 P
+PSI	Techno		90 P
+(((PSI	D-Dream Stars	75 P)))
+PSI	Minivectorballs	70 P
+PSI	Glenz		50
+PSI	Catzoomer	-
+PSI	-VectorRoutine-	60
+PSI	Atxt2-alus	-
+?	Endscroller	-
+?	Setup		-
+
+By	Picture				Code	ScrnRez	PicSize	Cols Status
+PIXEL	Alkufontti 			WILDF	320x400	?	3	-
+PIXEL	Second Reality Title 		WF/PSI	320x400	320x400	127	-
+PIXEL	Siisti kuva 1 (panicloppuun)	PSI	320x400 320x400	127	70 [1]
+PIXEL	Glenzin pohjalevy		PSI	320x200	prspect	7	-
+PIXEL	Peiliscrolli/scrolli		TRUG	320x200	640x31	16G	-
+PIXEL	Vuoriscrolli/scrolli		TRUG	320x200	640x31	16G	-
+MARVEL	Loppuscrollifontti		PSI?	320x400	?	16aa	-
+MARVEL	AlkuHorisontti (widescreen)	WILDF	320x200	640x150	63	-
+MARVEL	Siisti kuva 2 (lens/zoomer)	PSI	320x200	256x200	63	-
+MARVEL	FC-logo (loppuun)		PSI	320x400	320x400	127	-
+TRUG	Praxis r„j„hdys 		WILDF	320x200 320x200	255	80
+MARVEL	Siisti 3				320x400 200x400	63	-
+[1] tausta puuttuu
+
+=============================================================================
+
+	Second Reality - The Script
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PSI	Setup screen
+ 	- grafiikkatilassa (mutta n„ytt„„ tekstilt„)
+	- kun kaikki valittu, lent„„ face kohti ruutua ja jym„ht„„ siihen
+	- hidas fade mustaksi facen v„rist„
+	
+(music) Leffatyylimusat
+
+WILDF	Alkutekstit I
+	- mustalle fadeaa yksinkertaisella leffafontilla 
+PIXEL 	  [fontti 3 v„ri„]
+	"A FUTURE CREW production" [fade=>black]
+	"First presented at Assembly '93" [fade=>black]
+	[fade=>horisonttikuva]
+MARVEL	[ Horisonttikuva on 320x400 resoluutiossa widescreen.
+	  Itse kuva kooltaan 640x300 pikseli„. ]
+	- Kuvaa scrollataan taustalla hitaasti vasemmalle, seuraavat
+	  tekstit fadetaan kuvan p„„lle
+	"Graphics by ..." [xfade]
+(sfx)	- Surround jyrin„ voimistuu hiljalleen (takaa, surround)
+	"Music by ..." [xfade]			
+	- Jyrin„ nyt voimakasta (ja korkeaa) 
+	  (alus tulossa takaa (huom! doppler ilmi”!))
+	"Code by ..." [xfade]
+	
+PSI	Alkutekstit II (Vector Part 0)
+?	- Takaa lent„„ ylisuuri 'massiivi' alus kohti horisonttia
+	  (alus yksinkertaisen muotoinen, mutta paljon detailia yms.
+	  esim textureilla)
+(sfx)	- Aluksen ohilento„„net
+	- Alus kiihdytt„„ lujaa kohti horisonttia
+	- lopulta alus on pikselin kokoinen
+
+TRUG	Alkutekstit III
+	- Kun se pienenee pikselin kokoiseksi r„j„ht„„ piste (Praxis style)
+TRUG	- R„j„hdysvalli etenee kohti katsojaa (flic)
+	- vallin osuessa katsojaan ruutu j„„ valkoiseksi
+	- Valkoisesta fadeaa ensin mustavalkoisena demon logo
+PIXEL	[ Logo on 320x200x256, valkotaustainen ]
+	- Logoon fadeautuvat v„rit
+
+(music)	Teknomaista trackki„
+
+PSI	Glenz part 
+	- ruutu k„„ntyy alasp„in keskustansa ymp„ri (precalc logon aikana)
+	  jolloin alkuper„inen logo j„„ k„„ntv„n levyn alle
+	- lopulta n„kyy vain blokin reuna jonka alapuolella logo oli
+PIXEL	- blokin yl„puolella on 1 v„rinen simppeli muoto (smoothattu
+	  fadella)
+	- blokki pomppii alas
+	- blokin p„„lle tippuu glenzi (precalcattu jello)
+	- kun glenzi on pys„htynyt, levy laskeutuu alas ja vain glenzi 
+	  j„„ ruutuun
+	- glenzi alkaa py”ri„
+	- sen sis„lle fadeautuu toinen glenzi
+	- molemmat py”riv„t
+	- ulommainen suurenee yli ruudun
+	- pienempi j„„ keskelle 'valonl„hteeksi'
+	
+TRUG	Dottunnel
+	- glenzin ymp„rille tulee dottitunneli
+	- lopuksi tunneli himmenee valonl„hteen mukana
+	- eli siis musta ruutu 
+
+PSI	Interferenssi
+	- EGA tilaan
+
+PSI	Techno
+	- teknobaarit py”riv„t jne.
+	- lopuksi vauhti kiihtyy, kunnes
+(sfx)	- pamahdus
+	- ruutu pys„htyy (v„l„ht„„ samalla)
+	- hetken paikallaan
+	- MCGA tweakkiin
+PIXEL	- siisti kuva [320x400x256]
+
+WILDF	- panic style: ruutu pienenee pisteeksi ja musa samalla sammahtaa
+	- Taukoa noin 5 sec.
+
+TRUG	MountainScroll
+	- puut ilmestyv„t
+	- scrolli fadeaa
+	- scrolli scrollaa yli
+	[ scrolli on kuva 320x31 joka on jokin logo]
+	- vuori fadeautuu siniseksi
+
+PSI	Lens
+MARVEL	[ 320x400x64 siisti kuva]
+	- linssi (3 v„rin varjostus) pomppii pari kertaa
+
+PSI	Rotazoomer
+	- zoomaillaan ja py”ritell„„n linssikuvaa
+	- kuva fadeautuu valkoiseksi
+
+WILDF	Plasma
+
+WILDF	Plasmacube
+	- plasmacube on harmaan horisonttitason p„„ll„ (siis my”s varjo)
+	- py”rii etc kivaa
+	- lentelee ymp„ri
+	- kahdentuminen?
+
+PSI	MiniVectorBalls
+	- kaikkea kivaa, suihkul„hde jne...
+	- pomppuja
+	- poistuvat pomppien/kulkien/etc
+
+TRUG	Raytrace Scroll
+	- vesisinus ja peilipallo + tietty scrolli
+
+PSI	Comanche = 3D-Sinusfield
+	- fade ?sinisest„ efektiin
+	- aaltoileva aavikonpinta
+	- lopulta kamera nousee yl”sp„in ja efekti himmenee mustaksi
+
+PSI	Jellykuva (MARVEL)
+	
+(music) Leffatyylimusat (nyt oikein orkesterimaista jos onnistuu!?)
+
+ALL	Vector Part
+
+	#include "vecscr"
+
+PIXEL	Loppukuva = FC-Logo
+
+?	EndScroller
+	- 320x400x256
+MARVEL	[ fontti 12x24x32 ]
+	- creditseist„ pienet kuvat scrollaavat
+	- greetingsit ja muut m”lin„t
+	
+SOME1	The End
+	- dossiin tai looppi (alussa valittavissa)

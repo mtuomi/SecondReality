@@ -1,0 +1,173 @@
+Turbo Assembler	 Version 2.5	    02/21/93 18:09:17	    Page 1
+vec.asm
+
+
+
+      1	    0000			 text__vec SEGMENT para	public 'CODE'
+      2						 ASSUME	cs:text__vec
+      3
+      4					 .386
+      5
+      6					 PUBLIC	setmatrix
+      7	    0000			 setmatrix PROC	FAR
+      8						 ;ds:si=matrix
+      9	    0000  8B 04				 mov	 ax,ds:[si+0]
+     10	    0002  2E: A3 006Fr			 mov	 word ptr cs:[1+mtrm00],ax
+     11	    0006  8B 44	02			 mov	 ax,ds:[si+2]
+     12	    0009  2E: A3 007Cr			 mov	 word ptr cs:[1+mtrm02],ax
+     13	    000D  8B 44	04			 mov	 ax,ds:[si+4]
+     14	    0010  2E: A3 0089r			 mov	 word ptr cs:[1+mtrm04],ax
+     15	    0014  8B 44	06			 mov	 ax,ds:[si+6]
+     16	    0017  2E: A3 009Dr			 mov	 word ptr cs:[1+mtrm06],ax
+     17	    001B  8B 44	08			 mov	 ax,ds:[si+8]
+     18	    001E  2E: A3 00AAr			 mov	 word ptr cs:[1+mtrm08],ax
+     19	    0022  8B 44	0A			 mov	 ax,ds:[si+10]
+     20	    0025  2E: A3 00B7r			 mov	 word ptr cs:[1+mtrm10],ax
+     21	    0029  8B 44	0C			 mov	 ax,ds:[si+12]
+     22	    002C  2E: A3 00CBr			 mov	 word ptr cs:[1+mtrm12],ax
+     23	    0030  8B 44	0E			 mov	 ax,ds:[si+14]
+     24	    0033  2E: A3 00DAr			 mov	 word ptr cs:[1+mtrm14],ax
+     25	    0037  8B 44	10			 mov	 ax,ds:[si+16]
+     26	    003A  2E: A3 00E7r			 mov	 word ptr cs:[1+mtrm16],ax
+     27	    003E  CB				 ret
+     28	    003F			 setmatrix ENDP
+     29
+     30	    003F  90			 ALIGN 2
+     31	    0040  0000			 count	 dw	 0
+     32
+     33	    0042			 dovertices PROC FAR
+     34						 ;normals etc, only rotate
+     35						 ;pointlist@DS:SI=>pointlist@ES:DI
+     36	    0042  57				 push	 di
+     37						 LOADGS
+**Error** vec.asm(37) Illegal instruction
+     38	    0043  8B 0C				 mov	 cx,ds:[si]
+     39	    0045  83 C6	04			 add	 si,4
+     40	    0048  2E: 89 0E 0040r		 mov	 cs:count,cx
+     41	    004D  26: 8B 05			 mov	 ax,es:[di]
+     42	    0050  26: 01 0D			 add	 es:[di],cx
+     43	    0053  8B D8				 mov	 bx,ax
+     44	    0055  D1 E0				 shl	 ax,1
+     45	    0057  03 C3				 add	 ax,bx
+     46	    0059  C1 E0	02			 shl	 ax,2
+     47	    005C  03 F8				 add	 di,ax
+     48	    005E  83 C7	04			 add	 di,4
+     49
+     50	    0061			 nrup1:	 ;rotate with matrix
+     51	    0061  56				 push	 si
+     52	    0062  57				 push	 di
+     53	    0063  66| 8B 6C 08			 mov	 ebp,ds:[si+8]
+     54	    0067  66| 8B 7C 04			 mov	 edi,ds:[si+4]
+     55	    006B  66| 8B 34			 mov	 esi,ds:[si+0]
+     56
+Turbo Assembler	 Version 2.5	    02/21/93 18:09:17	    Page 2
+vec.asm
+
+
+
+     57	    006E  66| 69 F6 12345678	 mtrm00: imul	 esi,12345678h
+     58	    0075  66| 8B D8			 mov	 ebx,eax
+     59	    0078  66| 8B CA			 mov	 ecx,edx
+     60	    007B  66| 69 FF 12345678	 mtrm02: imul	 edi,12345678h
+     61	    0082  66| 03 D8			 add	 ebx,eax
+     62	    0085  66| 13 CA			 adc	 ecx,edx
+     63	    0088  66| 69 ED 12345678	 mtrm04: imul	 ebp,12345678h
+     64	    008F  66| 03 D8			 add	 ebx,eax
+     65	    0092  66| 13 CA			 adc	 ecx,edx
+     66	    0095  66| 0F A4 D9 11		 shld	 ecx,ebx,17
+     67	    009A  66| 51			 push	 ecx
+     68	    009C  66| 69 F6 12345678	 mtrm06: imul	 esi,12345678h
+     69	    00A3  66| 8B D8			 mov	 ebx,eax
+     70	    00A6  66| 8B CA			 mov	 ecx,edx
+     71	    00A9  66| 69 FF 12345678	 mtrm08: imul	 edi,12345678h
+     72	    00B0  66| 03 D8			 add	 ebx,eax
+     73	    00B3  66| 13 CA			 adc	 ecx,edx
+     74	    00B6  66| 69 ED 12345678	 mtrm10: imul	 ebp,12345678h
+     75	    00BD  66| 03 D8			 add	 ebx,eax
+     76	    00C0  66| 13 CA			 adc	 ecx,edx
+     77	    00C3  66| 0F A4 D9 11		 shld	 ecx,ebx,17
+     78	    00C8  66| 51			 push	 ecx
+     79	    00CA  66| B8 12345678	 mtrm12: mov	 eax,12345678h
+     80	    00D0  66| F7 EE			 imul	 esi
+     81	    00D3  66| 8B D8			 mov	 ebx,eax
+     82	    00D6  66| 8B CA			 mov	 ecx,edx
+     83	    00D9  66| 69 FF 12345678	 mtrm14: imul	 edi,12345678h
+     84	    00E0  66| 03 D8			 add	 ebx,eax
+     85	    00E3  66| 13 CA			 adc	 ecx,edx
+     86	    00E6  66| 69 ED 12345678	 mtrm16: imul	 ebp,12345678h
+     87	    00ED  66| 03 D8			 add	 ebx,eax
+     88	    00F0  66| 13 CA			 adc	 ecx,edx
+     89	    00F3  66| 0F A4 D9 11		 shld	 ecx,ebx,17
+     90	    00F8  66| 5A			 pop	 edx
+     91	    00FA  66| 58			 pop	 eax
+     92	    00FC  5F				 pop	 di
+     93	    00FD  5E				 pop	 si
+     94						 ;
+     95	    00FE  66| 65: 03 0E	0000		 add	 ecx,gs:xadd
+**Error** vec.asm(95) Undefined	symbol:	XADD
+     96	    0104  66| 26: 89 0D			 mov	 es:[di+0],ecx
+     97	    0108  66| 65: 03 0E	0000		 add	 ecx,gs:yadd
+**Error** vec.asm(97) Undefined	symbol:	YADD
+     98	    010E  66| 26: 89 55	04		 mov	 es:[di+4],edx
+     99	    0113  66| 65: 03 06	0000		 add	 eax,gs:zadd
+**Error** vec.asm(99) Undefined	symbol:	ZADD
+    100	    0119  66| 26: 89 45	08		 mov	 es:[di+8],eax
+    101						 ;next point
+    102	    011E  83 C6	0C			 add	 si,12
+    103	    0121  83 C7	0C			 add	 di,12
+    104	    0124  FF 0E	0040r			 dec	 ds:count
+    105	    0128  0F 85	FF35			 jnz	 nrup1
+    106	    012C  5F				 pop	 di
+    107	    012D  CB				 ret
+    108	    012E			 dovertices ENDP
+    109
+    110	    012E			 text__vec ENDS
+Turbo Assembler	 Version 2.5	    02/21/93 18:09:17	    Page 3
+vec.asm
+
+
+
+    111						 END
+Turbo Assembler	 Version 2.5	    02/21/93 18:09:17	    Page 4
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "02/21/93"
+??FILENAME			  Text	 "vec	  "
+??TIME				  Text	 "18:09:13"
+??VERSION			  Number 0205
+@CPU				  Text	 0D0FH
+@CURSEG				  Text	 TEXT__VEC
+@FILENAME			  Text	 VEC
+@WORDSIZE			  Text	 4
+COUNT				  Word	 TEXT__VEC:0040
+DOVERTICES			  Far	 TEXT__VEC:0042
+MTRM00				  Near	 TEXT__VEC:006E
+MTRM02				  Near	 TEXT__VEC:007B
+MTRM04				  Near	 TEXT__VEC:0088
+MTRM06				  Near	 TEXT__VEC:009C
+MTRM08				  Near	 TEXT__VEC:00A9
+MTRM10				  Near	 TEXT__VEC:00B6
+MTRM12				  Near	 TEXT__VEC:00CA
+MTRM14				  Near	 TEXT__VEC:00D9
+MTRM16				  Near	 TEXT__VEC:00E6
+NRUP1				  Near	 TEXT__VEC:0061
+SETMATRIX			  Far	 TEXT__VEC:0000
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+TEXT__VEC			  16  012E Para	  Public  CODE
+Turbo Assembler	 Version 2.5	    02/21/93 18:09:17	    Page 5
+Error Summary
+
+
+
+**Error** vec.asm(37) Illegal instruction
+**Error** vec.asm(95) Undefined	symbol:	XADD
+**Error** vec.asm(97) Undefined	symbol:	YADD
+**Error** vec.asm(99) Undefined	symbol:	ZADD
+

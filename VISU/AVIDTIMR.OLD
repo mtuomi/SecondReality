@@ -1,0 +1,88 @@
+ALIGN 4
+_olddostimer dd	?
+timerspeed dw	0
+timercount dw	0
+
+vidtimer PROC FAR
+	push	ax
+	push	cx
+	push	dx
+	push	ds
+	IF 0
+	mov	dx,3dah
+	in	al,dx
+	mov	dx,3c0h
+	mov	al,11h+20h
+	out	dx,al
+	mov	al,4
+	out	dx,al
+	mov	cx,1000
+@@pp:	loop	@@pp
+	mov	dx,3dah
+	in	al,dx
+	mov	dx,3c0h
+	mov	al,11h+20h
+	out	dx,al
+	mov	al,0
+	out	dx,al
+	ENDIF
+	inc	cs:framecounter
+	pop	ds
+	pop	dx
+	pop	cx
+	mov	ax,cs:timerspeed
+	add	cs:timercount,ax
+	jnc	@@x
+	pop	ax
+	jmp	cs:_olddostimer
+@@x:	mov	al,20h
+	out	20h,al
+	pop	ax
+	iret
+vidtimer ENDP
+
+;北北北北 _vid_inittimer() 北北北北
+;entry:	-
+; exit: -
+;descr: Captures the system timer and sets it to 70hz
+_vid_inittimer PROC FAR
+	CBEG
+	xor	ax,ax
+	mov	es,ax
+	mov	eax,es:[8h*4+0]
+	mov	cs:_olddostimer,eax
+	cli
+	mov	word ptr es:[8h*4+0],OFFSET vidtimer
+	mov	es:[8h*4+2],cs
+	mov	al,36h
+	out	43h,al
+	mov	ax,119318/7
+	mov	cs:timerspeed,ax
+	out	40h,al
+	mov	al,ah
+	out	40h,al
+	sti
+	CEND
+_vid_inittimer ENDP
+
+;北北北北 _vid_deinittimer() 北北北北
+;entry:	-
+; exit: -
+;descr: Restores the system timer to its original state
+_vid_deinittimer PROC FAR
+	CBEG
+	xor	ax,ax
+	mov	es,ax
+	cli
+	mov	eax,cs:_olddostimer
+	mov	es:[8h*4+0],eax
+	mov	al,36h
+	out	43h,al
+	mov	ax,0
+	out	40h,al
+	mov	al,ah
+	out	40h,al
+	sti
+	CEND
+_vid_deinittimer ENDP
+

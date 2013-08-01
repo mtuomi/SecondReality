@@ -1,0 +1,6 @@
+xbufseg	SEGMENT para public 'DATA'
+	;high=X, low=Y => result=X*Y/256
+PUBLIC _bufdata
+_bufdata dw	32768 dup(0)
+xbufseg	ENDS
+

@@ -1,0 +1,49 @@
+
+ Start  Stop   Length Name                   Class
+ 00000H 019C8H 019C9H KOE_TEXT               CODE
+ 019D0H 05663H 03C94H CODE                   CODE
+ 05670H 0789FH 02230H code2                  CODE
+ 078A0H 07973H 000D4H text_disc              CODE
+ 07974H 0910AH 01797H _TEXT                  CODE
+ 09110H 09111H 00002H EMULATOR_TEXT          CODE
+ 09112H 09112H 00000H C_ETEXT                ENDCODE
+ 09120H 0EEDFH 05DC0H DATA__circle           FARDATA
+ 0EEE0H 10E1FH 01F40H DATA__circle2          FARDATA
+ 10E20H 10E20H 00000H EMULATOR_DATA          FAR_DATA
+ 10E20H 115CBH 007ACH FAR_BSS                FAR_BSS
+ 115D0H 11611H 00042H NULL                   BEGDATA
+ 11612H 11939H 00328H _DATA                  DATA
+ 1193AH 1193BH 00002H XIQC                   DATA
+ 1193CH 11949H 0000EH DBDATA                 DATA
+ 1194AH 11957H 0000EH CDATA                  DATA
+ 11958H 11958H 00000H XIFB                   DATA
+ 11958H 11958H 00000H XIF                    DATA
+ 11958H 11958H 00000H XIFE                   DATA
+ 11958H 11958H 00000H XIB                    DATA
+ 11958H 11958H 00000H XI                     DATA
+ 11958H 11958H 00000H XIE                    DATA
+ 11958H 11958H 00000H XPB                    DATA
+ 11958H 1195BH 00004H XP                     DATA
+ 1195CH 1195CH 00000H XPE                    DATA
+ 1195CH 1195CH 00000H XCB                    DATA
+ 1195CH 1195CH 00000H XC                     DATA
+ 1195CH 1195CH 00000H XCE                    DATA
+ 1195CH 1195CH 00000H XCFB                   DATA
+ 1195CH 1195CH 00000H XCF                    DATA
+ 1195CH 1195CH 00000H XCFE                   DATA
+ 1195CH 119A3H 00048H CONST                  CONST
+ 119A4H 119ABH 00008H HDR                    MSG
+ 119ACH 11A81H 000D6H MSG                    MSG
+ 11A82H 11A83H 00002H PAD                    MSG
+ 11A84H 11A84H 00001H EPAD                   MSG
+ 11A86H 11A86H 00000H _BSS                   BSS
+ 11A86H 11A86H 00000H XOB                    BSS
+ 11A86H 11A86H 00000H XO                     BSS
+ 11A86H 11A86H 00000H XOE                    BSS
+ 11A90H 11C8FH 00200H c_common               BSS
+ 11C90H 1248FH 00800H STACK                  STACK
+
+ Origin   Group
+ 115D:0   DGROUP
+
+Program entry point at 0797:0014

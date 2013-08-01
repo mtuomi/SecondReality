@@ -1,0 +1,91 @@
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³                                                                             ³
+³                             = Second Reality =                              ³
+³                                                                             ³
+³                     Copyright (C) 1993 by the Future Crew                   ³
+³                                                                             ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³                                                                             ³
+³                     Released on the 7th of October 1993                     ³
+³                                                                             ³
+³                        This demo won the Assembly'93                        ³
+³                    annual international demo competition                    ³
+³                        held in Finland, summer 1993.                        ³
+³                                                                             ³
+³                            This demo is freeware.                           ³
+³             It can be freely distributed without modifications.             ³
+³                       No money can be charged for it.                       ³
+³                                                                             ³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+	FILES IN THE PACKAGE
+	--------------------
+
+	Second Reality is distributed in two ZIP files named:
+
+		2NDREAL1.ZIP and
+		2NDREAL2.ZIP.
+
+	You must unpack both zip-files to the same directory before
+	the demo can be run. After unpacking, you should have the
+	following files:
+
+                README.1ST      - This file
+		SECOND.EXE	- Demo executable file
+		REALITY.FC	- Demo data file
+                FCINFO10.TXT    - Information about future crew
+                FILE_ID.DIZ     - BBS file descriptions (one in both zips)
+
+
+
+        HARDWARE REQUIREMENTS AND OPTIONS
+        ---------------------------------
+
+        This demo requires a 80386 processor and 570 000 bytes of
+        free conventional memory.
+
+        With Sound Blaster and Sound Blaster Pro you will need an
+        additional 1 megabyte of EMS. With the Gravis UltraSound
+        and the No Sound-option no EMS is needed. You can choose
+	the desired sound card and the mixing frequency from the
+	SETUP screen when you run the demo.
+
+        To be able to really experience this demo, we recommend that
+        you have a 486-based machine, a fast VGA card and a sound card.
+	If your machine is 386-based, the demo will work, but many 
+	parts slow down and the demo simply looks worse.
+
+        If you have a DOLBY SURROUND decoder/amplifier hooked up to
+        your hi-fi set, have it on-line while running this demo and
+        you will get some cool surround sound effects.
+        (Surprisingly, does not work with the normal Sound Blaster).
+
+
+
+        COMMAND LINE PARAMETERS
+        -----------------------
+
+        You can start the demo from five different points by adding
+        a correct command line parameter at your DOS prompt after
+        typing the SECOND.EXE (, for example C:\> SECOND 3).
+        Here is the list:
+
+                1       Starts the demo from the very beginning
+                        (the same as without any parameter)
+                2       Starts from the title screen
+                3       Starts from the landscape scroller
+                4       Starts from the vectorpart
+                5       Starts from the end credits
+
+        If you want to run this demo in an endless loop, for example
+	at a computer exhibition, be sure to enable the Loop-option.
+	When looping, the end scroller will not be displayed, and the
+	demo will restart automatically after the credits.
+
+        You can find more information and a few hints from the SETUP-
+        screen by running the SECOND.EXE.
+
+        To learn more about Future Crew and a lot of other things,
+        read the FCINFO10.TXT !
+

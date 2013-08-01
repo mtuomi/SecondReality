@@ -1,0 +1,7 @@
+
+ Start  Stop   Length Name                   Class
+ 00000H 032ACH 032ADH u2_text                TEXT
+ 032B0H 0A656H 073A7H text_stmik300_text     CODE
+ 0A660H 0A66FH 00010H lastseg                STACK
+
+Program entry point at 0000:2EC6

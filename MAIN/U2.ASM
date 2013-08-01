@@ -1,0 +1,1010 @@
+;** ùSùEùCùOùNùDùùRùEùAùLùIùTùYù  Copyright (C) 1993 The Future Crew
+;**------------------------------------------------------------------
+;**  Main assembler file. This is the first program ran.
+;**  It installs dis (included), contains STMIK, plus
+;**  loads the other exe's.
+
+KEYBON=1
+DEBUG=0
+;FINAL=1
+TESTF=0
+
+include stmika.inc
+
+u2_text SEGMENT para public 'TEXT'
+        ASSUME cs:u2_text
+.386
+LOCALS
+INDEMO=1
+
+;±±±±±±±±±±±±±±±± Stack & hidden msg ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+ORG 0h
+;---[between these two, there is the stack]---
+db      13,25 dup(10)
+db      'ùSùEùCùOùNùDùùRùEùAùLùIùTùYù (beta)   Copyright (C) 1993 The Future Crew ',13,10
+db      '$'
+;---[between these two, there is the stack]---
+ORG 400h ;1K staack
+stack1  db      0
+
+;±±±±±±±±±±±±±±±± Utilities ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+ALIGN 16
+include u2a.asm
+
+;±±±±±±±±±±±±±±±± Copper ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+ALIGN 16
+include copper.asm
+include vmode.asm
+
+;±±±±±±±±±±±±±±±± DIS ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+ALIGN 16
+include ..\dis\disint.asm
+;----- usage of the dis's internal message areas -----
+;0: for current part (unused)
+;1: VGA-state for EGA 320x200x16 mode.
+;2: VGA-state for MCGA 320x200x256 mode.
+;3: used by START.EXE/U2.EXE
+
+;±±±±±±±±±±±±±±±± Startup here ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+ALIGN 16
+
+;exes to load
+exemus                                          db 'STARTMUS.EXE',0
+exe0                                            db 'START.EXE',0
+;txthid	db	'Hidden part',0
+exehid						db 'DDSTARS.EXE',0
+;txt1   db      'Alkutekstit I (WILDF)       ',0
+exe1                                            db 'ALKU.EXE',0
+;txt2   db      'Alkutekstit II (PSI)        ',0
+exe2                                            db 'U2A.EXE',0
+;txt3   db      'Alkutekstit III (TRUG/WILDF)',0
+exe3a                                           db 'PAM.EXE',0
+exe3                                            db 'BEGLOGO.EXE',0
+;txt4   db      'Glenz (PSI)                 ',0
+exe4                                            db 'GLENZ.EXE',0
+;txt5   db      'Dottitunneli (TRUG)         ',0
+exe5                                            db 'TUNNELI.EXE',0
+;txt6   db      'Techno (PSI)                ',0
+exe6                                            db 'TECHNO.EXE',0
+;txt7   db      'Panicfake (WILDF)           ',0
+exe7                                            db 'PANICEND.EXE',0
+;txt8   db      'Vector Part I - Space battle',0
+;txt9   db      'Vuori-Scrolli (TRUG)        ',0
+exe9                                            db 'MNTSCRL.EXE',0
+;txt10  db      'Desert Dream Stars (PSI)    ',0
+;exe10                                          db 'DDSTARS.EXE',0
+;txt11  db      'Lens (PSI)                  ',0
+;see below
+;txt12  db      'Rotazoomer (PSI)            ',0
+exe1112                                         db 'LNS&ZOOM.EXE',0
+;txt13  db      'Plasma (WILDF)              ',0
+;txt14  db      'Plasmacube (WILDF)          ',0
+exe1314                                         db 'PLZPART.EXE',0
+;txt15  db      'MiniVectorBalls (PSI)       ',0
+exe15                                           db 'MINVBALL.EXE',0
+;txt16  db      'Peilipalloscroll (TRUG)     ',0
+exe16                                           db 'RAYSCRL.EXE',0
+;txt17  db      '3D-Sinusfield (PSI)         ',0
+exe17                                           db '3DSINFLD.EXE',0
+;txt18  db      'Jellypic (PSI)              ',0
+exe18                                           db 'JPLOGO.EXE',0
+;txt19  db      'Vector Part II',0
+exe19                                           db 'U2E.EXE',0
+;txt20  db      'Endpictureflash (?)         ',0
+;see below
+;txt21  db      'Credits/Greetings scrl. (?) ',0
+exe2021                                         db 'ENDLOGO.EXE',0
+exe22                                           db 'CRED.EXE',0
+exe23                                           db 'ENDSCRL.EXE',0
+
+zeropage db	256*4 dup(0)
+
+looping	db	0
+whattorun db    7fh      
+;&1=start, &2=logo..panic &4=mount..comanche &8=vector, &16=scrollers
+partsmask LABEL BYTE
+db 11111b ;0
+db 11111b ;1
+db 11110b ;2
+db 11100b ;3
+db 11000b ;4
+db 10000b ;5
+db 00000b ;6
+db 00000b ;7
+db 80h 	  ;8
+db 00000b ;9
+
+filedir LABEL WORD
+include packing.inc
+
+ctrlwasdown db	0
+normalkbd db	0
+notextmode db	0
+	db	0
+
+ownpsp  dw      0       ;own psp
+stmikseg dw     0       ;segment to STMIK code / variables
+moduleseg dw    0       ;START.EXE loads the module and returns a pointer
+                        ;to it's base through DIS.
+msgareapnt dd   0       ;pointer to DIS msg area (inside this asm
+                        ;actually, but let's do it nicely)
+
+txt0    db      'Part missing!     ',60 dup(0)
+partmissing PROC NEAR
+        mov     ax,40h
+        mov     es,ax
+        test    byte ptr es:[17h],4
+        jnz     @@skip
+        mov     ax,cs
+        mov     ds,ax
+        mov     ax,3h
+        int     10h
+        mov     ax,0b800h
+        mov     es,ax
+        mov     bx,OFFSET txt0
+        mov     di,12*160+10*2
+        mov     dx,0c00h+196
+@@2:    mov     al,ds:[si]
+        inc     si
+        or      al,al
+        jz      @@1
+        mov     es:[di-160],dx
+        mov     ah,0eh
+        mov     es:[di],ax
+        mov     al,ds:[bx]
+        inc     bx
+        mov     ah,08h
+        mov     es:[di-320],ax
+        mov     es:[di+160],dx
+        add     di,2
+        jmp     @@2     
+@@1:    mov     cx,200
+@@3:    push    cx
+        mov     bx,1
+        int     0fch
+        mov     ah,1
+        int     16h
+        jnz     @@4
+        pop     cx
+        loop    @@3
+        mov     ax,3h
+        int     10h
+        ret
+@@4:    pop     cx
+        call    flushkbd
+        mov     ax,3h
+        int     10h
+@@skip: ret
+partmissing ENDP
+
+ctrldown PROC NEAR
+	cmp	cs:ctrlwasdown,0
+	jne	@@yes
+        push    ax
+        push    es
+        mov     ax,40h
+        mov     es,ax
+        test    byte ptr es:[17h],4
+        jz      @@no
+	mov	cs:ctrlwasdown,1
+        pop     es
+        pop     ax
+@@yes:  stc
+        ret
+@@no:   pop     es
+        pop     ax
+        clc
+        ret
+ctrldown ENDP
+
+partexecute PROC NEAR
+        call    ctrldown
+        jc      @@skip
+        mov     ax,cs
+        mov     ds,ax
+        call    execute
+        call    flushkbd
+@@skip: mov     ax,OFFSET copper_intretf
+        mov     word ptr cs:copper_int0[0],ax
+        mov     word ptr cs:copper_int0[2],cs
+        mov     word ptr cs:copper_int1[0],ax
+        mov     word ptr cs:copper_int1[2],cs
+        mov     word ptr cs:copper_int2[0],ax
+        mov     word ptr cs:copper_int2[2],cs
+        ret
+partexecute ENDP
+
+loaderservices PROC NEAR
+        cmp     ax,1
+        je      @@set   
+        cmp     ax,0
+        je      @@res
+        cmp     ax,100h
+        je      @@zldr
+        cmp     ax,101h
+        je      @@zint
+        cmp     ax,102h
+        je      @@zclrmem
+        cmp     ax,103h
+        je      @@zsizemem
+        ret
+	
+@@zsizemem:
+	call	_zsizegusmem
+	ret
+        
+@@zclrmem: 
+        mov     dx,-1
+        push    dx
+        call    _zloadinstrument
+        add     sp,2
+        ret
+@@zldr: push    dx
+        call    _zloadinstrument
+        add     sp,2
+        ret
+@@zint: ;dx is a parameter
+        push    ds
+        lds     bx,cs:msgareapnt
+        mov     ax,ds:[bx+4]
+        mov     es,cs:stmikseg
+        mov     es:_zemspageframe,ax
+        mov     ax,ds:[bx+8]
+        mov     es:_zemspagehandle,ax
+        pop     ds
+        push    dx
+        xor     ax,ax
+        push    ax
+        call    _zinitanothermodule
+        add     sp,4
+        ret
+@@set:  mov     bx,cs:exeldr_ownpsp ;exeloaders
+        mov     ah,50h
+        int     21h
+        ret
+@@res:  mov     bx,cs:exeldr_pspseg ;loaded programs
+        mov     ah,50h
+        int     21h
+        ret
+loaderservices ENDP
+
+waitforplus PROC NEAR
+@@1:    call    ctrldown
+        jc      @@2
+        mov     bx,6
+        int     0fch
+        cmp     dx,-4
+        jle     @@1
+@@2:    ret
+waitforplus ENDP
+
+u2copperint PROC NEAR
+	call	ctrldown
+	ret
+u2copperint ENDP
+        
+ALIGN 2
+forcebreak dw   0
+inforcebreak db 0
+forcebreakcheck PROC NEAR
+        cmp     cs:inforcebreak,0
+        jne     @@e
+        cmp     byte ptr cs:forcebreak,0
+        jne     @@g
+@@e:    ret
+@@g:    mov     cs:inforcebreak,1
+        pusha
+        push    ds
+        push    es
+        mov     bx,6
+        int     0fch
+        cmp     byte ptr cs:forcebreak[1],0
+        jne     @@4
+@@5:    cmp     dx,-4
+        jge     @@0
+        cmp     dx,-8
+        jle     @@0
+        dec     byte ptr cs:forcebreak
+        jnz     @@3
+        mov     word ptr cs:forcebreak,0
+@@3:    mov     ax,40h
+        mov     es,ax
+        mov     word ptr es:[1ah],1eh
+        mov     word ptr es:[1ch],1eh+2
+        mov     word ptr es:[1eh],0100h+27
+        mov     cs:exitflag,1
+        mov     byte ptr cs:forcebreak[1],1
+@@0:    pop     es
+        pop     ds
+        popa
+        mov     cs:inforcebreak,0
+        ret
+@@4:    cmp     dx,-4
+        jl      @@0
+        mov     cs:forcebreak[1],0
+        jmp     @@5
+forcebreakcheck ENDP
+
+fademusic PROC NEAR
+	mov	ds,cs:moduleseg
+@@cont:	mov	al,ds:[30h]
+	cmp	al,0
+	jle	@@done
+	push	cx
+	mov	bx,1
+	int	0fch
+	pop	cx
+	sub	byte ptr ds:[30h],cl
+	jnc	@@cont
+@@done:	mov	byte ptr ds:[30h],0
+	ret
+fademusic ENDP
+
+restartmus PROC NEAR
+        call    ctrldown
+        jc      @@non
+        push    bx
+        push    cx
+        push    ax
+        call    _zstopsong
+        call    _zshutup
+        lds     bx,cs:msgareapnt
+        mov     es,cs:stmikseg
+	mov	ax,cs:moduleseg
+	mov	ds:[bx+2],ax
+	mov	word ptr ds:[bx+0],0
+        pop     ax
+	mov	ah,byte ptr es:_zoutputmode
+        mov     word ptr ds:[bx+12],ax ;load music al with outputmode ah
+        mov     si,OFFSET exemus
+        call    executehigh
+        lds     bx,cs:msgareapnt
+	mov	ax,ds:[bx+8*4]
+        cmp     ax,-2
+        jne     @@emso
+	mov	cs:errorcode,4
+	jmp	fatalexit
+@@emso: cmp     ax,-3
+        jne     @@guso
+	mov	cs:errorcode,9
+	jmp	fatalexit
+@@guso: cmp     ax,-4
+        jne     @@emsh
+	mov	cs:errorcode,11
+	jmp	fatalexit
+@@emsh: mov     ax,ds:[bx+2]
+        mov     cs:moduleseg,ax
+        mov     es,cs:stmikseg
+        pop     cx
+        cmp     es:_zoutputmode,7
+        je      @@isnosound
+        cmp     es:_zoutputmode,2
+        jne     @@nogus2
+@@isnosound:
+        mov     es:_zspeedadjust2,cx
+@@nogus2: pop   bx 
+        cmp     bx,-1
+        je      @@non
+        push    bx
+        call    _zplaysong
+        add     sp,2
+@@non:  ret
+restartmus ENDP
+
+minmemfree dw	0ffffh
+recheckmem PROC NEAR
+	pushf
+	pusha
+	mov	ah,48h
+	mov	bx,0ffffh
+	int	21h
+	cmp	bx,100
+	jb	@@1
+	cmp	bx,cs:minmemfree
+	ja	@@1
+	mov	cs:minmemfree,bx
+@@1:	popa
+	popf
+	ret
+recheckmem ENDP
+
+.386P
+checkall PROC NEAR
+;*******-Check for 570,000 bytes of mem
+	mov	ah,48h
+	mov	bx,0ffffh
+	int	21h
+	cmp	bx,80a0h
+	ja	memok
+	mov	cs:errorcode,3
+	ret	
+;*******-Check for 386
+memok:	push	sp			; 86/186 will push SP-2;
+	pop	ax			; 286/386 will push SP.
+	cmp	ax, sp
+	jz	not86			; If equal, SP was pushed
+err1: 	mov	cs:errorcode,5
+	ret
+;*check 386 continues
+not86:	sub	sp, 6			; Is it 286 or 386 in 16-bit mode?
+	mov	bp, sp			; Allocate stack space for GDT pointer
+	sgdt	fword ptr [bp]
+	add	sp, 4			; Discard 2 words of GDT pointer
+	pop	ax			; Get third word
+	inc	ah			; 286 stores -1, 386 stores 0 or 1
+	jnz	is386
+is286:	jmp	err1
+is386:	nop
+;*******-Check for VGA
+	mov	ax,1a00h
+	int	10h
+	cmp	al,01ah
+	jne	isnot
+	cmp	bl,7
+	jae	isvga
+isnot:	mov	cs:errorcode,6
+isvga:	ret
+checkall ENDP
+.386
+
+IF DEBUG
+;--------------------------------------------------------------------------
+
+ipt db	256 dup(0,0,0)
+hexdigits db '0123456789ABCDEF'
+
+printdebug PROC NEAR
+	mov	ax,cs
+	mov	ds,ax
+	mov	cx,256
+	xor	ax,ax
+	mov	bx,OFFSET inttable
+	mov	di,OFFSET ipt
+@@1:	push	ax
+	push	bx
+	push	cx
+	cmp	byte ptr ds:[bx],0
+	je	@@2
+	mov	bx,ax
+	and	bx,15
+	mov	bl,ds:hexdigits[bx]
+	mov	ds:[di+1],bl
+	mov	bx,ax
+	shr	bx,4
+	and	bx,15
+	mov	bl,ds:hexdigits[bx]
+	mov	ds:[di+0],bl
+	mov	byte ptr ds:[di+2],32
+	add	di,3
+@@2:	pop	cx
+	pop	bx
+	pop	ax
+	inc	bx
+	inc	ax
+	loop	@@1
+	mov	byte ptr ds:[di],13
+	mov	byte ptr ds:[di+1],10
+	mov	byte ptr ds:[di+2],'$'
+	mov	dx,OFFSET ipt
+	mov	ah,9
+	int	21h	
+	ret
+printdebug ENDP
+
+;--------------------------------------------------------------------------
+ELSE
+printdebug PROC NEAR
+	ret
+printdebug ENDP
+ENDIF
+
+endansiname db	'U2END.BIN',0
+
+printend PROC NEAR
+	mov	ax,cs
+	mov	ds,ax
+	mov	bx,4096/16
+	call	getmem
+	mov	es,ax
+	mov	si,OFFSET endansiname
+	call	openfile
+	push	ax
+	mov	cx,4000
+	mov	di,0
+	call	readfile
+	pop	ax
+	call	closefile
+	mov	ax,es
+	mov	ds,ax
+	mov	ax,0b800h
+	mov	es,ax
+	mov	cx,4000/2
+	xor	si,si
+	xor	di,di
+	rep	movsd
+	mov	ah,2
+	mov	bx,0
+	mov	dx,256*14+0
+	int	10h
+	ret
+printend ENDP
+
+ALIGN 2
+errorcode dw	0
+errors LABEL WORD
+	dw	OFFSET error0
+	dw	OFFSET error1
+	dw	OFFSET error2
+	dw	OFFSET error3
+	dw	OFFSET error4
+	dw	OFFSET error5
+	dw	OFFSET error6
+	dw	OFFSET error7
+	dw	OFFSET error8
+	dw	OFFSET error9
+	dw	OFFSET error10
+	dw	OFFSET error11
+	
+error0	db	'$'
+error1	db	'Failed to initialize the selected soundcard.',13,10
+	db	'Try selecting another soundcard or no sound.',13,10
+	db	'$'
+error2	db	'Unknown command line switch. To start from the middle of the',13,10
+	db	'demo, execute "SECOND #" where # is a number between 2 and 5.',13,10
+	db	'$'
+error3	db	'Not enough conventional memory. At least 570,000 bytes free is required.',13,10
+	db	'$'
+error4	db	'Not enough expanded (EMS) memory for music.',13,10
+	db	'At least 1MB is required with SoundBlaster cards.',13,10
+	db	'$'
+error5	db	'A 386 or higher processor required.',13,10
+	db	'$'
+error6	db	'VGA or compatible graphics adapter required.',13,10
+	db	'$'
+error7	db	'Could not find either SECOND.EXE or REALITY.FC. These files are',13,10
+	db	'required to be in the current directory when the demo is run.',13,10
+	db	'$'
+error8	db	'FATAL: Could not load or execute internal subfile.',13,10
+	db	'Please reboot the machine *now* and try a clean configuration. Sorry.',13,10
+	db	'$'
+error9	db	'Not enough memory in the Gravis Ultrasound card.',13,10
+	db	'At least 512K is required.',13,10
+	db	'$'
+error10 db	'Sorry, but this program can not run under Microsoft Windows (tm).',13,10
+	db	'$'
+error11 db	'Not enough expanded (EMS) memory handles. The demo requires 50 free handles',13,10
+	db	'to be able to load music to expanded memory.',13,10
+	db	'$'
+
+printerror PROC NEAR
+	mov	ax,cs
+	mov	ds,ax
+	mov	bx,ds:errorcode
+	shl	bx,1
+	mov	dx,cs:errors[bx]
+	mov	ah,9
+	int	21h
+	ret
+printerror ENDP
+
+checkcmdline PROC NEAR
+        ;Check command line
+	mov	ds,cs:ownpsp
+	mov     si,81h
+        mov     bl,ds:[80h]
+        xor     bh,bh
+        mov     byte ptr ds:[si+bx],0
+        mov     si,80h
+@@f8:   inc     si
+        mov     al,ds:[si]
+	cmp	al,'/'
+	je	@@f0
+	cmp	al,0
+	je	@@f0
+        cmp     al,32
+        je      @@f8
+        cmp     al,'0'
+        jle     @@f2
+        cmp     al,'U'
+        je      @@f7
+        cmp     al,'u'
+        je      @@f7
+        cmp     al,'6'
+        jge     @@f2
+        ;numberstart
+        sub     al,'0'
+@@f9:   xor     bh,bh
+        mov     bl,al
+        mov     al,cs:partsmask[bx]
+        mov     cs:whattorun,al
+	ret
+@@f7:	mov	al,8
+	jmp	@@f9
+@@f2:	mov	cs:errorcode,2
+@@f0:	ret
+checkcmdline ENDP
+
+start:  ;set stack
+        cli
+        mov     ax,cs
+        mov     ss,ax
+        mov     sp,OFFSET stack1-2
+        sti
+        ;store own psp & relloc=free unused mem
+        mov     cs:ownpsp,es
+        mov     bx,SEG endcode
+        mov     ax,es
+        sub     bx,ax
+        add     bx,64
+        mov     ah,4ah
+        int     21h
+	;store zeropage
+	mov	ax,cs
+	mov	es,ax
+	mov	di,OFFSET zeropage
+	xor	ax,ax
+	mov	ds,ax
+	xor	si,si
+	mov	cx,256*4
+	cli
+	call	memcpy
+	sti
+;	;debugfilllowmem
+;@@fil:	mov	bx,1
+;	call	getmem
+;	mov	dx,cs
+;	cmp	ax,dx
+;	jb	@@fil
+	call	checkall
+	cmp	cs:errorcode,0
+	jne	fatalexit00
+        ;initialize dis
+	IF FINAL
+	call	file_checkfiles
+	cmp	cs:errorcode,0
+	jne	fatalexit00
+	ENDIF
+        mov     ds,cs:ownpsp
+        call    file_getexepath
+        call    dis_setint
+	call	file_initpacking
+        call    file_setint
+        call    flushkbd
+        mov     ax,3
+        mov     bx,5
+        int     0fch
+        mov     word ptr cs:msgareapnt[0],ax
+        mov     word ptr cs:msgareapnt[2],dx
+	;check for CPU/VGA/MEM
+	cmp	cs:errorcode,0
+	jne	fatalexit0
+	;check/process commandline
+	call	checkcmdline
+	cmp	cs:errorcode,0
+	jne	fatalexit0
+;======== Here we go! ========
+        call    vmode_init
+        ;
+	mov	ax,3h
+	int	10h
+	;
+        mov     ax,SEG _zinit
+        mov     cs:stmikseg,ax
+        lds     bx,cs:msgareapnt
+        mov     word ptr ds:[bx],0
+        mov     word ptr ds:[bx+2],0
+        mov     ax,cs
+        mov     ds,ax
+        mov     si,OFFSET exe0
+	mov	cs:normalkbd,1
+        call    executehigh
+	mov	cs:normalkbd,0
+        mov     ax,SEG _zinit
+        mov     cs:stmikseg,ax
+        lds     bx,cs:msgareapnt
+        mov     ax,ds:[bx+0]
+        cmp     ax,-3
+        jne     @@emsz
+	mov	cs:errorcode,10
+	jmp	fatalexit
+@@emsz: cmp     ax,-2
+        jne     @@emso
+	mov	cs:errorcode,4
+	jmp	fatalexit
+@@emso: cmp     ax,-1
+        je      fatalexit
+        ;
+	;Initialize sounds
+        mov     es,cs:stmikseg
+	mov	ax,ds:[bx+2]
+	mov	es:_zoutputmode,7 ;(nosound)
+	cmp	ax,1
+	jne	@@snd1
+	mov	es:_zoutputmode,1 ;SB
+@@snd1:	cmp	ax,2
+	jne	@@snd2
+	mov	es:_zoutputmode,5 ;SBpro
+@@snd2:	cmp	ax,3
+	jne	@@snd3
+	mov	es:_zoutputmode,2 ;Gravis
+@@snd3:
+	mov	ax,ds:[bx+4]
+	mov	es:_zmixspeed,20000
+	cmp	ax,0
+	jne	@@squ0
+	mov	es:_zmixspeed,12000
+@@squ0:	cmp	ax,1
+	jne	@@squ1
+	mov	es:_zmixspeed,16000
+@@squ1:
+	mov	ax,ds:[bx+6]
+	mov	cs:looping,al
+	
+        ;start music
+        call    _zinit ;try selected soundcard
+        cmp     es:_zoutputmode,0
+        jne     @@soundfound
+	;
+	mov	cs:errorcode,1
+	jmp	fatalexit
+	;
+@@soundfound:
+        cmp     es:_zoutputmode,5
+        jne     @@nosbpro
+        shl     es:_zmixspeed,1
+@@nosbpro:
+        mov     ax,cs
+        mov     ds,ax
+        lds     bx,cs:msgareapnt
+        mov     word ptr ds:[bx],0
+        mov     word ptr ds:[bx+2],0
+
+	mov	ax,0
+        mov     bx,-1
+	mov     cx,45000
+        test    cs:whattorun,1
+        jnz     @@sndz
+        mov     ax,1
+        mov     bx,0
+        mov     cx,48700
+@@sndz: call    restartmus
+        lds     bx,cs:msgareapnt
+        mov     ax,ds:[bx+2]
+        mov     cs:moduleseg,ax
+        call    _zsoundon
+        
+        call    _asmcopperinit
+        mov     es,cs:stmikseg
+        mov     es:_zpollmix,1
+
+        push    0
+        call    _zplaysong
+        add     sp,2
+                
+	;--------------------------
+@@partsagain:
+	mov	cs:notextmode,1
+        test    cs:whattorun,1
+        jz      @@skipp1
+        mov     si,OFFSET exe1
+        call    partexecute
+        mov     si,OFFSET exe2
+        call    partexecute
+        mov     si,OFFSET exe3a
+        call    partexecute
+@@skipp1:
+        test    cs:whattorun,2
+        jz      @@skipp2
+
+        test    cs:whattorun,1
+        jnz      @@skip2c
+	mov	ax,13h
+	int	10h
+	call	inittwk
+@@skip2c:
+        mov     si,OFFSET exe3
+        call    partexecute
+        
+        test    cs:whattorun,1
+        jz      @@skip2b
+        mov     ax,1
+        mov     bx,0
+        mov     cx,48700
+        call    restartmus
+@@skip2b:        
+        mov     si,OFFSET exe4
+        call    partexecute
+        mov     si,OFFSET exe5
+        call    partexecute
+        mov     si,OFFSET exe6
+        call    partexecute
+        mov     si,OFFSET exe7
+        call    partexecute
+
+        call    ctrldown
+        jc      @@skip5
+        sti
+        mov     es,cs:stmikseg
+@@zh5:  mov	bx,1
+	int	0fch
+	mov	bx,2
+	int	0fch
+	or	ax,ax
+	jnz	@@skip5
+	mov     bx,6
+        int     0fch
+        cmp     dx,0
+        jge     @@zh5
+@@zh4:  mov	bx,1
+	int	0fch
+	mov	bx,2
+	int	0fch
+	or	ax,ax
+	jnz	@@skip5
+	mov     bx,6
+        int     0fch
+        cmp     dx,0
+        jg      @@skip5
+	jmp	@@zh4
+@@skip5:
+@@skipp2:
+        test    cs:whattorun,4
+        jz      @@skipp3
+        test    cs:whattorun,2
+        jnz     @@con3
+        mov     ax,1
+        mov     bx,42
+        mov     cx,48700
+        call    restartmus
+@@con3:        
+	mov     si,OFFSET exe9
+        call    partexecute
+        mov     si,OFFSET exe1112
+        call    partexecute
+        mov     si,OFFSET exe1314
+        call    partexecute
+        mov     si,OFFSET exe15
+        call    partexecute
+        mov     si,OFFSET exe16
+        call    partexecute
+        mov     si,OFFSET exe17
+        call    partexecute
+        mov     si,OFFSET exe18
+        call    partexecute
+@@skipp3:       
+        test    cs:whattorun,8
+        jz      @@skipp4
+        mov     ax,0
+        mov     bx,18
+        mov     cx,45000
+        call    restartmus
+        mov     si,OFFSET exe19
+        call    partexecute
+@@skipp4:
+        test    cs:whattorun,80h
+        jz      @@skipp5
+        mov     ax,0
+        mov     bx,70
+        mov     cx,45000
+        call    restartmus
+	mov	si,OFFSET exehid
+	call	partexecute
+@@skipp5:
+        test    cs:whattorun,16
+        jz      @@skipp6
+        test    cs:whattorun,8
+        jnz      @@skip6b
+        mov     ax,0
+        mov     bx,25
+        mov     cx,45000
+        call    restartmus
+	mov	ax,13h
+	int	10h
+	call	inittwk
+@@skip6b:
+        mov     si,OFFSET exe2021
+        call    partexecute
+        mov     si,OFFSET exe22
+        call    partexecute
+	cmp	cs:looping,0
+	jne	@@skipp6
+        mov     si,OFFSET exe23
+        call    partexecute
+@@skipp6:
+	mov	cs:whattorun,07fh
+	call	ctrldown
+	jc	@@partsdone
+	cmp	cs:looping,0
+	je	@@partsdone
+	cmp	cs:looping,2
+	je	@@partsdone
+	;fade music
+	mov	cx,1
+	call	fademusic
+        mov     ax,0
+        mov     bx,0
+        mov     cx,45000
+        call    restartmus
+	jmp	@@partsagain
+        ;--------------------------
+@@partsdone:    
+	mov	cs:notextmode,0
+	;fade music
+	mov	cx,1
+	call	fademusic
+        ;stop music
+        call    _asmcopperdeinit
+        call    _zsoundoff
+@@exitnow:
+        lds     bx,cs:msgareapnt
+        mov     ax,SEG _zemspageframe
+        mov     es,ax
+        mov     ax,es:_zemspageframe
+        mov     ds:[bx+4],ax
+        mov     dx,SEG _zemspagehandle
+        mov     es,dx
+        mov     ax,es:_zemspagehandle
+        mov     ds:[bx+8],ax
+        mov     word ptr ds:[bx+12],-1 ;shut down all music
+	mov     ax,cs:moduleseg
+        mov     ds:[bx+2],ax
+	mov	word ptr ds:[bx+0],0
+        mov     ax,cs
+        mov     ds,ax
+        mov     si,OFFSET exemus
+        call    execute
+;======== And Done! (or fatal exit) ========
+fatalexit:
+	mov	cs:notextmode,0
+        call    vmode_deinit
+fatalexit0:
+        call    dis_resetint
+        mov     ax,3
+        int     10h
+	mov	cx,20
+@@cwb1:	push	cx
+	call	copperwaitborder
+	pop	cx
+	loop	@@cwb1
+	call	printend
+	call	printdebug
+        call    file_resetint
+fatalexit00:
+	mov	ax,cs
+	mov	ds,ax
+	mov	si,OFFSET zeropage
+	xor	ax,ax
+	mov	es,ax
+	xor	di,di
+	mov	cx,256*4
+	cli
+	call	memcpy
+	sti
+	call	printerror
+	IF DEBUG
+	mov	ax,cs:minmemfree
+	int	3
+	ENDIF
+        mov     ax,4c00h
+        int     21h
+u2_text ENDS
+
+.8086
+
+;force the STMIK segment before lastseg!        
+text_stmik300_text SEGMENT PARA PUBLIC 'CODE'
+text_stmik300_text ENDS
+
+lastseg segment para stack 'STACK' ;temporary stack when code starts
+        ALIGN 16
+public endcode
+endcode db 16 dup(0)
+lastseg ends
+
+        END start
+

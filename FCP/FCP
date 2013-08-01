@@ -1,0 +1,8 @@
+
+unpack.obj : unpack.asm
+	tasm /ML /m unpack.asm
+	
+fcprot.exe : pack.c unpack.obj
+	cl /qc /W3 /AL /c pack.c
+	link /E pack.obj+unpack.obj,fcprot.exe,fcp.map;
+	

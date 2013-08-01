@@ -1,0 +1,105 @@
+	Second Reality - The Vector Script
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++=code -=3DS
+	
++ Ruutu on musta
++ T„hdet v„l„ht„v„t ja avaruus leimahtaa (=back from hyperspace)
+- Alus suhahtaa vauhdilla kameran alta poisp„in jarruttaen.
+  (nopeus on per„isin hyperspacesta poistumisesta)
+- Alus pys„htyy kun se on noin nelj„sosaruudun kokoinen.
++ Taustalla (aluksen edessa = aluksen osittain peitt„m„n„) n„kyy paljon 
+  pikku aluksia (=polygoneja) Niihin sinus/spline kaukana
+- 3 sec paikallaan
+- kamera kiert„„ kerran aluksen ymp„ri oikealta stylesti (yl„puolelta)
+- kamera lopulta samassa suunnassa kuin alunperin, mutta l„hemp„n„
+
+- kamera paikallaan ison aluksen p„„ll„ l„hell„ sen pintaa (n„kyy vain
+  pala pintaa jossa tutka-antenni, joka py”rii, sek„ taustalla avaruutta,
+  jonka ep„keskell„ erottuu juuri oma alus)
+- antenni osoittaa aluksi suoraan eteenp„in (=oikealle omasta aluksesta) 
+  kokoajan tasaisella nopeudella py”rien. Antenni on oikeassa
+  alakulmassa.
+- kun antenni on tehnyt vajaan kierroksen ja osoittaa kohti omaa alusta,
+  se pys„htyy
+- 1 sec tauko
+- antenni alkaa taas p”yri„
+- viisi vihollisalusta lent„v„t kameran takaa l„helt„ surroundina vasemmasta
+  reunasta kohti omaa alusta 
+- kamera l„htee seuraamaan
+- lennet„„n noin 2 sec
+- alukset siirtyv„t muodostelmaan
+
+- yleiskuva jossa n„kyv„t sek„ muodostelma ett„ iso alus
+- kamera taas muodostelman taakse, muodostelma hajoaa
+- johtoalus j„„ taakse (eli kamera suhahtaa sen yli)
+- kamera alkaa seurata kahta oikeanpuoleista alusta (kiihdytt„„)
+- oikeanpuoleiset kaartavat oikealle kauemmas aluksesta, k„„ntyv„t
+  kohti sit„ ja hidastavat 
+- viholliset ampuvat
+- kamera ison aluksen l„helt„ kohti vihollismuodostelmaa, paukut
+  osuvat l„helle kameraa (=menev„t juuri taakse). Vihollisalukset
+  n„ytt„v„t oman aluksen pinnalta pisteilt„, joista l„htee paukkuja
+- kuva taas kahden vihollisen takaa
+- n„kyy kun pohjasta ilmestyy omia aluksia (putoavat) ja samalla
+  etualalla juuri ampuneet viholliset
+- omat alukset kaartavat peliin ison aluksen alta kohti kameraa
+  ja kahta vihollista (viholliset t„ytt„v„t noin puoli ruutua, 
+  vasemmassa reunassa)
+- omat ampuvat paukkusarjan
+- viholliset kaartavat, toinen oikelle, toinen vasemmalle,
+  kaarto menee pois ruudusta sill„ kamera jatkaa suoraan kohti
+  omia
+- laserit suhahtavat kameran alta
+- omat alukset suhahtavat kameran alta (immelman)
+- immelmanin lopuksi suhahtavat takaisin kameran ylt„
+- omat alukset jakautuvat kahteen ryhm„„n, joista oikealle
+  kaartavaa alkaa kamera seurata
+- kamera omien takana, vihollinen n„kyy ampumalinjalla
+- omat heitt„v„t paukkupinkan
+- PUM!
+- omat kaartavat aluksen takap„„n ymp„ri
+- kun ne ovat viel„ kaarteessa, tulee vasemmalta yll„tt„en paukkusuihku
+  joka osuu niiden kattoon ja PUM!
+- kamera vaihtuu vasemmalle menneen partion taakse (omat) joka on 
+  nyt melkein aluksen keulan kohdalla
+- ruudussa juuri n„kyy toisen aluksen r„j„hdys 
+- lennet„„n r„j„hdyspilven l„pi
+- omat kaartavat jyrk„sti oman ison aluksen alle
+- kamera lent„„ per„ss„ (katsoja saa ensivilkauksen pohjasta)
+- alukset lent„v„t juuri dockicompleksin alta keulan puolelta
+- kamera loikkaa kahden j„ljell„olevan vihollisaluksen taakse
+  katse kohti omaa alusta ja sen pohjaa. (vihollisalukset noin
+  1/6 ruutua)
+- oman aluksen alta kaartavat 2 j„ljell„olevaa (joita juuri trackattiin)
+- omat laukaisevat paukut yl”salaisin kaartaen (siististi)
+- viholliset PUM!
+- omat kaartavat kohti keulaa kameran edest„ (immelman part 2)
+- kuva vihollisen johtoaluksen takaa (edess„ oma iso alus)
+- johtoalus k„„ntyy paikallaan, ja painaa kaasua
+- kamera j„„ paikalleen
+- taukoa
+- omat h„vitt„j„t lent„v„t kameran ohi ja samalla kamera k„„ntyy
+  niiden menosuuntaan
+- kuva kaukaa ylh„„lt„, n„kyy kun omat saavat vihollista kiinni
+- kuva omien alusten per„st„
+- omat alkavat ampua PALJON!
+- kuvakulma vihollisesta omiin
+- kuvakulma omiin vihollisesta 
+- kuvakulma vihollisesta omiin
+- PUMPUM!
+- omat kaartavat oikealle U-k„„nn”ksen
+- kamera j„„ katsomaan niiden matkaa kohti omaa alusta
+
+Faces:	Tarvelista:
+200	Iso alus (1)
+200	Oma alus (4)
+200	Vihollisalus (4)
+200	Vihollisjohtoalus (1)
+
+Kamerat:
+Yleiskuvakamera
+	- alussa
+	- kaukokuvat
+Enemytrack
+Omatrack
+OmaCloseup

@@ -1,0 +1,45 @@
+Files in general:
+*.00A	Animation
+*.00M	Materials (palette)
+*.###	Object ### (###=number prefixed with zeros)
+
+OBJECT FILE:
+
+
+SCENE.00A FILE:
+word:	number of objects
+word:	file number for object 0
+word:	file number for object 1
+	...
+word:	file number for object N
+Stream of frame data starts.
+
+word	X
+x&0xfff = number of object
+bits:
+0x0F	Low 4 bits of the object to modify
+0x30	Bytes of flags to read (0..3)
+0xC0	Command:
+	0x00 0=Leave to list
+	0x40 1=Remove from list
+	0x80 2=Add to list
+	0xC0 3=Hi change. X&0x3F=Object number/16. (high bits)
+	       Hi change 0x3F (X=0xFF) means special. Next byte Y:
+	       		<0x80=next frame, Y=hi byte of camera angle (field of vision)
+			0=next frame
+			0xFF=end of anim
+
+Position: 3 x DWORD
+Rotation: 9 x WORD
+
+###
+
+Flags:
+bits:	
+0..1	0=X coordinate same, 1=byte change, 2=word change, 3=dword chnage (all start out zero)
+2..3	-"- for Y coordinate
+4..5	-"- for Z coordinate
+6	1=Matrix stored with word changes (0=bytes)
+7..15	1=This entry in matrix changed
+
+All objects start hidden (except camera)

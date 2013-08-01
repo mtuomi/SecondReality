@@ -1,0 +1,86 @@
+	#if 0
+	switch(mode=c)
+	{
+	case 0:
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=(rand()-16384)/2;
+			dot[a].y=(rand()-16384)/2;
+			dot[a].z=(rand()-16384)/2;
+		}
+		break;
+	case 1 :
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=sin(f*2)*3500+cos(f*5)*3500;
+			dot[a].y=sin(f*3)*3500+cos(f*6)*3500;
+			dot[a].z=sin(f*4)*3500+cos(f*7)*3500;
+			f+=.05;
+		}
+		break;
+	case 2 :
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=sin(a*4)*3500+cos(a*7)*3500;
+			dot[a].y=cos(a*5)*3500+sin(a*8)*3500;
+			dot[a].z=sin(a*6)*3500+cos(a*9)*3500;
+			f+=.05;
+		}
+		break;
+	case 3 :
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=sin(a)*7500*sin(3.141592*a/dotnum);
+			dot[a].y=-4000+a*8;
+			dot[a].z=cos(a)*7500*sin(3.141592*a/dotnum);
+			f+=.05;
+		}
+		gravity=3;
+		break;
+	case 4 :
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=sin(a*4)*3500+cos(a*7)*3500;
+			dot[a].y=cos(a*5)*3500+sin(a*8)*3500;
+			dot[a].z=sin(a*6)*3500+cos(a*9)*3500;
+			f+=.05;
+		}
+		gravity=3;
+		break;
+	case 5 :
+		b=0;
+		for(a=0;a<dotnum && face[b]!=30000;a++)
+		{
+			dot[a].x=face[b++];
+			dot[a].y=face[b++];
+			dot[a].z=face[b++];
+		}
+		break;
+	case 6 :
+		gravity=0;
+		i=0;
+		break;
+	default :
+		timer=15000;
+	case 7 :
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=0;
+			dot[a].y=0;
+			dot[a].z=-19000;
+		}
+		mode=7;
+		gravity=3;
+		gravityd=13;
+		i=-1;
+		break;
+	case 8:
+		for(a=0;a<dotnum;a++)
+		{
+			dot[a].x=(rand()-16384)/2;
+			dot[a].y=8000;
+			dot[a].z=(rand()-16384)/2;
+		}
+		break;
+	}
+	#endif

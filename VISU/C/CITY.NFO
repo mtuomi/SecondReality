@@ -1,0 +1,198 @@
+Mesh objects:  Total vertices:764    Total faces:1204
+
+Building01	 
+  Vertices:32    Faces:60
+  Materials:
+		GOLDMETAL
+  Smoothing:
+		 1, 2, 3, 4, 5, 6, 10, 11, 12, 17
+platform01	 
+  Vertices:64    Faces:96
+  Materials:
+		GRAYCEMENT
+Building03	 
+  Vertices:16    Faces:24
+  Materials:
+		CYANMETAL
+Building04	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building06	 
+  Vertices:9    Faces:14
+  Materials:
+		BLUEMETAL
+BuildingH	 
+  Vertices:40    Faces:60
+  Materials:
+		CYANMETAL
+platform02	 
+  Vertices:120    Faces:178
+  Materials:
+		GRAYCEMENT
+		GREENGRASS
+Building05	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building08	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building09	 
+  Vertices:9    Faces:14
+  Materials:
+		BLUEMETAL
+Building10	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building11	 
+  Vertices:16    Faces:24
+  Materials:
+		CYANMETAL
+Building12	 
+  Vertices:16    Faces:24
+  Materials:
+		CYANMETAL
+Car02	 
+  Vertices:12    Faces:20
+  Materials:
+		CYANMETAL
+
+                                     Page 1
+
+
+
+platform03	 
+  Vertices:128    Faces:192
+  Materials:
+		GRAYCEMENT
+		GREENGRASS
+Building02	 
+  Vertices:9    Faces:14
+  Materials:
+		BLUEMETAL
+Building13	 
+  Vertices:9    Faces:14
+  Materials:
+		BLUEMETAL
+Building14	 
+  Vertices:9    Faces:14
+  Materials:
+		BLUEMETAL
+Building15	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building16	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building17	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building18	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building19	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+BuildingC	 
+  Vertices:18    Faces:32
+  Materials:
+		CYANMETAL
+  Smoothing:
+		 1, 2, 3, 10, 11, 12, 17
+Building20	 
+  Vertices:14    Faces:24
+  Materials:
+		CYANMETAL
+Building21	 
+  Vertices:19    Faces:34
+  Materials:
+		CYANMETAL
+fclogo	 
+  Vertices:36    Faces:64
+  Smoothing:
+		 1, 2, 3, 10, 11, 12, 17
+Lamppost	 
+  Vertices:8    Faces:8
+  Materials:
+		GOLDMETAL
+Helicopter	 
+  Vertices:72    Faces:140
+
+                                     Page 2
+
+
+
+  Materials:
+		GOLDMETAL
+  Smoothing:
+		 1, 2, 3, 4, 5, 6, 10, 11, 12, 17
+HeliRotor	 
+  Vertices:12    Faces:10
+  Materials:
+		GOLDMETAL
+  Smoothing:
+		 17
+Building07	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building22	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+Building23	 
+  Vertices:8    Faces:12
+  Materials:
+		BLUEMETAL
+
+Materials summary:
+
+	GRAYCEMENT
+	GREENGRASS
+	BLUEMETAL
+	CYANMETAL
+	GOLDMETAL
+
+Lights:
+
+Light01	
+
+Cameras:
+
+FlyCam	(50.00mm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     Page 3
+
+
+

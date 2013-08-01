@@ -1,0 +1,129 @@
+#include <stdio.h>
+#include <conio.h>
+#include <stdarg.h>
+
+int	depth=2;
+int	bail=150;
+int	group=3;
+
+FILE	*f1;
+
+void	P(char *str,...)
+{
+	char out[256];
+	va_list	argp;
+	va_start(argp,str);
+	vsprintf(out,str,argp);
+	fprintf(f1,"%s\n",out);
+	va_end(argp);
+}
+
+long	weirdflip(unsigned long l)
+{
+	long	m,lo,hi;
+	lo=l&0xffff;
+	hi=l>>16;
+	m=(lo<<16)+hi;
+	return(m);
+}
+
+main()
+{
+	int	i,j,jm,y,a;
+	long	l;
+	f1=fopen("theloop.inc","wt");
+
+	P(";Register usage:		");
+	P(";eax	low...	ray heigth 	");
+	P(";ebx	-	p->screen	");
+	P(";ecx	low...	ray direction 	(always negative)");	
+	P(";edx	-       scenary heigth	");
+	P(";esi	-	xsin		");	
+	P(";edi	-	ysin		");	
+	P(";ebp	-	p->ray_dir_table");	
+	P(";ds	->codesegment");
+	P(";es	->screenbuffer");
+	P(";fs	->wavetable");
+	P(";gs	-");
+	P("");
+	P("ALIGN 16 ;following should stay in cache");
+	P("theloop_waveseg dw 0");
+	P("theloop_xsina dw 0");
+	P("theloop_ysina dw 0");
+	P("theloop_heigth dw 0");
+	P("theloop_raydir LABEL DWORD");
+	for(y=0;y<200;y++)
+	{	
+		a=(199-y)-100;
+		l=-(long)a*10L*256L*depth;
+		l=weirdflip(l);
+		P("dd 0%08lXh",l);
+	}
+	P("");
+	P(";entry: es=videbuf");
+	P(";	bp=pointer to bottom of current column in videbuf");
+	P(";	fs=waveXsegment");
+	P(";	gs=waveYsegment");
+	P(";	si=waveXpos");
+	P(";	di=waveYpos");
+	P(";	cx=waveXadd");
+	P(";	dx=waveYadd");
+	P(";	ax=camera heigth adder");
+	P("theloop PROC FAR");
+	P("mov bx,bp");
+	P("mov cs:theloop_xsina,cx");
+	P("mov cs:theloop_ysina,dx");
+	P("mov cs:theloop_heigth,ax");
+	P("mov bp,OFFSET theloop_raydir");
+	P("mov ax,cs");
+	P("mov ds,ax");
+	P("xor eax,eax");
+	P("mov ecx,ds:[bp]");
+	P("add bp,4");
+	for(i=0;i<bail;i+=group)
+	{
+		printf("%i\r",i);
+		jm=i+group; if(jm>bail) jm=bail;
+		for(j=i;j<jm;j++)
+		{
+			P("_@seek%i:",j);
+			P("add si,ds:theloop_xsina");
+			P("xor dh,dh");
+			P("mov dl,fs:[si]");
+			P("add di,ds:theloop_ysina");
+			P("add dl,gs:[di]");
+			P("add dx,ds:theloop_heigth");
+			P("cmp ax,dx");
+			P("jl short _@hit%i",j);
+			P("_@seekr%i:",j);
+			P("add eax,ecx");
+			P("adc ax,-1");
+		}
+		if(jm>=bail) 
+		{
+			P("_@seek%i:",bail);
+			P("_@seekr%i:",bail);
+			P("ret");
+		}
+		else P("jmp _@seek%i",jm);
+		for(j=i;j<jm;j++)
+		{
+			l=j*10L*256;
+			l=weirdflip(l);
+			P("_@hit%i:",j);
+			P("add eax,0%08lXh",l*depth);
+			P("adc ax,0");
+			P("mov es:[bx],dl");
+			P("add bp,4");
+			P("sub bx,320");
+			P("cmp ax,dx");
+			P("jle short _@hit%i",j);
+			P("mov ecx,ds:[bp]");
+			P("jmp short _@seekr%i",j+1);
+		}
+	}
+	P("theloop ENDP");
+	printf("       \r",i);
+	
+	fclose(f1);
+}

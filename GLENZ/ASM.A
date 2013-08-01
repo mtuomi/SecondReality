@@ -1,0 +1,545 @@
+;FIND "386opt" TO FIND OPTIMIZABLE PLACES NOTED
+include clink.inc
+
+extrn _everyframe:far
+extrn _fromasmdraw:far
+extrn _toasmdraw:far
+
+;----------------------------------------------------------------
+data_seg SEGMENT para public 'DATA'
+
+public sintable16
+public costable16
+public tantable32
+include calcsin.inc
+
+public _splinecoef
+_splinecoef LABEL WORD
+include spline.inc
+
+ALIGN 16 ;temporary working area, used by:
+;- polyn() for scanline min/mix storage
+public workarea
+public borders
+workarea LABEL WORD
+borders	LABEL WORD ;should be enough for 680 normal hlines in group
+	db	8192 dup(0)
+workareaoverflow dw 012fch
+
+data_seg ENDS
+;----------------------------------------------------------------
+
+extrn _worldroot
+asm_objs SEGMENT para public 'DATA'
+;contents in obj.asm
+asm_objs ENDS
+
+asm_text SEGMENT para public 'CODE'
+	ASSUME cs:asm_text
+	ASSUME gs:data_seg ;when data used, generally in gs
+.386
+
+;****************************************************************
+;PUBLICS
+;****************************************************************
+PUBLIC	_asminit,_asmdeinit,_asm,_asmclear
+PUBLIC	_testinit
+PUBLIC	_setborder
+
+PUBLIC	_borders
+PUBLIC	_autofly
+
+PUBLIC	_horizon
+
+;****************************************************************
+;GLOBAL VARIABLES
+;****************************************************************
+
+MAXY	equ	159
+MAXX	equ	319
+
+;vector window coordinates (for clipping)
+public _vecwindow
+_vecwindow label word
+WMINX	dw	4
+WMINY	dw	4
+WMAXX	dw	315
+WMAXY	dw	155
+
+videot	LABEL WORD
+	dw OFFSET v320x200x256
+	dw OFFSET v320x240x256
+	dw OFFSET v320x350x256
+	dw OFFSET v320x350x256unr
+	dw OFFSET vtseng640x400x256
+	dw OFFSET valien ;5
+
+video	LABEL WORD
+vvinit	= cs:video[0]
+	dw	0	;init screen
+vvswitch = cs:video[2]
+	dw	0	;switch pages
+vvclear	= cs:video[4]
+	dw	0	;clear
+	;all following gfx routines require:
+	;es=vram; OUT 3C4,2
+vvpset	= cs:video[6]
+	dw	0	;pset (DX,BX),CS:COLOR - plot a plot. Saves DS:SI/CX
+vvlineto = cs:video[8]
+	dw	0	;lineto - (CX,AX)->(DX,BX),CS:COLOR - draw a line - OPTIMIZE ME!-)
+vvhline	= cs:video[10]
+	dw	0	;hline - (AX,BX)->(DX,BX),CS:COLOR - draw a horizontal line
+vvhlinegroup = cs:video[12]
+	dw	0	;hlinegroup - GS:SI->list of hlines:
+			;word:start row
+			;REPT
+			;word:X1 (-32767=end of list)
+			;word:X2
+			;ENDM
+vvthlinegroup = cs:video[14]
+	dw	0	;thlinegroup - GS:SI->list of hline, FS=texture segment
+			;word:start row
+			;REPT
+			;word:X1 (-32767=end of list)
+			;word:X2
+			;word:TextureX1Y1
+			;word:TextureX2Y2
+			;ENDM
+video9	LABEL WORD
+public _framebuf ;used by nrm modes  (=>vram)
+_framebuf dw	0,0
+
+PUBLIC _framemul
+_framemul dw	0
+
+supervga db	1
+	db	0
+
+ALIGN 4
+rows	dw	512 dup(0)
+rowsadd	dw	0
+truerowsadd dw	0
+vecvram	dw	?	;used by vector drawer
+public _asmvramseg
+_asmvramseg LABEL WORD
+truevram dw	?
+vram	dw	0a5f0h	;-"- old
+
+
+PUBLIC _texture
+_texture dw	0,0
+
+
+color	LABEL WORD
+color1	db	0
+color2	db	0
+colorl	dw	0
+PUBLIC _asmexit
+_asmexit db	0
+fatalss	dw	0
+fatalsp	dw	0
+PUBLIC _inunreal
+_inunreal db 	0
+PUBLIC _framestaken
+_framestaken dw	0
+PUBLIC _subpart
+_subpart db 	2
+PUBLIC _wireframe,_nohidden,_curlist
+_wireframe db	0
+_nohidden db	0
+_curlist dw	0
+PUBLIC _mousedotx,_mousedoty
+PUBLIC _mouse0dotx,_mouse0doty
+_mousedotx dw	160
+_mousedoty dw	80
+_mouse0dotx dw	160
+_mouse0doty dw	80
+
+public	_font3x5
+_font3x5	dw	0,0
+
+_horizon dw	0,0
+_horizonenabled db 1
+
+nowaitborder db	0
+_borders db	0 ;1=show bordertimings
+_autofly db	0
+
+ALIGN 2
+dataseg	dw	data_seg
+cdataseg dw	0	;DS of the C routines
+public _depthtable
+_depthtable dw	0
+depthseg dw	0	
+	
+public _asmdebugmode,_asmvideomode
+_asmvideomode dw 0
+_asmdebugmode dw 0
+public _debugw
+
+;****************************************************************
+;SCREEN ROUTINES:
+;waitborder
+;LOW LEVEL ROUTINES:
+;hline1 (AX,BX)-(DX,BX), color  REQ: color1=color2, ds=cs, 
+;	es=vram, OUT 3C4,2, EAXhi=0
+;pset (DX,BX), color  REQ: ds=cs, es=vram, OUT 3C4,2
+;?line (DX,BX), color
+;****************************************************************
+include vid.asm
+;INITIALIZATION ROUTINES & COPPER EMULATION:
+include copper.asm ;calls copper_doit() every frame
+.386 ;for copper.asm sets .286
+
+;****************************************************************
+;POLYGONS: call poly
+;polygon with 1 sides is a dot
+;polygon with 2 sides is a line
+;following variables must be set (used as parameters)
+;****************************************************************
+include poly.asm
+
+;****************************************************************
+;VECTOR ROUTINES:
+;doobject
+;MACRO sinbx2ax ;ax=sin(bx) req: ds=cs
+;MACRO cosbx2ax ;ax=cos(bx) req: ds=cs
+;****************************************************************
+include calc.asm
+include spline.asm
+include vec.asm
+include matrix.asm
+include horiz.asm
+
+;****************************************************************
+;(OBJECT) MEMORY MANAGEMENT
+;****************************************************************
+include omem.asm
+
+;****************************************************************
+;C-interface
+;****************************************************************
+
+copper_doit PROC NEAR
+	;called every frame by copper, must save all but AX/BX/CX/DX
+	sti
+	pushad
+	push	ds
+	push	es
+	;call dos timer
+	pushf
+	call	cs:oldint8 ;from copper
+	mov	ds,cs:cdataseg
+	cmp	cs:_inunreal,0
+	je	nodoni
+	mov	ah,9
+	int	60h ;musicmixer
+nodoni:	;call	_everyframe ;if uses scrn, should restore all VGA regs
+	pop	es
+	pop	ds
+	popad
+	cli
+	ret
+copper_doit ENDP
+
+_testinit PROC FAR
+	CBEG
+	CEND
+_testinit ENDP
+
+_asmclear PROC FAR
+	CBEG
+	call	vvclear
+	CEND
+_asmclear ENDP
+
+ALIGN 2
+INTER	equ	0h
+oldint	dd	?
+_asminit PROC FAR
+	CBEG
+	mov	cs:cdataseg,ds
+	;
+	mov	si,cs:_asmvideomode
+	shl	si,1
+	mov	si,cs:videot[si]
+	mov	di,OFFSET video
+	cld
+	mov	ax,cs
+	mov	ds,ax
+	mov	es,ax
+	mov	cx,(video9-video)/2
+	rep	movsw
+	;
+	call	vvinit
+	call	vvclear
+	call	vvswitch
+	cmp	cs:_asmdebugmode,0
+	je	noadm
+	call	tweak320x200
+noadm:	
+	cli
+	mov	ax,0
+	mov	es,ax
+	mov	ax,es:[INTER*4]
+	mov	WORD PTR cs:[oldint+0],ax
+	mov	ax,es:[INTER*4+2]
+	mov	WORD PTR cs:[oldint+0+2],ax
+	mov	ax,OFFSET intti
+	mov	es:[INTER*4],ax
+ 	mov	word ptr es:[INTER*4+2],cs
+	sti
+	
+	call	clearpal
+
+	;call	testmem
+	CEND
+_asminit ENDP
+
+_asmdeinit PROC FAR
+	CBEG
+	cli
+	mov	ax,0
+	mov	es,ax
+	mov	ax,WORD PTR cs:[oldint+0]
+	mov	es:[INTER*4],ax
+	mov	ax,WORD PTR cs:[oldint+0+2]
+	mov	es:[INTER*4+2],ax
+	sti
+	;mov	ax,3
+	;int	10h
+	CEND
+_asmdeinit ENDP
+
+m_diverror db 	'FATAL: divide overflow',0
+m_workflow db	'FATAL: work area overflow',0
+m_oldpoly db	'FATAL: old style polygons no longer supported',0
+m_outofvx db	'FATAL: too many vertices in object',0
+m_press	db	'    Press ESC to return to dos   ',0
+
+dosmsgp dw	0
+dosmsg PROC NEAR
+	mov	ax,cs
+	mov	ds,ax
+	mov	ax,0b800h
+	mov	es,ax
+	mov	di,ds:dosmsgp
+	mov	ah,4eh
+doe2:	lodsb
+	cmp	al,0
+	je	doe1
+	stosw
+	jmp	doe2
+doe1:	add	ds:dosmsgp,di
+	ret
+dosmsg ENDP
+
+intti	PROC FAR
+	;DIVIDE OVERFLOW
+	sti
+	mov	si,OFFSET m_diverror
+	jmp	fatalexit
+fatalexit:
+	mov	ax,3
+	int	10h
+	call	dosmsg
+	mov	si,OFFSET m_press
+	call	dosmsg
+iiia:	mov	ax,0
+	int	16h
+	cmp	al,27
+	jne	iiia
+	mov	cs:_asmexit,1
+	mov	ss,cs:fatalss
+	mov	sp,cs:fatalsp
+	CEND
+intti	ENDP
+
+public _camera,_tmpxyz
+_camera LABEL WORD
+dd	0
+dd	0
+dd	0
+dw	?,?,?
+dw	0
+dw	0
+dw	0
+_tmpxyz	dd -200000000,0,0
+
+lastcoppercount dw 0
+clearit	dw	1
+
+PUBLIC _doclear
+_doclear PROC FAR
+	CBEG
+	call	doclear
+	CEND
+_doclear ENDP
+
+doclear PROC NEAR
+	ret
+	mov	dx,3c4h
+	mov	ax,0f02h
+	out	dx,ax
+	xor	di,di
+	mov	ax,0a000h
+	mov	es,ax
+	mov	cx,65535
+	xor	ax,ax
+doc1:	mov	es:[di],al
+	nop
+	inc	di
+	loop	doc1
+	ret
+doclear ENDP
+
+_asm	PROC FAR
+	CBEG
+	mov	cs:fatalss,ss
+	mov	cs:fatalsp,sp
+	sti
+
+	cmp	cs:_asmvideomode,5
+	je	nothis1
+	mov	ds,cs:cdataseg
+	call	_toasmdraw
+nothis1:
+	call	cs:video[2] ;switchpages, returns cs:vram
+	mov	ax,cs:vram
+	mov	cs:vecvram,ax
+	
+	;mov	ax,cs:vram
+	;add	ax,02dh ;add 8 rows
+	;mov	ax,asm_framebuf
+	;mov	ax,asm_framebuf
+	;mov	cs:vecvram,ax
+	;mov	ax,0a000h
+	;mov	cs:vram,ax
+	
+	cmp	cs:nowaitborder,0
+	jne	asm1b
+	
+	cmp	cs:_inunreal,0
+	je	asmnormal
+	;waitborder with copper
+asm2:	mov	ah,10
+	int	60h
+	cmp	ax,cs:lastcoppercount
+	je	asm2
+asm1:	mov	bx,ax
+	sub	bx,cs:lastcoppercount
+	mov	cs:_framestaken,bx
+	mov	cs:lastcoppercount,ax
+	jmp	asmunr
+	
+asmnormal:
+	;waitborder with copper
+asm2b:	mov	ax,cs:coppercount
+	cmp	ax,cs:lastcoppercount
+	je	asm2b
+asm1b:	mov	bx,ax
+	sub	bx,cs:lastcoppercount
+	mov	cs:_framestaken,bx
+	mov	cs:lastcoppercount,ax
+	
+asmunr:	setborder 1
+	;mov	cs:color,0000h
+	;call	vecclearscreen
+	;enable all planes for debugdots
+	mov	dx,3c4h
+	mov	ax,0f02h
+	out	dx,ax
+	;do the vecs
+	;call	dofirstnew
+	setborder 2
+	call	dofirstnrs
+	setborder 0
+	;do the mousedot
+	IFDEF MOUSEDOT
+	mov	dx,3c4h
+	mov	al,2
+	out	dx,al
+	mov	ax,cs:vecvram
+	mov	es,ax
+	mov	ax,cs
+	mov	ds,ax
+	mov	dx,cs:_mouse0dotx
+	mov	bx,cs:_mouse0doty
+	mov	cs:color1,15
+	call	pset1
+	mov	dx,cs:_mousedotx
+	mov	bx,cs:_mousedoty
+	mov	cs:color1,14
+	call	pset1
+	ENDIF
+	;check workareaoverflow
+	mov	gs,cs:dataseg
+	cmp	gs:workareaoverflow,012fch
+	je	workok
+	mov	si,OFFSET m_workflow
+	jmp	fatalexit
+workok:	;done
+
+	cmp	cs:_asmvideomode,5
+	je	nothis2
+	mov	ds,cs:cdataseg
+	call	_fromasmdraw
+nothis2:
+	CEND
+_asm	ENDP
+
+public _softice
+_softice PROC FAR
+	CBEG
+	mov ah,9
+	mov al,11h
+	mov si,'FG'
+	mov di,'JM'
+	movpar ds,1
+	movpar dx,0
+	int 3
+	CEND
+_softice ENDP
+
+copybmap PROC NEAR
+	;enable all planes for debugdots
+	mov	ax,OFFSET cbj2
+	mov	cs:bmapjmp,ax
+	mov	bx,cs:bmapwid
+	shr	bx,1
+cbm3:	mov	cs:bmapdi,di
+	mov	dx,3c4h
+	mov	ax,0102h
+cbm4:	push	ax
+	push	si
+	out	dx,ax
+	mov	cx,bx
+	jmp	cs:bmapjmp
+cbmb:	mov	di,cs:bmapdi
+	pop	si
+	pop	ax
+	shl	ah,1
+	add	si,80
+	cmp	ah,16
+	jb	cbm4
+	sub	si,320
+	ret
+cbj1:	rep	movsw
+	jmp	cbmb
+cbj2:	movsb
+	dec	cx
+	rep	movsw
+	movsb
+	jmp	cbmb
+cbj3:	rep	movsw
+	movsb
+	jmp	cbmb
+cbj4:	movsb
+	rep	movsw
+	jmp	cbmb
+copybmap ENDP
+
+.8086
+asm_text ENDS
+	END
+	

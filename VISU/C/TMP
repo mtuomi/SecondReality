@@ -1,0 +1,101 @@
+h:
+cd \u2
+g:c -s10.0 u2e
+
+Analyzing and converting (while screen is blue)
+  Scene name: U2E
+Scale factor: 10.000000
+
+Materials:
+DEFAULT colors:0..31 
+FC colors:128..159 
+FCG colors:128..159 Gouraud 
+GRAYCEMENT colors:16..31 
+BLUEMETAL colors:64..95 
+CYANMETAL colors:192..223 
+GREENGRASS colors:32..63 Gouraud 
+TALO1 colors:96..127 
+RED_HOUSE colors:128..159 
+LIGHT_BLUE colors:192..223 Gouraud 
+BLACK colors:0..15 Gouraud 
+ORANGE colors:160..191 
+GREY colors:8..23 Gouraud 
+BLUE PLASTIC colors:64..95 Gouraud 
+BEIGE MATTE colors:208..223 Gouraud 
+
+
+Saving scenery: (U2E.00O,U2E.00M,U2E.0$$)
+
+Object: "_platform"123456      File: U2E.001    Size:756
+      Faces:8=>4  Vertices:16=>25  Normals:1  Gouraudnormals:0
+Object: "BuildingH"123456      File: U2E.002    Size:1756
+      Faces:48=>24  Vertices:32=>41  Normals:6  Gouraudnormals:8
+Object: "_platform0"123456      File: U2E.003    Size:844
+      Faces:10=>5  Vertices:20=>29  Normals:2  Gouraudnormals:0
+Object: "Building08"123456      File: U2E.004    Size:800
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "Building14"123456      File: U2E.005    Size:916
+      Faces:14=>9  Vertices:9=>18  Normals:9  Gouraudnormals:9
+Object: "BuildingC"123456      File: U2E.006    Size:1292
+      Faces:32=>13  Vertices:18=>27  Normals:11  Gouraudnormals:18
+Object: "Building20"123456      File: U2E.007    Size:1024
+      Faces:24=>8  Vertices:14=>23  Normals:8  Gouraudnormals:12
+Object: "Building21"123456      File: U2E.008    Size:1260
+      Faces:34=>11  Vertices:19=>28  Normals:11  Gouraudnormals:18
+Object: "Tree01g"123456      File: U2E.009    Size:4044
+      Faces:76=>70  Vertices:42=>51  Normals:70  Gouraudnormals:42
+Object: "puistotie"123456      File: U2E.010    Size:448
+      Faces:2=>1  Vertices:4=>13  Normals:1  Gouraudnormals:0
+Object: "_L_pohja"123456      File: U2E.011    Size:532
+      Faces:4=>2  Vertices:6=>15  Normals:1  Gouraudnormals:0
+Object: "tunneli"123456      File: U2E.012    Size:1264
+      Faces:26=>15  Vertices:16=>25  Normals:8  Gouraudnormals:16
+Object: "sivutalo"123456      File: U2E.013    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "_laatta2"123456      File: U2E.014    Size:564
+      Faces:4=>2  Vertices:8=>17  Normals:1  Gouraudnormals:0
+Object: "_laatta01"123456      File: U2E.015    Size:800
+      Faces:10=>5  Vertices:18=>27  Normals:1  Gouraudnormals:0
+Object: "_laatta02"123456      File: U2E.016    Size:448
+      Faces:2=>1  Vertices:4=>13  Normals:1  Gouraudnormals:0
+Object: "_levyt"123456      File: U2E.017    Size:1716
+      Faces:28=>14  Vertices:56=>65  Normals:1  Gouraudnormals:0
+Object: "talot"123456      File: U2E.018    Size:2712
+      Faces:84=>42  Vertices:56=>65  Normals:6  Gouraudnormals:8
+Object: "talot2"123456      File: U2E.019    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "_levyt3"123456      File: U2E.020    Size:756
+      Faces:8=>4  Vertices:16=>25  Normals:1  Gouraudnormals:0
+Object: "kulmatalot"123456      File: U2E.021    Size:1760
+      Faces:48=>24  Vertices:32=>41  Normals:6  Gouraudnormals:8
+Object: "_laatta"123456      File: U2E.022    Size:448
+      Faces:2=>1  Vertices:4=>13  Normals:1  Gouraudnormals:0
+Object: "logo"123456      File: U2E.023    Size:12632
+      Faces:381=>190  Vertices:266=>275  Normals:66  Gouraudnormals:176
+Object: "b4"123456      File: U2E.024    Size:3352
+      Faces:92=>54  Vertices:48=>57  Normals:22  Gouraudnormals:44
+Object: "talojota"123456      File: U2E.025    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "talot01"123456      File: U2E.026    Size:1756
+      Faces:48=>24  Vertices:32=>41  Normals:6  Gouraudnormals:8
+Object: "talot02"123456      File: U2E.027    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "talot03"123456      File: U2E.028    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "s01"123456      File: U2E.029    Size:8968
+      Faces:272=>124  Vertices:152=>159  Normals:124  Gouraudnormals:150
+Object: "hightop"123456      File: U2E.030    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "tunneli2"123456      File: U2E.031    Size:796
+      Faces:12=>6  Vertices:8=>17  Normals:6  Gouraudnormals:8
+Object: "minitalo"123456      File: U2E.032    Size:1756
+      Faces:48=>24  Vertices:32=>41  Normals:6  Gouraudnormals:8
+Object: "fcirto"123456      File: U2E.033    Size:448
+      Faces:2=>1  Vertices:4=>13  Normals:1  Gouraudnormals:0
+Object: "fcirto01"123456      File: U2E.034    Size:964
+      Faces:12=>6  Vertices:25=>34  Normals:1  Gouraudnormals:0
+Total sum of stuff in animation:
+   faces: 1415
+vertices: 1013
+ normals: 420
+g:

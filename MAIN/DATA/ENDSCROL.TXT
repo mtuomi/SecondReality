@@ -1,0 +1,542 @@
+Second Reality
+
+Copyright (C) 1993 by the Future Crew
+
+
+
+This demo won the Assembly'93
+annual international demo competition
+held in Finland, summer 1993.
+
+
+
+As the PC organizers of Assembly'93,
+we would like to thank the following
+companies for sponsoring the event:
+
+Advanced Gravis
+Canada
+[15
+Epic MegaGames
+USA
+[15
+Waite Group Press
+USA
+[15
+Terton
+Finland
+[15
+HiCompu
+Finland
+[15
+Toptronics
+Finland
+[15
+Pro Component
+Finland
+[15
+Lan Vision
+Finland
+[15
+Data Fellows
+Finland
+
+
+Don't forget to attend Assembly'94!
+
+
+
+If you want to contact us, please
+read the FCINFO10.TXT file first.
+The questions you'd like to ask
+might already be answered there.
+
+
+
+Future Crew greets the following groups:
+
+Sonic PC
+Access Denied
+Silents PC
+Avalanche
+Xography
+Witan
+Triton
+Epical
+Electromotive Force
+Extreme
+Renaissance
+Iguana
+Darkzone
+Dust
+Pentagon
+Surprise! Productions
+Paranoids
+Cascada
+Majic 12
+iCE
+Anarchy PC
+
+
+
+The members of Future Crew send
+their personal greetings to:
+
+
+Psi:
+
+The Silents PC members
+[12
+Lord Cyrix / Access Denied
+[12
+Daryl / Sun Projects
+[12
+Tran & White Shadow
+[12
+Dr.Weird / DanTe
+[12
+Martti Palonen
+[12
+Jussi Markula
+[12
+Mikko Vierula
+[12
+Jussi Lepp„nen
+
+
+Wildfire:
+
+Emphii, Mace & Shaft
+Extream
+[12
+Sonic PC members
+[12
+All the people I met at Asm'93
+
+
+Purple Motion:
+
+Lord Cyrix / Access Denied
+[12
+Kwisatz Haderach / Tri-Pirata
+[12
+Purple Bandit
+[12
+Louis Crespo
+[12
+Green Jester / S!P
+[12
+Nicolas Ayme
+[12
+Tonedeaf / Extreme
+[12
+Lizard King & Vogue / Triton
+[12
+Timo Flink
+[12
+Druid / EMF
+[12
+C.C.Catch / Renaissance
+[12
+John Smith / Advanced Gravis
+- You are one cool guy!
+[12
+Silent Mode / Pentagon
+[12
+Dust members at Asm'93
+[12
+Drift
+[12
+Faceless / Pentagram
+[12
+All members of Fulmar Design
+[12
+Cybelius & Mellow-D / Sonic PC
+[12
+Arjan Brussee / Digital Dimensions
+[12
+Silents PC members
+
+
+Skaven:
+
+Devastator, Druid & Saracen / EMF
+[12
+Lord Cyrix / Access Denied
+[12
+Faceless / Pentagram
+[12
+C.C.Catch / Renaissance
+[12
+John Smith / Advanced Gravis
+[12
+All the people I met at Asm'93
+[12
+Mikko Saario
+[12
+Ville Tirronen
+[12
+Mika Tammenkoski
+[12
+Mikko Kodisoja
+[12
+All musicians on the PC scene
+
+
+Trug:
+
+Triton coders
+[12
+Silents coders
+[12
+Ford Prefect
+[12
+Calius
+[12
+GuildMast
+[12
+ZigZag
+[12
+Leinad
+[12
+Jizmak
+[12
+SRebel
+[12
+wReam
+[12
+Bourbon
+[12
+Patch
+[12
+Zax
+[12
+cc
+[12
+Sand
+[12
+wilco
+[12
+Juha Pajunen
+[12
+Kaj Tuomi
+[12
+Tomi Suominen
+[12
+Antti Rinne
+
+
+Pixel:
+
+Lord Cyrix / Access Denied
+[12
+Faceless / Pentagram
+[12
+Chris Zimman / Quantum Accelerator
+[12
+Martin / Silents PC
+[12
+John Smith / Advanced Gravis
+[12
+McGarret / Genesis BBS
+[12
+Erroll / iCE Euro
+[12
+Timo Flink
+[12
+Riku Rokkanen
+[12
+Janne Pellinen
+[12
+Toffe Laustiola
+
+
+Abyss:
+
+Eija - I love you!
+[12
+FTJ / Sonic PC
+[12
+John Smith / Advanced Gravis
+[12
+Dark Inventor & Bobo / VSW
+[12
+Michael Hoess
+[12
+Arjan Pool
+[12
+Teppo Oranne
+[12
+Embo
+[12
+Lord Cyrix & Jumping Jack Flash
+Access Denied
+[12
+Teppo Oranne
+[12
+Embo
+[12
+Sparr / iCE
+[12
+Mizar / Chronicle
+[12
+Mik & Jaz / Sonic PC
+[12
+Tran & White Shadow
+[12
+Dr. Doom / Paranoids
+[12
+Timo / Xography
+[12
+All users of StarPort
+
+
+Marvel:
+
+Murk and the rest of Sonic Amiga
+[12
+Mik / Sonic PC
+[12
+PowerOn
+[12
+Roi
+[12
+John Smith / Advanced Gravis
+[12
+Erroll / iCE Euro
+
+
+GORE:
+
+Lord Cyrix / Access Denied
+[12
+John "Ricochet" Smith
+Advanced Gravis
+[12
+Chris Zimman / Quantum Accelerator
+[12
+Phil Shatz
+[12
+Tran & White Shadow
+[12
+Arjan Brussee / Digital Dimensions
+[12
+Jake & Henchman
+FC Internet PR-Division
+[12
+Janne Pellinen
+[12
+Jari Cederberg
+[12
+Jani Suominen
+[12
+Riku Rokkanen
+[12
+Miha Peternel
+The author of C-64 Emulator
+[12
+Martin / Silents PC
+[12
+Pallbearer / The Toxic Zombies
+[12
+Timo / Xography
+[12
+JCAB, JARE & Parasite / Iguana
+[12
+C.C.Catch & Daredevil
+Renaissance
+[12
+Jumping Jack Flash, Mark Helwig,
+Boris Ottlewski & Venior
+Access Denied
+[12
+Faceless / Pentagram
+[12
+Erroll & Wiperson / iCE Euro
+[12
+Mitchell Waite
+The Waite Group Press
+[12
+Alex & Micha / Witan
+[12
+Red Scorpion & Firefly
+Surprise! Productions
+[12
+Ford Prefect, Leinad, Patch & Zax
+Avalanche
+[12
+Syntax Error & Tempus Thales / iCE USA
+[12
+Baldric & Zyric / Extreme
+[12
+Kwisatz Haderach / Tri-Pirata
+[12
+Devastator / Electromotive Force
+[12
+Jeff Glaze / C.A.N.
+[12
+ViniT, Bourbon, Calius,
+Arcane, MrFanatic, 
+CP & GuildMast
+Internet Relay Chat
+[12
+Mik, Jaz, Mellow-D,
+Cybelius & FTJ
+Sonic PC
+[12
+Zodiak / Cascada
+[12
+Silent Mode / Pentagon
+[12
+Zak / Inapt
+[12
+Kapsu / Epical
+[12
+Loot / Triton
+[12
+Mike & Kent Arnold
+[12
+Grendel / Byterapers
+[12
+MeeGosh / The Movement
+[12
+Noble Man, Turtle, Pehu,
+Moku, Target, DDT & SOB
+Accession
+[12
+Xenit, Teque & Lancelot
+Aggression
+[12
+Rex / Hysteria
+[12
+Ossi M„ntylahti / Pelit
+
+
+
+The winners of IRC:
+
+Arcane - FC's fave poet!
+[12
+Calius
+[12
+Sand
+[12
+cc
+
+
+		
+All FC distribution site SysOps:
+
+USA:
+[10
+Chris Zimman / Quantum Accelerator
+[8
+Daredevil / The Sound Barrier
+[8
+Soul Rebel / Eleutheria
+[8
+Grid Runner / The Power Grid
+[8
+Lion Heart / Red Sector BBS
+[8
+Holy Water / The End of Time
+[8
+Daniel Potter / Programmer's Oasis
+
+England:
+[10
+Rob Barth / Sound & Vision
+
+Canada:
+[10
+Snibble / Spasm-o-Tron
+
+Australia:
+[10
+Bartender / Tequila Sunrise
+
+Belgium:
+[10
+Lord Cyrix / Point Break
+McGarret / Genesis
+
+Denmark:
+[10
+Executioner / Crack Central
+
+Germany:
+[10
+BitBlaster / The BitBlaster BBS
+[10
+Trojaner / The Continental
+
+Holland:
+[10
+Preceptor / The Consultation
+
+Israel:
+[10
+Shachar Cafri / The Bureaucratic
+
+Norway:
+[10
+Stinger / Romeo November
+
+Spain:
+[10
+Gvyt / Dracker BBS
+
+Sweden:
+[10
+ZED / Illusion
+
+Switzerland:
+[10
+PfUsuUS / Wonderland
+
+
+
+
+
+
+
+
+
+
+
+Thank you for experiencing
+
+Second Reality
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%
+
+
+
+

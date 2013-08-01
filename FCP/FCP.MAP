@@ -1,0 +1,45 @@
+
+ Start  Stop   Length Name                   Class
+ 00000H 010CAH 010CBH PACK_TEXT              CODE
+ 010D0H 01561H 00492H unp_text               CODE
+ 01562H 044B6H 02F55H _TEXT                  CODE
+ 044C0H 044C1H 00002H EMULATOR_TEXT          CODE
+ 044C2H 044C2H 00000H C_ETEXT                ENDCODE
+ 044D0H 044D0H 00000H EMULATOR_DATA          FAR_DATA
+ 044D0H 0A4D3H 06004H FAR_BSS                FAR_BSS
+ 0A4E0H 0A521H 00042H NULL                   BEGDATA
+ 0A522H 0A9E1H 004C0H _DATA                  DATA
+ 0A9E2H 0A9E3H 00002H XIQC                   DATA
+ 0A9E4H 0A9F1H 0000EH DBDATA                 DATA
+ 0A9F2H 0A9FFH 0000EH CDATA                  DATA
+ 0AA00H 0AA00H 00000H XIFB                   DATA
+ 0AA00H 0AA00H 00000H XIF                    DATA
+ 0AA00H 0AA00H 00000H XIFE                   DATA
+ 0AA00H 0AA00H 00000H XIB                    DATA
+ 0AA00H 0AA00H 00000H XI                     DATA
+ 0AA00H 0AA00H 00000H XIE                    DATA
+ 0AA00H 0AA00H 00000H XPB                    DATA
+ 0AA00H 0AA03H 00004H XP                     DATA
+ 0AA04H 0AA04H 00000H XPE                    DATA
+ 0AA04H 0AA04H 00000H XCB                    DATA
+ 0AA04H 0AA04H 00000H XC                     DATA
+ 0AA04H 0AA04H 00000H XCE                    DATA
+ 0AA04H 0AA04H 00000H XCFB                   DATA
+ 0AA04H 0AA04H 00000H XCF                    DATA
+ 0AA04H 0AA04H 00000H XCFE                   DATA
+ 0AA04H 0ABDBH 001D8H CONST                  CONST
+ 0ABDCH 0ABE3H 00008H HDR                    MSG
+ 0ABE4H 0ACB9H 000D6H MSG                    MSG
+ 0ACBAH 0ACBBH 00002H PAD                    MSG
+ 0ACBCH 0ACBCH 00001H EPAD                   MSG
+ 0ACBEH 0ACCBH 0000EH _BSS                   BSS
+ 0ACCCH 0ACCCH 00000H XOB                    BSS
+ 0ACCCH 0ACCCH 00000H XO                     BSS
+ 0ACCCH 0ACCCH 00000H XOE                    BSS
+ 0ACD0H 0AECFH 00200H c_common               BSS
+ 0AED0H 0B6CFH 00800H STACK                  STACK
+
+ Origin   Group
+ 0A4E:0   DGROUP
+
+Program entry point at 0156:0012

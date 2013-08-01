@@ -1,0 +1,62 @@
+{FILL-DATA}
+word	type
+0:	rest of stream is {NORMAL-FILL-DATA}
+1:	rest of stream is {GOURAUD-FILL-DATA}
+
+{NORMAL-FILL-DATA}
+word	Color
+word	Ystart
+---------(1)
+word	flag (0=no left, &8000h=end of fill data, polygon done)
+dword	leftX	
+dword	leftXA	
+word	flag (0=no right, &8000h=end of fill data, polygon done)
+dword	rightX	
+dword	rightXA	
+word	Ycount
+---------(goto 1)
+
+{GOURAUD-FILL-DATA}
+word	-
+word	Ystart
+---------(1)
+word	flag (0=no left, &8000h=end of fill data, polygon done)
+word	leftColor
+word	leftColorA
+dword	leftX	
+dword	leftXA	
+word	flag (0=no right, &8000h=end of fill data, polygon done)
+word	rightColor
+word	rightColorA
+dword	rightX	
+dword	rightXA	
+word	Ycount
+---------(goto 1)
+
+{SIGHT-DATA}
+no description yet
+
+{PIC64}
+Unpacked 320x200x256 picture. Saved from top to bottom, left to right.
+One byte per color. No compression. Pixel in top left corner is at
+offset 0, pixel in bottom right corner at offset 63999. Organization
+similar to VGA mode 13h.
+
+{PIC64TW}
+Tweaked 320x200x256 picture. Saved from top to bottom, left to right.
+Every row is interleaved by four, so that the pixels are in the following
+order (0 is the leftmost pixel, 319 the rightmost): 
+0 4 8 12 ... 316  1 5 9 13 ... 317  2 6 10 14 ... 318  3 7 11 15 ... 319
+One byte per color. No compression.
+
+{FLAGS}
+	Face:		Object:			Notes:
+0x0001	-		Enable object		(The F is so that an AND
+0x0100	Flip face	-			can be used for enabling
+0x0200	2-Sided face	-			gouraud/texture)
+0x1000	Gouraud		Enable Gouraud		both Gouraud and Texture can 
+0x2000	Texture		Enable Texture		be set at the same time!
+&x0C00	0=no shade
+	4=8 color fade
+	8=16 color fade
+	C=32 color fade

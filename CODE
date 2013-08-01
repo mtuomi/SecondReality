@@ -1,0 +1,98 @@
+		Unreal 2 - Coders Info
+		======================
+
+__________________________________________________________________________
+1. General
+
+Nothing general so far... Except read this file!
+
+__________________________________________________________________________
+2. Directory structure
+
+See file DIRS for descriptions about current directories.
+
+I'm going to use this structure, hope you will too. For me [root] is
+D:\S\P\U2, but it could be anything you like. I'll use \ as root
+for the rest of the text for simplicity, so [root]\DIS is just \DIS.
+
+Refer to all files relatively. That is, if you are coding part X and
+need DIS.H, refer to it as "..\DIS\DIS.H". This way our sources are 
+easily shared and minimum number of files lies in multiple directories.
+
+Don't put your own data to \MAIN\DATA, it's reserved for the loader.
+The idea is that there will be a batch file etc in MAIN that will
+copy all part exe's from part directories to \MAIN\DATA, and the
+loader will load them from there. The makefile in MAIN will create
+the combined exe to \.
+
+When you create part directories for your own parts, use intelligent
+dir names like GLENZ, not something like PART1.
+
+__________________________________________________________________________
+3. Coding concerns
+
+The current suggested memory limit is about 450K, so it'd be great
+if your part would run in it. No need to start counting memory
+usage just yet, but keep this in mind, so no this-requires-620K-of-
+free-mem-routines. Note also that you must use the DIS routines,
+see later section.
+
+__________________________________________________________________________
+4. Music
+
+Music will most probably be loaded to EMS, so it doesn't use main 
+memory. There will be equpointer information etc available from
+DIS so using equs etc will be possible. 
+
+__________________________________________________________________________
+5. Demo Interrupt Server (DIS)
+
+This is an unreal style interrupt server through which certain
+demo operations should be performed. 
+
+Mainly, exit status (any key pressed) and waitborder should be
+processesd through DIS. DIS will also provide internal copper 
+routine for general copper needs and poll the music. There will
+also be an option for you to use the DIS copper for simple
+call this procedure once per frame operations. If your part
+requires hi resolution copper, you must include it to your
+code. There will be an option to temporarily shut down the
+DIS copper. If that is done you'll also need to poll the music
+etc, but more on that when special coppers are needed.
+
+More exact information on DIS from the \DIS directory (source
+& documentation included). Once again, don't modify the source,
+since if you do, our copies will be out of sync.
+
+There is a resident DIS server in \DIS, which can be used to
+test the parts before including them to the actual demo. The
+demo will have the DIS built in. With this resident utility,
+all parts should be ready-for-demo, which will make compiling
+the demo easier and reduce the bugs otherwise generated in
+the progress.
+
+The basic structure of a part using DIS:
+1. Initialize dis (actually tell it of a new part)
+	dis_version() 	/* will return 0 if no dis, in mem, then exit to dos */
+     or dis_partstart() /* checks & exits automatically */
+     
+2. Do the demo effect, remember to wait for borders with
+	dis_waitb()
+
+3. Repeat 2 until dis_exit() returns 1.
+
+Note, that you can use dis_indemo() to determine if you are actually
+running inside the demo, since inside the demo you generally don't
+reset video mode etc for smooth transitions. If dis_indemo returns
+0, you are running from dos, and should set/reset video on startup
+and exit.
+
+__________________________________________________________________________
+6. Part packaging
+
+Every part should be combined to a single exe file. Convert
+data files to object files and link. If you need (like me)
+a paragraph starting segment (offset=0, segment para), use
+\UTIL\DOOBJ.
+
+The EXE should run on it's own with DIS on the background.

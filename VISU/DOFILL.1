@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <string.h>
+
+char	xf[256];
+char	xi[256];
+
+main()
+{
+	int	a,b,c,d,e,f,g;
+	int	lastmask,mask,first,wcnt;
+	FILE	*f1;
+	f1=fopen("avidfill.inc","wt");
+	for(b=0;b<4;b++)
+	{
+		memset(xf,0,32);
+		for(a=0;a<32;a++)
+		{
+			for(c=b;c<b+a;c++) 
+			{
+				xf[c]=1;
+				xi[c]=c-b;
+			}
+			for(c=0;c<32;c+=4)
+			{
+				if(xf[c+2]) xf[c+2]=2;
+				if(xf[c+3]) xf[c+3]=2;
+			}
+			
+			for(c=0;c<32;c++) printf("%i",xf[c]);
+			printf("\n");
+			
+			for(g=1;g<=2;g++)
+			{
+				fprintf(f1,"mov cx,si\n");
+				if((b>=2 && g==1) || (b<2 && g==2))
+				{
+					fprintf(f1,"add cx,bp\n");
+				}
+				lastmask=0;
+				wcnt=0;
+				for(c=0;c<32;c+=4)
+				{
+					mask=0;
+					if(xf[c+0]==1) 
+					{
+						mask|=1;
+					}
+					if(xf[c+1]==1) 
+					{
+						mask|=2;
+					}
+					if(xf[c+2]==1) 
+					{
+						mask|=4;
+					}
+					if(xf[c+3]==1) 
+					{
+						mask|=8;
+					}
+					if(mask!=lastmask)
+					{
+						lastmask=mask;
+					 	fprintf(f1,"mov al,%i\n",mask);
+					 	fprintf(f1,"out dx,al\n");
+					}
+					if(mask)
+					{
+						switch(wcnt)
+						{
+						case 0 : fprintf(f1,"mov al,ch\n"); break;
+						case 1 : fprintf(f1,"mov ah,ch\n"); break;
+						case 2 : fprintf(f1,"shl eax,16\nmov al,ch\n"); break;
+						case 3 : fprintf(f1,"mov ah,ch\nmov es:[di+%i],eax",c/4); break;
+						}
+						wcnt++;
+						fprintf(f1,"add cx,dx\n");
+					}
+				}
+			 	fprintf(f1,"ret\n\n");
+			}
+		}
+	}
+	fclose(f1);
+}

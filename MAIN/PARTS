@@ -1,0 +1,20 @@
+txt1	db	'Alkutekstit I (WILDF)       ',0
+txt2	db	'Alkutekstit II (PSI)        ',0
+txt3	db	'Alkutekstit III (TRUG/WILDF)',0
+txt4	db	'Glenz (PSI)                 ',0
+txt5	db	'Dottitunneli (TRUG)         ',0
+txt6	db	'Techno (PSI)                ',0
+txt7	db	'Panicfake (WILDF)           ',0
+txt8	db	'Vector Part I - Space battle',0
+txt9	db	'Peilipalloscroll (TRUG)     ',0
+txt10	db	'Desert Dream Stars (PSI)    ',0
+txt11	db	'Lens (PSI)                  ',0
+txt12	db	'Rotazoomer (PSI)            ',0
+txt13	db	'Plasma (WILDF)              ',0
+txt14	db	'Plasmacube (WILDF)          ',0
+txt15	db	'MiniVectorBalls (PSI)       ',0
+txt16	db	'Vuori-Scrolli (TRUG)        ',0
+txt17	db	'3D-Sinusfield (PSI)         ',0
+txt18	db	'Vector Part II - KewlComplex',0
+txt19	db	'Endpictureflash (?)         ',0
+txt20	db	'Credits/Greetings scrl. (?) ',0

@@ -1,0 +1,37 @@
+	mov	ax,es:[bx-2]
+	xor	ax,8000h
+	test	ax,4000h
+	jz	@@5
+	mov	dl,al
+	and	dl,1
+	shl	dl,5
+	mov	al,dl
+@@5:	mov	es:[bx-2],ax
+@@7:	pop	ax
+	;lightsource
+		;push	es
+		;push	bx
+		;mov	bx,0a000h
+		;mov	es,bx
+		;mov	bx,ax
+		;sar	bx,8
+		;add	bx,320
+		;inc	byte ptr es:[bx]
+		;pop	bx
+		;pop	es
+	mov	cl,cs:_lightshift
+	shrd	ax,dx,cl
+	cmp	ax,0
+	jge	@@s1
+	mov	ax,0
+@@s1:	cmp	ax,15
+	jle	@@s2
+	mov	ax,15
+@@s2:	;mov	dx,15
+	;sub	dx,ax
+	mov	dx,ax
+;	mov	ax,es:[bx-2]
+;	and	ax,not 15
+;	or	ax,dx
+;	mov	es:[bx-2],ax
+	ret

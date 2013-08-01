@@ -1,0 +1,29 @@
+@@2:	;this loop also clears
+	mov	dx,3c4h
+	mov	ax,0302h
+	out	dx,ax
+	zzz=0
+	REPT	20
+	mov	eax,ds:[si+zzz]
+	mov	ds:[si+zzz],ebx
+	mov	es:[di+zzz],eax
+	zzz=zzz+4
+	ENDM
+	mov	dx,3c4h
+	mov	ax,0C02h
+	out	dx,ax
+	zzz=0
+	REPT	20
+	mov	eax,ds:[si+zzz+80]
+	mov	ds:[si+zzz+80],ebx
+	mov	es:[di+zzz],eax
+	zzz=zzz+4
+	ENDM
+	sub	ebx,01010101h
+	cmp	bl,256-31
+	jae	@@3
+	mov	ebx,0e1e1e1e1h
+@@3:	add	si,160
+	add	di,80
+	dec	cx
+	jmp	@@1

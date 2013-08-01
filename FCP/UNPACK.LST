@@ -1,0 +1,739 @@
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 1
+unpack.ASM
+
+
+
+      1					 NOJUMPS
+      2
+      3					 calccrc MACRO	 start,end
+      4						 local	 l1
+      5						 mov	 cx,OFFSET end-OFFSET start
+      6						 mov	 si,OFFSET start
+      7					 l1:	 add	 dl,cs:[si]
+      8						 adc	 dh,0
+      9						 rol	 dx,1
+     10						 inc	 si
+     11						 loop	 l1
+     12						 ENDM
+     13					 uncryptxor MACRO beg,key
+     14						 local	 l1
+     15						 mov	 bx,OFFSET beg
+     16						 mov	 ax,key
+     17						 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET beg)/2
+     18					 l1:	 xor	 ds:[bx],ax
+     19						 add	 bx,2
+     20						 dec	 cx
+     21						 jnz	 l1
+     22						 ENDM
+     23					 uncryptadd MACRO beg,key ;actually sub, uncrypts add-crypting
+     24						 local	 l1
+     25						 mov	 bx,OFFSET beg
+     26						 mov	 ax,key
+     27						 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET beg)/2
+     28					 l1:	 sub	 ds:[bx],ax
+     29						 add	 bx,2
+     30						 dec	 cx
+     31						 jnz	 l1
+     32						 ENDM
+     33
+     34	    0000			 unp_text SEGMENT para public 'CODE'
+     35						 ASSUME	cs:unp_text
+     36						 PUBLIC	 _unpack_start,_unpack_end
+     37						 PUBLIC	 _unpack_data,_unpack_dataend,_unpack_data2,_unpack_code
+     38						 PUBLIC	 _unpack_stack0,_unpack_stack1
+     39						 PUBLIC	 _unpack_crc0,_unpack_crc1
+     40						 PUBLIC	 _unpack_crypt1	 ;add 5f27h - INC
+     41						 PUBLIC	 _unpack_crypt2	 ;xor 4493h - INC
+     42						 PUBLIC	 _unpack_crypt3	 ;add 0073h - INC
+     43						 PUBLIC	 _unpack_crypt4	 ;xor 4536h - none
+     44						 PUBLIC	 _unpack_crypt10 ;xor 0666h - none
+     45						 PUBLIC	 _unpack_crypt11 ;add 0656h - DEC
+     46						 PUBLIC	 _unpack_crypt12 ;xor 0466h - DEC
+     47						 PUBLIC	 _unpack_crypt13 ;add 0663h - none
+     48						 PUBLIC	 _unpack_crypt14 ;add DX - none
+     49						 PUBLIC	 _unpack_crypt15 ;xor 5cach - none
+     50						 PUBLIC	 _unpack_crypt16 ;add 3fach - INC
+     51						 PUBLIC	 _unpack_endcrypt
+     52	    0000			 _unpack_start LABEL BYTE
+     53
+     54	    0000  46 43	50 2F 49 56		 db	 'FCP/IV'	 ;Future Protector IV
+     55
+     56	    0006			 _unpack_code LABEL BYTE
+     57	    0006			 startup PROC NEAR
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 2
+unpack.ASM
+
+
+
+     58	    0006  BC 0074r			 mov	 sp,OFFSET _unpack_stack1
+     59	    0009			 io21data LABEL	BYTE
+     60	    0009  C3				 ret
+     61	    000A			 pntds2	 LABEL WORd
+     62	    000A  2E: FF 2E 0468r		 jmp	 cs:[farjump+2]
+     63	    000F			 startup ENDP
+     64	    000F			 int_iret PROC FAR
+     65	    000F  CF				 iret
+     66	    0010			 int_iret ENDP
+     67
+     68					 ALIGN 2
+     69	    0010			 _unpack_stack0	LABEL BYTE
+     70	    0010  32*(5555)			 dw	 50 dup(5555h)
+     71	    0074			 _unpack_stack1	LABEL BYTE
+     72	    0074  0091r				 dw	 OFFSET	step1
+     73	    0076  0000				 dw	 0	 ;popped by step 1 => DS
+     74	    0078  0139r				 dw	 OFFSET	step2
+     75	    007A  00EBr				 dw	 OFFSET	step3
+     76	    007C  017Er				 dw	 OFFSEt	step4
+     77	    007E  017Ar			 stck1:	 dw	 OFFSET	stepx1	 ;the cracker blew it :-)
+     78	    0080  FFF0 0000			 dw	 0fff0h,0000h
+     79	    0084  0000			 disk0	 dw	 0
+     80	    0086  0000			 disk1	 dw	 0
+     81	    0088  1234			 vram	 dw	 01234h
+     82	    008A  2E 3B	2A 0D 00	 hboottxt db	 '.;*',13,0
+     83	    008F  0000			 pntds	 dw	 0
+     84
+     85	    0091			 _unpack_crc0 LABEL BYTE
+     86
+     87					 .386P
+     88	    0091			 step1	 PROC NEAR
+     89	    0091  E4 21				 in	 al,21h
+     90	    0093  2E: A2 0009r			 mov	 cs:io21data,al
+     91	    0097  B0 FF				 mov	 al,255
+     92	    0099  E6 21				 out	 21h,al
+     93	    009B  FA				 cli
+     94	    009C  2E: 8C 1E 008Fr		 mov	 cs:pntds,ds
+     95	    00A1  1F				 pop	 ds
+     96	    00A2  FC				 cld
+     97						 ;disk detect
+     98	    00A3  B4 08				 mov	 ah,08h
+     99	    00A5  B2 80				 mov	 dl,128
+    100	    00A7  B6 00				 mov	 dh,0
+    101	    00A9  CD 13				 int	 13h
+    102	    00AB  80 FE	00			 cmp	 dh,0
+    103	    00AE  74 0C	90 90			 je	 jjj1
+    104	    00B2  2E: 89 0E 0084r		 mov	 cs:disk0,cx
+    105	    00B7  2E: 89 16 0086r		 mov	 cs:disk1,dx
+    106	    00BC			 jjj1:	 ;video	detect
+    107	    00BC  B4 0F				 mov	 ah,0fh
+    108	    00BE  CD 10				 int	 10h
+    109	    00C0  3C 07				 cmp	 al,7
+    110	    00C2  74 09	90 90			 je	 ismda
+    111	    00C6  2E: C7 06 0088r 1A34		 mov	 cs:vram,0800h+1234h
+    112	    00CD  2E: 81 06 0088r 9DCC	 ismda:	 add	 cs:vram,0b000h-01234h
+    113						 ;processor detect, at return: BP=0=real BP=1=protected	mode
+    114	    00D4  54				 push	 sp			 ; 86/186 will push SP-2;
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 3
+unpack.ASM
+
+
+
+    115	    00D5  58				 pop	 ax			 ; 286/386 will	push SP.
+    116	    00D6  3B C4				 cmp	 ax, sp
+    117	    00D8  74 06	90 90			 jz	 not86			 ; If equal, SP	was pushed
+    118						 ;8086/80186
+    119	    00DC  BD 0000		 noprot: mov	 bp,0
+    120	    00DF  C3				 ret
+    121	    00E0  0F 01	E1		 not86:	 smsw	 cx			 ; Protected?  Machine status -> CX
+    122	    00E3  D1 C9				 ror	 cx,1			 ; Protection bit -> carry flag
+    123	    00E5  73 F5				 jnc	 noprot			 ; Real	mode if	no carry
+    124	    00E7  BD 0001			 mov	 bp,1
+    125	    00EA  C3				 ret
+    126	    00EB			 step1	 ENDP
+    127					 .8086
+    128
+    129	    00EB			 step3	 PROC	 NEAR
+    130						 ;DS=CS	now (in	step 2)
+    131						 ;uncode crap
+    132	    00EB  2E: C6 06 0114r 40		 mov	 byte ptr cs:int1code,40h ;INC AX
+    133	    00F1  CC				 int	 3	 ;clc set at step2's end
+    134						 uncryptadd _unpack_crypt1,5f27h
+1   135	    00F2  BB 017Er			 mov	 bx,OFFSET _unpack_crypt1
+1   136	    00F5  B8 5F27			 mov	 ax,5f27h
+1   137	    00F8  B9 018D			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt1)/2
+1   138	    00FB  29 07			 ??0000: sub	 ds:[bx],ax
+1   139	    00FD  83 C3	02			 add	 bx,2
+1   140	    0100  49				 dec	 cx
+1   141	    0101  75 F8				 jnz	 ??0000
+    142	    0103  C3				 ret
+    143	    0104			 step3	 ENDP
+    144
+    145	    0104			 ints	 PROC FAR	 ;SingleStep/DEBUG
+    146	    0104  F9			 int_01: stc
+    147	    0105  55			 int_03: push	 bp
+    148	    0106  8B EC				 mov	 bp,sp
+    149	    0108  73 0E				 jnc	 int2
+    150	    010A  53				 push	 bx
+    151	    010B  8B 5E	02			 mov	 bx,ss:[bp+2] ;ip
+    152	    010E  2E: 80 3F 49			 cmp	 byte ptr cs:[bx],49h ;inc cx
+    153	    0112  75 01				 jne	 int1
+    154	    0114  43			 int1code: inc	 bx
+    155	    0115  5B			 int1:	 pop	 bx
+    156	    0116  5D			 int3:	 pop	 bp
+    157	    0117  CF				 iret
+    158	    0118  81 76	06 0100		 int2:	 xor	 ss:[bp+6],256
+    159	    011D  2E: 8B 2E 01ABr		 mov	 bp,cs:stck1to
+    160	    0122  2E: 89 2E 007Er		 mov	 word ptr cs:[stck1],bp
+    161	    0127  EB ED				 jmp	 int3
+    162	    0129			 ints000:
+    163	    0129			 ints	 ENDP
+    164
+    165	    0129			 _unpack_crc1 LABEL BYTE
+    166
+    167	    0129			 itable	 LABEL WORD
+    168		  = 0004		 itablelen equ	 4
+    169	    0129  000Fr	F000			 dw	 OFFSET	int_iret,0f000h	 ;int 0
+    170	    012D  0104r	F000			 dw	 OFFSET	int_01,0f000h	 ;int 1
+    171	    0131  000Fr	F000			 dw	 OFFSET	int_iret,0f000h	 ;int 2
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 4
+unpack.ASM
+
+
+
+    172	    0135  0105r	F000			 dw	 OFFSET	int_03,0f000h	 ;int 3
+    173					 ;Stack	contents on ints:
+    174					 ; [bp+6]: flags
+    175					 ; [bp+4]: cs
+    176					 ; [bp+2]: ip
+    177					 ; [bp+0]: bp
+    178
+    179	    0139			 _startzeroing LABEL BYTE
+    180
+    181	    0139			 step2	 PROC NEAR	 ;WARNING! ROUTINE OVERWRITTEN BY INNER	STACK
+    182	    0139  2E: C6 06 008Ar 62		 mov	 cs:hboottxt[0],'b'
+    183						 ;set interrupts
+    184	    013F  BB 4647			 mov	 bx,'FG'
+    185	    0142  BE 0129r			 mov	 si,OFFSET itable
+    186	    0145  33 FF				 xor	 di,di
+    187	    0147  B9 0004			 mov	 cx,itablelen
+    188	    014A  BA 4A4D			 mov	 dx,'JM'
+    189	    014D  2E: C6 06 008Br 43		 mov	 cs:hboottxt[1],'C'
+    190	    0153  2E:			 st2a:	 segcs
+    191	    0154  AD				 lodsw
+    192	    0155  87 05				 xchg	 ds:[di],ax
+    193	    0157  2E: 89 44 FE			 mov	 cs:[si-2],ax
+    194	    015B  8C C8				 mov	 ax,cs
+    195	    015D  87 45	02			 xchg	 ds:[di+2],ax
+    196	    0160  2E: 89 04			 mov	 cs:[si],ax
+    197	    0163  83 C6	02			 add	 si,2
+    198	    0166  83 C7	04			 add	 di,4
+    199	    0169  E2 E8				 loop	 st2a
+    200						 ;carry=0 for di won't rotate
+    201	    016B  8B FA				 mov	 di,dx	 ;='JM'
+    202	    016D  BA 008Ar			 mov	 dx,OFFSET hboottxt
+    203	    0170  8C C8				 mov	 ax,cs
+    204	    0172  8E D8				 mov	 ds,ax
+    205	    0174  8B F3				 mov	 si,bx	 ;='FG'	 ;if this enabled, ICE will reboot
+    206	    0176  B8 0911			 mov	 ax,0911h
+    207	    0179  C3				 ret
+    208	    017A			 step2	 ENDP
+    209
+    210	    017A			 stepx1	 PROC NEAR
+    211	    017A  B8 F000			 mov	 ax,0f000h
+    212	    017D  CB				 retf	 ;reboots
+    213	    017E			 stepx1	 ENDP
+    214
+    215	    017E			 _unpack_crypt1	 LABEL BYTE
+    216
+    217	    017E			 step4	 PROC	 NEAR
+    218						 ;DS=CS
+    219	    017E  2E: A1 008Fr			 mov	 ax,cs:pntds
+    220	    0182  2E: A3 000Ar			 mov	 cs:pntds2,ax
+    221						 uncryptxor _unpack_crypt2,4493h
+1   222	    0186  BB 0197r			 mov	 bx,OFFSET _unpack_crypt2
+1   223	    0189  B8 4493			 mov	 ax,4493h
+1   224	    018C  B9 0180			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt2)/2
+1   225	    018F  31 07			 ??0001: xor	 ds:[bx],ax
+1   226	    0191  83 C3	02			 add	 bx,2
+1   227	    0194  49				 dec	 cx
+1   228	    0195  75 F8				 jnz	 ??0001
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 5
+unpack.ASM
+
+
+
+    229	    0197			 _unpack_crypt2	LABEL BYTE
+    230						 uncryptadd _unpack_crypt3,0073h
+1   231	    0197  BB 01A8r			 mov	 bx,OFFSET _unpack_crypt3
+1   232	    019A  B8 0073			 mov	 ax,0073h
+1   233	    019D  B9 0178			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt3)/2
+1   234	    01A0  29 07			 ??0002: sub	 ds:[bx],ax
+1   235	    01A2  83 C3	02			 add	 bx,2
+1   236	    01A5  49				 dec	 cx
+1   237	    01A6  75 F8				 jnz	 ??0002
+    238	    01A8			 _unpack_crypt3	LABEL BYTE
+    239	    01A8  EB 08	90			 jmp	 stp4o
+    240	    01AB  01D6r			 stck1to dw	 OFFSET	step5
+    241	    01AD  42 63	2A 0D 00	 hboottxt2 db	 'Bc*',13,0
+    242	    01B2  2B C0			 stp4o:	 sub	 ax,ax
+    243	    01B4  BE 4647			 mov	 si,'FG'
+    244	    01B7  BF 4A4D			 mov	 di,'JM'
+    245	    01BA  B8 0911			 mov	 ax,0911h
+    246	    01BD  BA 01ADr			 mov	 dx,OFFSET hboottxt2
+    247	    01C0  F8				 clc
+    248	    01C1  CC				 int	 3
+    249						 uncryptxor _unpack_crypt4,4536h
+1   250	    01C2  BB 01D4r			 mov	 bx,OFFSET _unpack_crypt4
+1   251	    01C5  B8 4536			 mov	 ax,4536h
+1   252	    01C8  B9 0162			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt4)/2
+1   253	    01CB  31 07			 ??0003: xor	 ds:[bx],ax
+1   254	    01CD  83 C3	02			 add	 bx,2
+1   255	    01D0  49				 dec	 cx
+1   256	    01D1  75 F8				 jnz	 ??0003
+    257	    01D3  C3				 ret	 ;goes to step5
+    258	    01D4			 step4	 ENDP
+    259
+    260	    01D4			 _unpack_crypt4	LABEL BYTE
+    261
+    262	    01D4			 innerstack LABEL BYTE
+    263	    01D4  017Ar				 dw	 OFFSET	stepx1
+    264
+    265	    01D6			 step5	 PROC	 NEAR
+    266						 ;enter	inner stack
+    267	    01D6  BC 01D4r			 mov	 sp,OFFSET innerstack
+    268						 uncryptxor _unpack_crypt10,0666h
+1   269	    01D9  BB 01EAr			 mov	 bx,OFFSET _unpack_crypt10
+1   270	    01DC  B8 0666			 mov	 ax,0666h
+1   271	    01DF  B9 0157			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt10)/2
+1   272	    01E2  31 07			 ??0004: xor	 ds:[bx],ax
+1   273	    01E4  83 C3	02			 add	 bx,2
+1   274	    01E7  49				 dec	 cx
+1   275	    01E8  75 F8				 jnz	 ??0004
+    276	    01EA			 _unpack_crypt10 LABEL BYTE
+    277	    01EA  BA 0656		 i1c0:	 mov	 dx,0656h
+    278	    01ED  2B C0				 sub	 ax,ax
+    279	    01EF  8E C0				 mov	 es,ax
+    280	    01F1  26: A1 0006			 mov	 ax,es:[6]
+    281	    01F5  8C CB				 mov	 bx,cs
+    282	    01F7  3B C3				 cmp	 ax,bx
+    283	    01F9  74 0A				 je	 i1c1
+    284	    01FB  2E: C7 06 01EBr CA3F		 mov	 word ptr cs:[i1c0+1],0CA3Fh
+    285	    0202  BA 3FC1			 mov	 dx,3FC1H
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 6
+unpack.ASM
+
+
+
+    286	    0205  26: 81 3E 0004 0104r	 i1c1:	 cmp	 word ptr es:[4],OFFSET	int_01
+    287	    020C  74 0A				 je	 i1c2
+    288	    020E  2E: C7 06 01EBr CA3F		 mov	 word ptr cs:[i1c0+1],0CA3Fh
+    289	    0215  BA 3CF2			 mov	 dx,3CF2H
+    290	    0218  2E: C6 06 0114r 48	 i1c2:	 mov	 byte ptr cs:int1code,48h ;DEC AX
+    291	    021E  2B C0				 sub	 ax,ax
+    292	    0220  CC				 int	 3
+    293						 uncryptadd _unpack_crypt11,dx
+1   294	    0221  BB 0231r			 mov	 bx,OFFSET _unpack_crypt11
+1   295	    0224  8B C2				 mov	 ax,dx
+1   296	    0226  B9 0133			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt11)/2
+1   297	    0229  29 07			 ??0005: sub	 ds:[bx],ax
+1   298	    022B  83 C3	02			 add	 bx,2
+1   299	    022E  49				 dec	 cx
+1   300	    022F  75 F8				 jnz	 ??0005
+    301	    0231			 _unpack_crypt11 LABEL BYTE
+    302						 uncryptxor _unpack_crypt12,0466h
+1   303	    0231  BB 0242r			 mov	 bx,OFFSET _unpack_crypt12
+1   304	    0234  B8 0466			 mov	 ax,0466h
+1   305	    0237  B9 012B			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt12)/2
+1   306	    023A  31 07			 ??0006: xor	 ds:[bx],ax
+1   307	    023C  83 C3	02			 add	 bx,2
+1   308	    023F  49				 dec	 cx
+1   309	    0240  75 F8				 jnz	 ??0006
+    310	    0242			 _unpack_crypt12 LABEL BYTE
+    311	    0242  2E: C6 06 0114r 40		 mov	 byte ptr cs:int1code,40h ;INC AX
+    312	    0248  2B C0				 sub	 ax,ax
+    313	    024A  CC				 int	 3
+    314						 uncryptadd _unpack_crypt13,0663h
+1   315	    024B  BB 025Cr			 mov	 bx,OFFSET _unpack_crypt13
+1   316	    024E  B8 0663			 mov	 ax,0663h
+1   317	    0251  B9 011E			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt13)/2
+1   318	    0254  29 07			 ??0007: sub	 ds:[bx],ax
+1   319	    0256  83 C3	02			 add	 bx,2
+1   320	    0259  49				 dec	 cx
+1   321	    025A  75 F8				 jnz	 ??0007
+    322	    025C			 _unpack_crypt13 LABEL BYTE
+    323						 ;calc checksum	of exe start
+    324	    025C  33 D2				 xor	 dx,dx
+    325	    025E  2E: C6 06 0114r 43		 mov	 byte ptr cs:int1code,43h ;INC BX
+    326						 calccrc _unpack_crc0,_unpack_crc1
+1   327	    0264  B9 0098			 mov	 cx,OFFSET _unpack_crc1-OFFSET _unpack_crc0
+1   328	    0267  BE 0091r			 mov	 si,OFFSET _unpack_crc0
+1   329	    026A  2E: 02 14		 ??0008: add	 dl,cs:[si]
+1   330	    026D  80 D6	00			 adc	 dh,0
+1   331	    0270  D1 C2				 rol	 dx,1
+1   332	    0272  46				 inc	 si
+1   333	    0273  E2 F5				 loop	 ??0008
+    334						 uncryptadd _unpack_crypt14,0 ;dx
+1   335	    0275  BB 0286r			 mov	 bx,OFFSET _unpack_crypt14
+1   336	    0278  B8 0000			 mov	 ax,0
+1   337	    027B  B9 0109			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt14)/2
+1   338	    027E  29 07			 ??0009: sub	 ds:[bx],ax
+1   339	    0280  83 C3	02			 add	 bx,2
+1   340	    0283  49				 dec	 cx
+1   341	    0284  75 F8				 jnz	 ??0009
+    342	    0286			 _unpack_crypt14 LABEL BYTE
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 7
+unpack.ASM
+
+
+
+    343						 uncryptxor _unpack_crypt15,5CACh
+1   344	    0286  BB 0297r			 mov	 bx,OFFSET _unpack_crypt15
+1   345	    0289  B8 5CAC			 mov	 ax,5CACh
+1   346	    028C  B9 0100			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt15)/2
+1   347	    028F  31 07			 ??000A: xor	 ds:[bx],ax
+1   348	    0291  83 C3	02			 add	 bx,2
+1   349	    0294  49				 dec	 cx
+1   350	    0295  75 F8				 jnz	 ??000A
+    351	    0297			 _unpack_crypt15 LABEL BYTE
+    352	    0297  2E: C6 06 0114r 40		 mov	 byte ptr cs:int1code,40h ;INC AX
+    353	    029D  2B C0				 sub	 ax,ax
+    354	    029F  CC				 int	 3
+    355						 uncryptadd _unpack_crypt16,3FACh
+1   356	    02A0  BB 02B1r			 mov	 bx,OFFSET _unpack_crypt16
+1   357	    02A3  B8 3FAC			 mov	 ax,3FACh
+1   358	    02A6  B9 00F3			 mov	 cx,(OFFSET _unpack_endcrypt-OFFSET _unpack_crypt16)/2
+1   359	    02A9  29 07			 ??000B: sub	 ds:[bx],ax
+1   360	    02AB  83 C3	02			 add	 bx,2
+1   361	    02AE  49				 dec	 cx
+1   362	    02AF  75 F8				 jnz	 ??000B
+    363	    02B1			 _unpack_crypt16 LABEL BYTE
+    364	    02B1  2E: C7 06 01D4r     +		 mov	 word ptr cs:innerstack,OFFSET execute
+    365		  02BCr
+    366	    02B8  2B C0				 sub	 ax,ax
+    367	    02BA  CC				 int	 3
+    368	    02BB  C3				 ret
+    369	    02BC			 step5	 ENDP
+    370
+    371					 ALIGN 2
+    372
+    373	    02BC			 execute PROC NEAR
+    374						 ;unpack data
+    375	    02BC  2E: 8B 16 000Ar		 mov	 dx,cs:pntds2
+    376	    02C1  83 C2	10			 add	 dx,10h
+    377	    02C4  33 F6				 xor	 si,si
+    378	    02C6  33 FF				 xor	 di,di
+    379	    02C8  2E: 83 3E 0482r 00		 cmp	 cs:mcrcon,0
+    380	    02CE  74 21				 je	 exec11
+    381						 ;calc machine crc
+    382	    02D0  B8 FF00			 mov	 ax,0ff00h
+    383	    02D3  8E D8				 mov	 ds,ax
+    384	    02D5  BB 0000			 mov	 bx,0
+    385	    02D8  B9 0400			 mov	 cx,1024
+    386	    02DB  03 37			 mcrc1:	 add	 si,ds:[bx]
+    387	    02DD  03 7F	02			 add	 di,ds:[bx+2]
+    388	    02E0  D1 C6				 rol	 si,1
+    389	    02E2  83 C3	04			 add	 bx,4
+    390	    02E5  E2 F4				 loop	 mcrc1
+    391	    02E7  2E: 03 36 0084r		 add	 si,cs:disk0
+    392	    02EC  2E: 03 3E 0086r		 add	 di,cs:disk1
+    393	    02F1  2E: 03 36 0466r	 exec11: add	 si,cs:regcs
+    394	    02F6  2E: 03 3E 0468r		 add	 di,cs:regip
+    395	    02FB  2E: 03 36 046Cr		 add	 si,cs:regsp
+    396	    0300  2E: 03 3E 046Ar		 add	 di,cs:regss
+    397	    0305  2E: 03 36 0480r		 add	 si,cs:regkey
+    398	    030A  2E: 03 3E 0480r		 add	 di,cs:regkey
+    399	    030F  2E: 8B 0E 046Er		 mov	 cx,cs:regcs0
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 8
+unpack.ASM
+
+
+
+    400	    0314  8E DA			 exec1:	 mov	 ds,dx
+    401	    0316  29 36	0000			 sub	 ds:[0],si
+    402	    031A  29 3E	0002			 sub	 ds:[2],di
+    403	    031E  81 F6	5354			 xor	 si,5354h
+    404	    0322  81 F7	1525			 xor	 di,1525h
+    405	    0326  29 36	0004			 sub	 ds:[4],si
+    406	    032A  29 3E	0006			 sub	 ds:[6],di
+    407	    032E  81 C6	1234			 add	 si,1234h
+    408	    0332  D1 CE				 ror	 si,1
+    409	    0334  81 C7	4321			 add	 di,4321h
+    410	    0338  D1 C7				 rol	 di,1
+    411	    033A  29 36	0008			 sub	 ds:[8],si
+    412	    033E  29 3E	000A			 sub	 ds:[10],di
+    413	    0342  81 F6	5354			 xor	 si,5354h
+    414	    0346  81 F7	1525			 xor	 di,1525h
+    415	    034A  29 36	000C			 sub	 ds:[12],si
+    416	    034E  29 3E	000E			 sub	 ds:[14],di
+    417	    0352  81 C6	1234			 add	 si,1234h
+    418	    0356  D1 CE				 ror	 si,1
+    419	    0358  81 C7	4321			 add	 di,4321h
+    420	    035C  D1 C7				 rol	 di,1
+    421	    035E  42				 inc	 dx
+    422	    035F  03 36	0000			 add	 si,ds:[0]
+    423	    0363  03 3E	0008			 add	 di,ds:[8]
+    424	    0367  03 36	0002			 add	 si,ds:[2]
+    425	    036B  03 3E	000A			 add	 di,ds:[10]
+    426	    036F  03 36	0004			 add	 si,ds:[4]
+    427	    0373  03 3E	000C			 add	 di,ds:[12]
+    428	    0377  03 36	0006			 add	 si,ds:[6]
+    429	    037B  03 3E	000E			 add	 di,ds:[14]
+    430	    037F  E2 93				 loop	 exec1
+    431	    0381  BD 0470r			 mov	 bp,OFFSET errormsg1
+    432	    0384  2E: 3B 36 0484r		 cmp	 si,cs:keychk0
+    433	    0389  75 7D				 jne	 error
+    434	    038B  2E: 3B 3E 0486r		 cmp	 di,cs:keychk1
+    435	    0390  75 76				 jne	 error
+    436	    0392  FC				 cld
+    437	    0393			 _endzeroing LABEL BYTE	;may overflow a	byte, but who cares
+    438	    0393  2E: 8B 16 000Ar		 mov	 dx,cs:pntds2
+    439	    0398  8C C8				 mov	 ax,cs
+    440	    039A  8E C0				 mov	 es,ax
+    441	    039C  B9 012D			 mov	 cx,(OFFSET _endzeroing-OFFSET _startzeroing+1)/2
+    442	    039F  BF 0139r			 mov	 di,OFFSET _startzeroing
+    443	    03A2  B8 2E2E			 mov	 ax,'..'
+    444	    03A5  F3> AB			 rep	 stosw
+    445	    03A7  E8 00A9			 call	 resetints
+    446	    03AA  2E: A0 0009r			 mov	 al,cs:io21data
+    447	    03AE  E6 21				 out	 21h,al
+    448	    03B0  8C C8				 mov	 ax,cs
+    449	    03B2  8E C0				 mov	 es,ax
+    450	    03B4  B9 0133			 mov	 cx,OFFSET _startzeroing-OFFSET	_unpack_code
+    451	    03B7  BF 0006r			 mov	 di,OFFSET _unpack_code
+    452	    03BA  B0 2E				 mov	 al,'.'
+    453	    03BC  F3> AA			 rep	 stosb
+    454						 ;load stack and cs:ip for the actual program and run it.
+    455	    03BE  8E DA				 mov	 ds,dx
+    456	    03C0  8E C2				 mov	 es,dx
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 9
+unpack.ASM
+
+
+
+    457	    03C2  8C CB				 mov	 bx,cs
+    458	    03C4  2E: 8B 0E 046Er		 mov	 cx,cs:regcs0
+    459	    03C9  2E: A1 046Ar			 mov	 ax,cs:regss
+    460	    03CD  03 C3				 add	 ax,bx
+    461	    03CF  2B C1				 sub	 ax,cx
+    462	    03D1  8E D0				 mov	 ss,ax
+    463	    03D3  2E: 8B 26 046Cr		 mov	 sp,cs:regsp
+    464	    03D8  2E: 01 1E 0466r		 add	 cs:regcs,bx
+    465	    03DD  2E: 29 0E 0466r		 sub	 cs:regcs,cx
+    466	    03E2  2E: FF 36 0466r		 push	 cs:regcs
+    467	    03E7  2E: FF 36 0468r		 push	 cs:regip
+    468	    03EC  2E: A3 0466r			 mov	 cs:regcs,ax
+    469	    03F0  2E: A3 0468r			 mov	 cs:regip,ax
+    470	    03F4  2E: A3 046Ar			 mov	 cs:regss,ax
+    471	    03F8  2E: A3 046Er			 mov	 cs:regcs0,ax
+    472	    03FC  2E: A3 0486r			 mov	 cs:keychk1,ax
+    473	    0400  2E: A3 0480r			 mov	 cs:regkey,ax
+    474	    0404  FB				 sti
+    475	    0405  E9 008F			 jmp	 endprg2
+    476
+    477	    0408			 _endzeroing2 LABEL BYTE
+    478	    0408			 error:	 ;destroy and exit with	error at OFFSET	BP
+    479	    0408  FC				 cld
+    480	    0409  2E: 8B 16 000Ar		 mov	 dx,cs:pntds2
+    481	    040E  8C C8				 mov	 ax,cs
+    482	    0410  8E C0				 mov	 es,ax
+    483	    0412  B9 0168			 mov	 cx,(OFFSET _endzeroing2-OFFSET	_startzeroing+1)/2
+    484	    0415  BF 0139r			 mov	 di,OFFSET _startzeroing
+    485	    0418  B8 2E2E			 mov	 ax,'..'
+    486	    041B  F3> AB			 rep	 stosw
+    487	    041D  E8 0033			 call	 resetints
+    488	    0420  2E: A0 0009r			 mov	 al,cs:io21data
+    489	    0424  E6 21				 out	 21h,al
+    490	    0426  8C C8				 mov	 ax,cs
+    491	    0428  8E C0				 mov	 es,ax
+    492	    042A  BF 0006r			 mov	 di,OFFSET _unpack_code
+    493	    042D  B9 0133			 mov	 cx,OFFSET _startzeroing-OFFSET	_unpack_code
+    494	    0430  B0 2E				 mov	 al,'.'
+    495	    0432  F3> AA			 rep	 stosb
+    496	    0434  2E: A3 0466r			 mov	 cs:regcs,ax
+    497	    0438  2E: A3 0468r			 mov	 cs:regip,ax
+    498	    043C  2E: A3 046Ar			 mov	 cs:regss,ax
+    499	    0440  2E: A3 046Er			 mov	 cs:regcs0,ax
+    500	    0444  2E: A3 0486r			 mov	 cs:keychk1,ax
+    501	    0448  2E: A3 0480r			 mov	 cs:regkey,ax
+    502	    044C  BC 0466r			 mov	 sp,OFFSET _unpack_data
+    503	    044F  FB				 sti
+    504	    0450  EB 36	90			 jmp	 endprg1
+    505	    0453			 execute ENDP
+    506
+    507	    0453			 resetints PROC	NEAR
+    508						 ;reset	interrupts
+    509	    0453  33 C0				 xor	 ax,ax
+    510	    0455  8E C0				 mov	 es,ax
+    511	    0457  BE 0129r			 mov	 si,OFFSET itable
+    512	    045A  33 FF				 xor	 di,di
+    513	    045C  B9 0008			 mov	 cx,itablelen*2
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 10
+unpack.ASM
+
+
+
+    514	    045F  2E:			 st20a:	 segcs
+    515	    0460  AD				 lodsw
+    516	    0461  AB				 stosw
+    517	    0462  E2 FB				 loop	 st20a
+    518	    0464  C3				 ret
+    519	    0465			 resetints ENDP
+    520
+    521	    0465  90				 ALIGN	 2
+    522	    0466			 _unpack_data LABEL BYTE
+    523	    0466			 farjump LABEL DWORD
+    524	    0466  0000			 regcs	 dw	 0
+    525	    0468  0000			 regip	 dw	 0
+    526	    046A  0000			 regss	 dw	 0
+    527	    046C  0000			 regsp	 dw	 0
+    528	    046E  0000			 regcs0	 dw	 0
+    529	    0470  46 69	6C 65 20 63 6F+	 errormsg1 db	 'File corrupted!$'
+    530		  72 72	75 70 74 65 64+
+    531		  21 24
+    532	    0480			 _unpack_data2 LABEL BYTE
+    533	    0480  0000			 regkey	 dw	 0
+    534	    0482  0000			 mcrcon	 dw	 0	 ;1=machine crc	enabled
+    535	    0484  0000			 keychk0 dw	 0
+    536	    0486  0000			 keychk1 dw	 0
+    537	    0488			 _unpack_dataend LABEL BYTE
+    538
+    539						 ALIGN	 2
+    540
+    541	    0488			 endprg1: ;****************
+    542	    0488  8B D5				 mov	 dx,bp
+    543	    048A  8C C8				 mov	 ax,cs
+    544	    048C  8E D8				 mov	 ds,ax
+    545	    048E  B4 09				 mov	 ah,9h
+    546	    0490  CD 21				 int	 21h
+    547	    0492  B8 4C03			 mov	 ax,4c03h
+    548	    0495  CD 21				 int	 21h
+    549	    0497			 endprg2:  ;****************
+    550	    0497  CB				 retf
+    551
+    552						 ALIGN	 2
+    553	    0498			 _unpack_endcrypt LABEL	BYTE
+    554	    0498  00 FC				 db	 000h,0fch
+    555	    049A			 _unpack_end LABEL BYTE
+    556	    049A			 unp_text ENDS
+    557						 END
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 11
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??0000				  Near	 UNP_TEXT:00FB
+??0001				  Near	 UNP_TEXT:018F
+??0002				  Near	 UNP_TEXT:01A0
+??0003				  Near	 UNP_TEXT:01CB
+??0004				  Near	 UNP_TEXT:01E2
+??0005				  Near	 UNP_TEXT:0229
+??0006				  Near	 UNP_TEXT:023A
+??0007				  Near	 UNP_TEXT:0254
+??0008				  Near	 UNP_TEXT:026A
+??0009				  Near	 UNP_TEXT:027E
+??000A				  Near	 UNP_TEXT:028F
+??000B				  Near	 UNP_TEXT:02A9
+??DATE				  Text	 "05/06/93"
+??FILENAME			  Text	 "unpack  "
+??TIME				  Text	 "20:32:49"
+??VERSION			  Number 0205
+@CPU				  Text	 0101H
+@CURSEG				  Text	 UNP_TEXT
+@FILENAME			  Text	 UNPACK
+@WORDSIZE			  Text	 2
+DISK0				  Word	 UNP_TEXT:0084
+DISK1				  Word	 UNP_TEXT:0086
+ENDPRG1				  Near	 UNP_TEXT:0488
+ENDPRG2				  Near	 UNP_TEXT:0497
+ERROR				  Near	 UNP_TEXT:0408
+ERRORMSG1			  Byte	 UNP_TEXT:0470
+EXEC1				  Near	 UNP_TEXT:0314
+EXEC11				  Near	 UNP_TEXT:02F1
+EXECUTE				  Near	 UNP_TEXT:02BC
+FARJUMP				  Dword	 UNP_TEXT:0466
+HBOOTTXT			  Byte	 UNP_TEXT:008A
+HBOOTTXT2			  Byte	 UNP_TEXT:01AD
+I1C0				  Near	 UNP_TEXT:01EA
+I1C1				  Near	 UNP_TEXT:0205
+I1C2				  Near	 UNP_TEXT:0218
+INNERSTACK			  Byte	 UNP_TEXT:01D4
+INT1				  Near	 UNP_TEXT:0115
+INT1CODE			  Near	 UNP_TEXT:0114
+INT2				  Near	 UNP_TEXT:0118
+INT3				  Near	 UNP_TEXT:0116
+INTS				  Far	 UNP_TEXT:0104
+INTS000				  Near	 UNP_TEXT:0129
+INT_01				  Near	 UNP_TEXT:0104
+INT_03				  Near	 UNP_TEXT:0105
+INT_IRET			  Far	 UNP_TEXT:000F
+IO21DATA			  Byte	 UNP_TEXT:0009
+ISMDA				  Near	 UNP_TEXT:00CD
+ITABLE				  Word	 UNP_TEXT:0129
+ITABLELEN			  Number 0004
+JJJ1				  Near	 UNP_TEXT:00BC
+KEYCHK0				  Word	 UNP_TEXT:0484
+KEYCHK1				  Word	 UNP_TEXT:0486
+MCRC1				  Near	 UNP_TEXT:02DB
+MCRCON				  Word	 UNP_TEXT:0482
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 12
+Symbol Table
+
+
+
+NOPROT				  Near	 UNP_TEXT:00DC
+NOT86				  Near	 UNP_TEXT:00E0
+PNTDS				  Word	 UNP_TEXT:008F
+PNTDS2				  Word	 UNP_TEXT:000A
+REGCS				  Word	 UNP_TEXT:0466
+REGCS0				  Word	 UNP_TEXT:046E
+REGIP				  Word	 UNP_TEXT:0468
+REGKEY				  Word	 UNP_TEXT:0480
+REGSP				  Word	 UNP_TEXT:046C
+REGSS				  Word	 UNP_TEXT:046A
+RESETINTS			  Near	 UNP_TEXT:0453
+ST20A				  Near	 UNP_TEXT:045F
+ST2A				  Near	 UNP_TEXT:0153
+STARTUP				  Near	 UNP_TEXT:0006
+STCK1				  Near	 UNP_TEXT:007E
+STCK1TO				  Word	 UNP_TEXT:01AB
+STEP1				  Near	 UNP_TEXT:0091
+STEP2				  Near	 UNP_TEXT:0139
+STEP3				  Near	 UNP_TEXT:00EB
+STEP4				  Near	 UNP_TEXT:017E
+STEP5				  Near	 UNP_TEXT:01D6
+STEPX1				  Near	 UNP_TEXT:017A
+STP4O				  Near	 UNP_TEXT:01B2
+VRAM				  Word	 UNP_TEXT:0088
+_ENDZEROING			  Byte	 UNP_TEXT:0393
+_ENDZEROING2			  Byte	 UNP_TEXT:0408
+_STARTZEROING			  Byte	 UNP_TEXT:0139
+_UNPACK_CODE			  Byte	 UNP_TEXT:0006
+_UNPACK_CRC0			  Byte	 UNP_TEXT:0091
+_UNPACK_CRC1			  Byte	 UNP_TEXT:0129
+_UNPACK_CRYPT1			  Byte	 UNP_TEXT:017E
+_UNPACK_CRYPT10			  Byte	 UNP_TEXT:01EA
+_UNPACK_CRYPT11			  Byte	 UNP_TEXT:0231
+_UNPACK_CRYPT12			  Byte	 UNP_TEXT:0242
+_UNPACK_CRYPT13			  Byte	 UNP_TEXT:025C
+_UNPACK_CRYPT14			  Byte	 UNP_TEXT:0286
+_UNPACK_CRYPT15			  Byte	 UNP_TEXT:0297
+_UNPACK_CRYPT16			  Byte	 UNP_TEXT:02B1
+_UNPACK_CRYPT2			  Byte	 UNP_TEXT:0197
+_UNPACK_CRYPT3			  Byte	 UNP_TEXT:01A8
+_UNPACK_CRYPT4			  Byte	 UNP_TEXT:01D4
+_UNPACK_DATA			  Byte	 UNP_TEXT:0466
+_UNPACK_DATA2			  Byte	 UNP_TEXT:0480
+_UNPACK_DATAEND			  Byte	 UNP_TEXT:0488
+_UNPACK_END			  Byte	 UNP_TEXT:049A
+_UNPACK_ENDCRYPT		  Byte	 UNP_TEXT:0498
+_UNPACK_STACK0			  Byte	 UNP_TEXT:0010
+_UNPACK_STACK1			  Byte	 UNP_TEXT:0074
+_UNPACK_START			  Byte	 UNP_TEXT:0000
+
+Macro Name
+
+CALCCRC
+UNCRYPTADD
+UNCRYPTXOR
+Turbo Assembler	 Version 2.5	    05/06/93 20:32:49	    Page 13
+Symbol Table
+
+
+
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+UNP_TEXT			  16  049A Para	  Public  CODE
+

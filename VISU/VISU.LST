@@ -1,0 +1,66 @@
+vr................adata             _afilldiv.........adata
+_avistan..........adata             _calc_applyrmatrix..acalc
+_calc_invrmatrix..visu              _calc_mulrmatrix..acalc
+_calc_nrotate.....acalc             _calc_project.....acalc
+_calc_project16...acalc             _calc_rotate......acalc
+_calc_rotate16....acalc             _calc_setrmatrix_camera..visux
+_calc_setrmatrix_ident..acalc       _calc_setrmatrix_rotxyz..acalc
+_calc_setrmatrix_rotyxz..acalc      _calc_setrmatrix_rotzyx..acalc
+_calc_sftranslate..acalc            _calc_singlez.....acalc
+_cdataseg.........adata             _datanull.........adata
+_draw_polylist....adraw             _draw_setfillroutine..adraw
+_font3x5..........avid              _polydrw..........adata
+_projaddx.........adata             _projaddy.........adata
+_projaspect.......adata             _projclipx........adata
+_projclipy........adata             _projclipz........adata
+_projmulx.........adata             _projmuly.........adata
+_projoversampleshr..adata           _prtt.............avid
+_prttcol..........avid              _rowlen...........adata
+_rows.............adata             _sintable.........adata
+_txtx.............avid              _txty.............avid
+_vid_cameraangle..avid              _vid_clear........avid
+_vid_clear255.....avid              _vid_clearbg......avid
+_vid_deinit.......avid              _vid_dotdisplay_pvlist..avid
+_vid_dotdisplay_zcolor..avid        _vid_drawdots.....avid
+_vid_drawfill.....avid              _vid_drawpolylist..avid
+_vid_drawsight....avid              _vid_init.........avid
+_vid_pic320200....avid              _vid_pset.........avid
+_vid_setpal.......avid              _vid_setswitch....avid
+_vid_skyclear.....avid              _vid_switch.......avid
+_vid_waitb........avid              _vid_window.......avid
+_vis_drawobject...visu              _vis_loadobject...visu
+_vramseg..........adata             
+
+visux             Offset: 00000010H  Code and data size: f46H
+  _calc_setrmatrix_camera           
+
+visu              Offset: 00001580H  Code and data size: 1209H
+  _calc_invrmatrix  _vis_drawobject   _vis_loadobject 
+
+amain             Offset: 00002ff0H  Code and data size: 0H
+
+adata             Offset: 00003130H  Code and data size: 3208H
+  vr                _afilldiv         _avistan          _cdataseg
+  _datanull         _polydrw          _projaddx         _projaddy
+  _projaspect       _projclipx        _projclipy        _projclipz
+  _projmulx         _projmuly         _projoversampleshr
+  _rowlen           _rows             _sintable         _vramseg
+
+acalc             Offset: 00005d00H  Code and data size: c1dH
+  _calc_applyrmatrix                  _calc_mulrmatrix  _calc_nrotate
+  _calc_project     _calc_project16   _calc_rotate      _calc_rotate16
+  _calc_setrmatrix_ident              _calc_setrmatrix_rotxyz
+  _calc_setrmatrix_rotyxz             _calc_setrmatrix_rotzyx
+  _calc_sftranslate                   _calc_singlez   
+
+avid              Offset: 00007bd0H  Code and data size: 827fH
+  _font3x5          _prtt             _prttcol          _txtx
+  _txty             _vid_cameraangle  _vid_clear        _vid_clear255
+  _vid_clearbg      _vid_deinit       _vid_dotdisplay_pvlist
+  _vid_dotdisplay_zcolor              _vid_drawdots     _vid_drawfill
+  _vid_drawpolylist                   _vid_drawsight    _vid_init
+  _vid_pic320200    _vid_pset         _vid_setpal       _vid_setswitch
+  _vid_skyclear     _vid_switch       _vid_waitb        _vid_window
+
+adraw             Offset: 00015020H  Code and data size: 1329H
+  _draw_polylist    _draw_setfillroutine              

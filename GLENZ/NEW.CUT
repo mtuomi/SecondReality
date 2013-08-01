@@ -1,0 +1,20 @@
+	mov	ax,0a000h
+	mov	es,ax
+	xor	di,di
+	xor	ax,ax
+	mov	cx,32000
+	rep	stosw
+
+	mov	ax,SEG newdata1
+	mov	ds,ax
+	xor	si,si
+	xor	di,di
+	xor	ax,ax
+	mov	dx,cs:ndp
+@@b:	mov	bx,ds:[si]
+	mov	al,ds:[si+2]
+	xor	es:[bx],al
+	add	si,4
+	cmp	si,dx
+	jb	@@b
+	ret

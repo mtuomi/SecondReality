@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <string.h>
+#include "..\dis\dis.h"
+
+#define RECLEN (4*4)
+extern char muldata[];
+extern int xyzdata[];
+/**/
+extern void asminit(void);
+extern void asmloop1(void);
+extern void setborder(int);
+
+unsigned char far *vram0=(char far *)0xa0000000L;
+
+main(int argc,char *argv[])
+{
+	FILE	*f1;
+	char	*cp;
+	int	a,b,c;
+	int	x,y,x1,y1,x2,y2;
+	int	scale=50,scalea=-1;
+	int	plane=1;
+	unsigned u;
+	
+	dis_partstart();
+	if(!dis_indemo())
+	{
+		_asm mov ax,13h
+		_asm int 10h
+	}
+
+	#if 0
+	memset(vram0,8,64000);
+	while(dis_muscode(1)!=1 && !dis_exit());
+	for(x=319;x>=0;x--)
+	{
+		vram0[x+100*320]=0;
+		if(!(x&15)) dis_waitb();
+	}
+	y1=100; a=100*64; b=0;
+	while(y1<200)
+	{
+		b+=8;
+		a+=b;
+		y2=a/64;
+		if(y2>200) y2=200;
+		for(y=y1;y<y2;y++)
+		{
+			memset(vram0+y*320,0,320);
+		}
+		y1=y2;
+		dis_waitb();
+	}
+	for(a=0;a<35 && !dis_exit();a++) dis_waitb();
+	#endif
+	
+	outp(0x3c8,0);
+	for(x=0;x<256;x++)
+	{
+		a=b=c=0;
+		if(x&4) c=63;
+		if(x&2) c=32;
+		if(x&1) c=16;
+		outp(0x3c9,a);
+		outp(0x3c9,b);
+		outp(0x3c9,c);
+		vram0[x]=x;
+	}
+	
+	asminit();
+	cp=muldata;
+	for(x=0;x<256;x++) for(y=0;y<256;y++)
+	{
+		_asm mov al,x
+		_asm mul byte ptr y
+		_asm mov al,ah
+		_asm xor ah,ah
+		_asm mov a,ax
+		*(cp++)=a;
+	}
+	
+	while(!dis_exit())
+	{
+		for(y=0;y<32;y++)
+		{
+			for(x=0;x<32;x++)
+			{
+				u=(x+y*32)*RECLEN;
+				xyzdata[u+0]=((x-16)*8)*scale/50+160;
+				xyzdata[u+1]=((y-16)*6)*scale/50+100;
+			}
+		}
+		scale+=scalea;
+		if(scale>50) scalea=-scalea;
+		if(scale<30) scalea=-scalea;
+		setborder(3);
+		asmloop1(plane);
+		plane<<=1; if(plane>15) plane=1;
+		setborder(0);
+		if(getch()==27) break;
+		dis_waitb();
+		setborder(1);
+	}
+
+	if(!dis_indemo())
+	{
+		_asm mov ax,3h
+		_asm int 10h
+	}
+}

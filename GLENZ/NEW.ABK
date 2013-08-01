@@ -1,0 +1,270 @@
+;!!!!!! TRANSPARENT NEW COPPER !!!!!!
+
+FREELINE equ 200
+
+ALIGN 2
+newrows LABEL WORD
+cc=0
+REPT 200
+	dw	cc
+	cc=cc+320
+ENDM
+
+PUBLIC _newsinus,_newsinusx
+_newsinus dw 512 dup(0)
+_newsinusx dw -1
+
+newgroup PROC NEAR
+	;hline list in gs:si
+	push	ds
+	mov	ax,SEG newdata1
+	mov	ds,ax
+	mov	ax,SEG newdata2
+	mov	fs,ax
+	mov	bx,gs:[si]
+	shl	bx,1
+	mov	bx,cs:newrows[bx]
+	add	si,2
+	mov	al,gs:color1
+@@1:	mov	edx,gs:[si]
+	cmp	dx,-32767
+	je	@@2
+	mov	di,dx
+	shr	edx,16
+	add	si,4
+	cmp	di,dx
+	jl	@@133
+	xchg	di,dx
+@@133:	cmp	di,1
+	jl	@@11
+@@111:	cmp	dx,319
+	jg	@@12
+@@122:	add	di,bx
+	xor	ds:[di],al
+	shr	di,2
+	mov	byte ptr fs:[di],1
+	mov	di,dx
+	add	di,bx
+	xor	ds:[di],al
+	shr	di,2
+	mov	byte ptr fs:[di],1
+@@0:	add	bx,320
+	jmp	@@1
+@@2:	pop	ds
+	ret
+@@11:	mov	di,1
+	cmp	dx,1
+	jl	@@0
+	jmp	@@111
+@@12:	mov	dx,319
+	cmp	di,319
+	jg	@@0
+	jmp	@@122
+newgroup ENDP
+
+PUBLIC _initnewgroup
+_initnewgroup PROC FAR
+	CBEG
+	mov	ax,SEG newdata2
+	mov	ds,ax
+	mov	ax,-1
+	mov	ds:[8000h],ax
+	mov	ds:[8000h+4000h],ax
+	CEND
+_initnewgroup ENDP
+
+ALIGN 2
+dng_bgcolor	dw	0
+dng_rowbase	dw	0
+dng_random	dw	0
+dng_page	dw	8000h
+
+checkdword PROC NEAR
+	mov	edx,fs:[bx]
+	xor	eax,eax
+	mov	fs:[bx],eax ;=0
+	or	dl,dl
+	jnz	@@1
+@@1b:	or	dh,dh
+	jnz	@@2
+@@2b:	shr	edx,16
+	or	dl,dl
+	jnz	@@3
+@@3b:	or	dh,dh
+	jnz	@@4
+	ret
+@@4:	mov	al,dh
+	shl	eax,16
+	lea	ax,[bx+3]
+	mov	ds:[si],eax
+	add	si,4
+	ret
+@@3:	mov	al,dl
+	shl	eax,16
+	lea	ax,[bx+2]
+	mov	ds:[si],eax
+	add	si,4
+	jmp	@@3b
+@@2:	mov	al,dh
+	shl	eax,16
+	lea	ax,[bx+1]
+	mov	ds:[si],eax
+	add	si,4
+	jmp	@@2b
+@@1:	mov	al,dl
+	shl	eax,16
+	lea	ax,[bx]
+	mov	ds:[si],eax
+	add	si,4
+	jmp	@@1b
+checkdword ENDP
+
+PUBLIC _drawnewgroup
+_drawnewgroup PROC FAR
+	CBEG
+	LOADDS
+	cld
+	mov	dx,3c4h
+	mov	ax,0f02h
+	out	dx,ax
+	
+	;mov	ax,SEG newdata1
+	;mov	ds,ax
+	;xor	si,si
+	;mov	ax,0a000h
+	;mov	es,ax
+	;xor	di,di
+	;mov	cx,16000
+	;rep	movsd
+	
+	mov	ax,SEG newdata2
+	mov	es,ax
+	mov	ax,SEG newdata1
+	mov	fs,ax
+	xor	di,di
+	mov	ax,SEG newdata2
+	mov	ds,ax
+	mov	si,cs:dng_page
+	xor	si,4000h
+	mov	cs:dng_page,si
+
+	INT3	
+	mov	cx,4000
+@@9:	xor	eax,eax
+	repz	scasd
+	jcxz	@@10
+	lea	bx,[di-4]
+	mov	edx,es:[bx]
+	mov	es:[bx],eax ;=0
+	shl	bx,2
+	or	dl,dl
+	jz	@@c1
+	xchg	ebp,edx
+	call	checkdword
+	xchg	ebp,edx
+@@c1:	add	bx,4
+	or	dh,dh
+	jz	@@c2
+	xchg	ebp,edx
+	call	checkdword
+	xchg	ebp,edx
+@@c2:	add	bx,4
+	shr	edx,16
+	or	dl,dl
+	jz	@@c3
+	xchg	ebp,edx
+	call	checkdword
+	xchg	ebp,edx
+@@c3:	add	bx,4
+	or	dh,dh
+	jz	@@c4
+	xchg	ebp,edx
+	call	checkdword
+	xchg	ebp,edx
+@@c4:	jmp	@@9
+	;
+@@10:	mov	eax,-1
+	mov	ds:[si],eax
+	
+	setborder 4
+	
+	mov	ax,0a000h
+	mov	es,ax
+	xor	di,di
+	mov	si,cs:dng_page
+	mov	bx,si
+	xor	bx,4000h
+	xor	ax,ax
+	;si=new     bx=last
+	;cx=newpos  dx=lastpos
+	;al=newcol  ah=lastcol
+	mov	edx,ds:[bx]
+	add	bx,4
+	mov	ecx,ds:[si]
+	add	si,4
+	;
+@@21:	cmp	dx,cx
+	jb	@@23
+	je	@@22
+	;cx<dx
+	cmp	al,ah
+	je	@@31
+	push	cx
+	sub	cx,di
+	cmp	cx,4
+	jae	@@r1
+	rep	stosb
+	pop	cx
+@@31:	mov	di,cx
+	shr	ecx,16
+	xor	al,cl
+	mov	ecx,ds:[si]
+	add	si,4
+	jmp	@@21
+@@r1:	push	ax
+	mov	ah,al
+	test	di,1
+	jz	@@r11
+	dec	cx
+	stosb
+@@r11:	shr	cx,1
+	rep	stosw
+	adc	cx,cx
+	rep	stosb
+	pop	ax
+	pop	cx
+	jmp	@@31
+@@22:	;cx=dx
+	cmp	cx,-1
+	je	@@20
+@@23:	;dx<cx
+	cmp	al,ah
+	je	@@32
+	push	cx
+	mov	cx,dx
+	sub	cx,di
+	cmp	cx,4
+	jae	@@r2
+	rep	stosb
+	pop	cx
+@@32:	mov	di,dx
+	shr	edx,16
+	xor	ah,dl
+	mov	edx,ds:[bx]
+	add	bx,4
+	jmp	@@21
+@@r2:	push	ax
+	mov	ah,al
+	test	di,1
+	jz	@@r21
+	dec	cx
+	stosb
+@@r21:	shr	cx,1
+	rep	stosw
+	adc	cx,cx
+	rep	stosb
+	pop	ax
+	pop	cx
+	jmp	@@32
+@@20:	CEND
+_drawnewgroup ENDP

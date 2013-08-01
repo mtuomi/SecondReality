@@ -1,0 +1,123 @@
+;used for matrix inverses
+invmacro MACRO	row1,row2,col1,col2
+	mov	ax,es:[di+col1+row1*6]
+	imul	word ptr es:[di+col2*2+row2*6]
+	mov	cx,dx
+	mov	bx,ax
+	mov	ax,es:[di+col1*2+row2*6]
+	imul	word ptr es:[di+col2*2+row1*6]
+	sub	cx,dx
+	sbb	bx,ax
+	shld	ecx,bx,1+16
+	ENDM
+
+;entry: es:di=matrix1
+; exit: es:di=matrix1 (overwritten by it's inverse)
+invmatrix PROC NEAR
+	invmacro 1,2,1,2
+	push	ecx ;(0,0)
+	movsx	eax,es:[di+0*2+0*6]
+	imul	ecx
+	mov	esi,eax
+	invmacro 2,0,1,2
+	neg	ecx
+	push	ecx ;(1,0)
+	movsx	eax,es:[di+1*2+0*6]
+	imul	ecx
+	add	esi,eax
+	invmacro 0,1,1,2
+	push	ecx ;(2,0)
+	movsx	eax,es:[di+2*2+0*6]
+	imul	ecx
+	add	esi,edx
+	;si=determinant
+	
+	or	si,si
+	jnz	@@1
+	pop	cx
+	pop	cx
+	pop	cx
+	ret	;matrix can not be inversed
+@@1:
+	invmacro 1,2,0,2
+	neg	ecx
+	push	ecx ;(0,0)
+	invmacro 2,0,0,2
+	push	ecx ;(1,0)
+	invmacro 0,1,0,2
+	neg	ecx
+	push	ecx ;(2,0)
+	
+	invmacro 1,2,0,1
+	push	ecx ;(0,0)
+	invmacro 2,0,0,1
+	neg	ecx
+	push	ecx ;(1,0)
+	invmacro 0,1,0,1
+	push	ecx ;(2,0)
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+0*2+0*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+0*2+1*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+0*2+2*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+1*2+0*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+1*2+1*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+1*2+2*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+2*2+0*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+2*2+1*6],ax
+	
+	pop	dx
+	xor	ax,ax
+	sar	dx,1
+	rcr	ax,1
+	idiv	si
+	mov	es:[di+2*2+2*6],ax
+	
+	ret
+invmatrix ENDP

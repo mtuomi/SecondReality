@@ -1,0 +1,21 @@
+ao.exe : ao.c lfcp.c sfcp.c
+	cl /qc /AL ao.c /link /e
+
+vp.exe : vp.c
+	cl /qc /AL vp.c /link /e
+	copy vp.exe c:\dos\prg
+	
+col.exe : col.c
+	cl /qc /AL col.c /link /e
+	
+glvp.exe : glvp.c vpl.c lfcp.c sfcp.c gfxsave.h
+	cl /qc /AL glvp.c /link /e
+	copy glvp.exe c:\dos\prg
+	
+gfx.exe : gfx.c
+	cl /qc /AL gfx.c
+	copy gfx.exe c:\dos\prg
+		
+#  sp.exe : sp.c gfxsave.h
+# 	cl /qc /AL sp.c /link /E
+	

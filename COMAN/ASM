@@ -1,0 +1,158 @@
+PUBLIC _docol,_docolset
+
+PUBLIC _docol_mapc,_docol_maph,_docol_ycd
+PUBLIC _docol_hig,_docol_higr,_docol_higrr,_docol_higrrr
+PUBLIC _docol_bailout,_docol_debug
+PUBLIC _docol_avg
+
+BAILOUT equ 256
+
+ALIGN 16
+_docol_hig  dd 256 dup(0)
+_docol_higr dd 256 dup(0)
+_docol_higrr dd 256 dup(0)
+_docol_higrrr dd 256 dup(0)
+_docol_ycd dd	200 dup(0)
+_docol_bailout dw BAILOUT
+_docol_mapc dw	0,0
+_docol_maph dw	0,0
+_docol_avg dw	0,0
+_docol_debug dd	0
+
+_docolset PROC FAR
+	CBEG
+	movpar	ax,0
+	mov	cx,(slf1-slf0)/BAILOUT
+	mul	cx
+	add	ax,OFFSET slf0
+	mov	bx,ax
+	movpar	ax,1
+	movpar	dx,2
+	mov	cs:[bx+10+2],ax
+	mov	cs:[bx+10+4],dx
+	CEND
+_docolset ENDP
+
+public _doavg
+_doavg PROC FAR
+	CBEG
+	mov	ax,SEG _vbuf
+	mov	es,ax
+	mov	ds,cs:_docol_avg[2]
+	movpar	di,0
+
+	add	di,80*320
+	mov	cx,200-80
+@@1:	mov	bl,es:[di]
+	diadd=2
+	REPT	159
+	mov	bh,es:[di+diadd]
+	mov	al,ds:[bx]
+	mov	bl,bh
+	mov	es:[di+diadd-1],al
+	diadd=diadd+2
+	ENDM
+	add	di,320
+	dec	cx
+	jz	@@2
+	jmp	@@1
+@@2:
+	CEND
+_doavg ENDP
+
+_docol PROC FAR
+	CBEG
+	mov	ax,cs
+	mov	ds,ax
+
+	push	bp ;store C parameter start
+	
+	mov	fs,ds:_docol_maph[2]
+	mov	gs,ds:_docol_mapc[2]
+	
+	movpar	ax,1
+	shl	ax,7
+	movpar	si,0
+	movzx	esi,si
+	add	si,ax ;basepos
+	
+	xor	ebx,ebx
+	;movpar	ax,3 ;screen pos
+	;and	ax,3
+	;mov	bh,al ;scatterer
+
+	movpar	dx,2
+	movsx	edx,dx
+	shl	edx,7
+	rol	edx,16
+	mov	bp,dx
+	add	bp,-128 ;baseadd
+	xor	dx,dx
+
+	;selfmod: vram/pos, docol_ycd/pos
+	;eax	-	-
+	;ebx	indexer-tmp (+scatterpos)
+	;ecx	-	-
+	;edx	xaddl	0
+	;esi	xl	x
+	;edi	-	-
+	;ebp	-	xaddh
+	;ds		code
+	;es		-
+	;fs		maph
+	;gs		mapc
+	diadd=OFFSET slf0
+	REPT	BAILOUT
+	and	si,16383
+	mov	bl,fs:[si]
+	mov	eax,ds:_docol_hig[ebx*4]
+	mov	dword ptr ds:[diadd+0+2],eax ;set compare
+	add	esi,edx
+	mov	al,gs:[si]
+	mov	byte ptr ds:[diadd+8+1],al ;set color
+	adc	si,bp
+	diadd=diadd+(slf1-slf0)/BAILOUT
+	ENDM
+	
+	jmp	@@flsh
+@@flsh:	pop	bp ;restore C parameter start
+
+	mov	ax,SEG _vbuf
+	mov	es,ax
+	movpar	ax,3
+	mov	bp,ax
+	mov	di,OFFSET _docol_ycd+199*4
+	mov	ecx,ds:[di]
+	xor	eax,eax
+	
+	;selfmod: vram/pos, docol_ycd/pos
+	;eax	yc	ycl
+	;ebx	-	-
+	;ecx	ycaddh	ycaddl
+	;edx	-	-
+	;esi	-	-
+	;edi	-	offset to ycd
+	;ebp	-	offset to vram
+	;ds		code
+	;es		vram
+	
+	int	3
+	
+slf0:	siadd=0
+	REPT BAILOUT
+	local	l1,l2,l3
+l3:	cmp	eax,12345678h			;@0  compare ray / scene
+	jge	short l1			;@6  hit?
+	mov	cl,12h				;@8  load color
+l2:	sub	eax,12345678h			;@10 adjust next ray pos
+	mov	es:[bp+0],cl			;    store color
+	sub	di,4				;    adjust raytable pointer
+	sub	bp,320				;    next screen pos
+	cmp	dword ptr ds:l3[2],eax		;    next ray hits too?
+	jge	short l2			;    yup.
+	mov	ecx,ds:[di]			;    next ray direction
+l1:	add	eax,ecx				;    on we go in Z
+	siadd=siadd+4
+	ENDM
+slf1:	CEND
+_docol ENDP

@@ -1,0 +1,65 @@
+ÛßßßßßßßßßßßßßßßßßßÛ	+ Big routine ('demo part')	T Trug
+Û Unreal 2 - Ideas Û	- Small routine			W Wildfire
+ÛÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÛ	? Depends			P Psi
+Note: This is not a list of what WILL be in the demo, but a list of what
+could be in the demo. Some parts won't be finished in time (surprise!?)
+and some will be rejected later after experimenting.... 
+		
+================ Fully implemented (ready to use in demo):
+(none...)
+
+================ Partially implemented:
++ Shadow / 3DS mountain scroller [T]
++ Mirror / 3DS mirrorball scroller [T]
++ 256 color lightsourced glenz [P]
+  - transform
+  - background piccy fadein
++ Minivectorballdots [P]
+  - transform	
+  - bounce
+  - reverse-bounce (nice)
++ rotating dot-tunnel [T]
++ Desert Dreams' Stars [P]
+- Dotcuberise with colorfade [P]
+- Lens [P]
+- WaterLens [P]
+- Lightning routine [P]
+- Dotpicture metamorph (logos) [P]
++ Plasma cube [W]
+- Techno part
+  - interference with sinus
+  - 8 times interleaved rotating delay bars (what a name) [P]
+- Sinuslines (good old ones) [P]
+- Shadebobs (really, I did optimize 'em :-) [P]
++ Infiniteworm (noerase/8 planes) [P]
++ Optimized '3D' sinusworm [T]
+
+================ Being experimented with:
++ Faster Comanche; canyon/cave [P]
+- 4 bitplane interference smoke (sounds nice, eh?-) [T]
+- rectangular interference => Techno part [P] 
+? Shaded tunnel with holes (3DS) [W]
+
+================ Just ideas:
+? glass cube [W]
+- rotating dotcannon with distancefade and collisions to walls [P]
+- 2D jelloblock with delay (blue screen bg)
+
+================ Track transition ideas:
+- Panic style end, then continues from the dot with explosion!
+- Screen sliced in half from top to bottom, both sides fall to
+  left/right.                /\
+- Screen divided to vertical \/-bars (3d/offset=0) which start to 
+  rotate faster and faster...
+  
+================ Vector world:
+- biiiig zoom from space to a house (nice idea trug, easy to implement :-)
+- zoom from vector world to monitor containing demo effects and finally
+  back
+- jellyforest (line/ega/precalced spring movement) [P]
+- fast flying between a huge grid of big cubes. Semitexture if possible [P]
+  Going very close sometimes -almost- hitting the walls
+
+================ Rejected?:
+- Whirpool [P]
+
