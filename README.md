@@ -3,7 +3,7 @@ SecondReality
 
 Source code and data of Second Reality by Future Crew in 1993
 
-This release is made to celebreate the 20th anniversary of the demo.
+This release is made to celebrate the 20th anniversary of the demo.
 
 Wikipedia links :
 
