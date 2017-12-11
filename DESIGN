@@ -1,218 +1,218 @@
-		S:E:C:O:N:D:::R:E:A:L:I:T:Y:
+        S:E:C:O:N:D:::R:E:A:L:I:T:Y:
 
 [leffamusaa]
 
-- Setup screeni grafiikkatilaan, joka nÑyttÑÑ tekstiltÑ
-- Kun stuhvit valittu, lentÑÑ polygoniface kohti katsojaa muuttaen
+- Setup screeni grafiikkatilaan, joka n√§ytt√§√§ tekstilt√§
+- Kun stuhvit valittu, lent√§√§ polygoniface kohti katsojaa muuttaen
   ruudun valkoiseksi
 - hidas fade mustaksi
 - leffatyylitekstit mustalla
 
 "            A
-"	FUTURE CREW
-"	production
-	
-"	First presented at
-"	Assembly '93 
-	
-	fade leveÑÑn horisonttikuvaan 960x480
-	^himmeÑ reunoilta, widescreen (35mm-70mm)
-	kuva alkaa scrollata hitaasti vasemmalle
-	tekstit pÑÑllÑ,eivÑt scrollaa
-	
+"   FUTURE CREW
+"   production
+    
+"   First presented at
+"   Assembly '93 
+    
+    fade leve√§√§n horisonttikuvaan 960x480
+    ^himme√§ reunoilta, widescreen (35mm-70mm)
+    kuva alkaa scrollata hitaasti vasemmalle
+    tekstit p√§√§ll√§,eiv√§t scrollaa
+    
 "       Graphics by ...
 
-	jyrinÑ alkaa voimistua hiljalleen (surround)
-	
+    jyrin√§ alkaa voimistua hiljalleen (surround)
+    
 "       Music by ...
 
-	...
-	
-	Music By:n kohdassa ylimassiivista musaa
-	ja ylisiistiÑ grafua.. jokapuolella
-	vÑlkkyy Purple Motion ja tÑmÑn jÑlkeen
-	infraÑÑni ylitse muiden hajoittaa kaiuttimet
-	ja kaikki koulun ikkunat.. loppujen lopuksi
-	partylaisten sydÑmet tahdistuvat bassobeatin tahtiin
-	ja kun sitten musiikki epÑtahdistuu, koko demoscene saa
-	yhden ison sydÑnkohtauksen ja kuolee pois..
-	lopulta demokone rÑjÑhtÑÑ ja sytyttÑÑ koko koulun tuleen
-	ja hÑvittÑÑ nÑin kaiken todistusaineiston..
-	
+    ...
+    
+    Music By:n kohdassa ylimassiivista musaa
+    ja ylisiisti√§ grafua.. jokapuolella
+    v√§lkkyy Purple Motion ja t√§m√§n j√§lkeen
+    infra√§√§ni ylitse muiden hajoittaa kaiuttimet
+    ja kaikki koulun ikkunat.. loppujen lopuksi
+    partylaisten syd√§met tahdistuvat bassobeatin tahtiin
+    ja kun sitten musiikki ep√§tahdistuu, koko demoscene saa
+    yhden ison syd√§nkohtauksen ja kuolee pois..
+    lopulta demokone r√§j√§ht√§√§ ja sytytt√§√§ koko koulun tuleen
+    ja h√§vitt√§√§ n√§in kaiken todistusaineiston..
+    
 "       Code by ...
-	
-	jyrinÑ ns. tÑysillÑ
-	suuri vektorialus lentÑÑ yli, pohjassa erikoisdetailia
-	500 polygonia
-	lentÑÑ horisonttiin lujaa
-	vÑlÑhtÑÑ rengasvallina, kuten Startrek VI:n alussa Praxis
-	vÑlÑhdys kasvaa ja lentÑÑ kohti katsojaa (surround)
-	ruutu vÑlÑhtÑÑ
+    
+    jyrin√§ ns. t√§ysill√§
+    suuri vektorialus lent√§√§ yli, pohjassa erikoisdetailia
+    500 polygonia
+    lent√§√§ horisonttiin lujaa
+    v√§l√§ht√§√§ rengasvallina, kuten Startrek VI:n alussa Praxis
+    v√§l√§hdys kasvaa ja lent√§√§ kohti katsojaa (surround)
+    ruutu v√§l√§ht√§√§
 [pamaus, technoksi]
-	nopea fade, ensin logo mustavalkoiseen ja sitten vÑrit.
-	
-	ruutu pyîrÑhtÑÑ ympÑri (precalc alkutekstien aikana)
-	
-	45 asteen kÑÑnnîs, lopuksi nÑkyy vain ruudun 'reuna'
-	
-	toiselle puolelle levyÑ 8 vÑrin kuvio
-	
-	taso laskeutuu alaspÑin jolloin pÑÑllÑ oleva kuva paljastuu
-	
-	jellyglenz tippuu (precalc)
-	
-	kun glenzi pysÑhtyy, shakkilauta laskeutuu pois ruudusta,
-	glenz pysyy paikallaan.
-	
-	toinen glenz tulee ruutuun korvaten shakkilaudan vÑrit
-	
-	toinen glenzi lentÑÑ pois
+    nopea fade, ensin logo mustavalkoiseen ja sitten v√§rit.
+    
+    ruutu py√∂r√§ht√§√§ ymp√§ri (precalc alkutekstien aikana)
+    
+    45 asteen k√§√§nn√∂s, lopuksi n√§kyy vain ruudun 'reuna'
+    
+    toiselle puolelle levy√§ 8 v√§rin kuvio
+    
+    taso laskeutuu alasp√§in jolloin p√§√§ll√§ oleva kuva paljastuu
+    
+    jellyglenz tippuu (precalc)
+    
+    kun glenzi pys√§htyy, shakkilauta laskeutuu pois ruudusta,
+    glenz pysyy paikallaan.
+    
+    toinen glenz tulee ruutuun korvaten shakkilaudan v√§rit
+    
+    toinen glenzi lent√§√§ pois
 
-	toinen pienenee ruudun keskelle
-	
-	ympÑrille tulee trugin dottitunneli (lineblit?)
+    toinen pienenee ruudun keskelle
+    
+    ymp√§rille tulee trugin dottitunneli (lineblit?)
 
-	slerssin tunneli perÑÑn
+    slerssin tunneli per√§√§n
 
-	MCGA=>EGA
-	
-	teknopartti
-	
-	lopulta kolme vinoa palkkia jÑÑ ruutuun. reunimmaiset
-	scrollaavat pois, keskimmÑinen muuttu 2D vektorianimaatioksi
-	ala SpaceBalls (delaylla). Animaation aihe on: paikallaan 
-	juokseva kissa (autodeskistÑ). Animaation morphautuessa
-	neliîstÑ tulee schhrlurchtsphssht ÑÑniefekti. Kissa 
-	juoksee paikallaan ja zoomatuu, kun sopivan kokeinen,
-	stensiloituu kivasti.
+    MCGA=>EGA
+    
+    teknopartti
+    
+    lopulta kolme vinoa palkkia j√§√§ ruutuun. reunimmaiset
+    scrollaavat pois, keskimm√§inen muuttu 2D vektorianimaatioksi
+    ala SpaceBalls (delaylla). Animaation aihe on: paikallaan 
+    juokseva kissa (autodeskist√§). Animaation morphautuessa
+    neli√∂st√§ tulee schhrlurchtsphssht √§√§niefekti. Kissa 
+    juoksee paikallaan ja zoomatuu, kun sopivan kokeinen,
+    stensiloituu kivasti.
 
-	taukoa, kuva muuttuu dotiksi kuten panicin lopussa, musa
-	loppuu.
-	
-	tauko (15 sec etc)
-	EGA=>MCGA
-	
+    taukoa, kuva muuttuu dotiksi kuten panicin lopussa, musa
+    loppuu.
+    
+    tauko (15 sec etc)
+    EGA=>MCGA
+    
 [musa muuttuu]
-		
-	avaruusvektoripartti.	
+        
+    avaruusvektoripartti.   
 
-	dotin kohdasta lentÑÑ vektoriobjekti (sama kuin alku)
+    dotin kohdasta lent√§√§ vektoriobjekti (sama kuin alku)
 
-	objektin perÑstÑ tulevat tÑhdet (out of hyperspace style)
+    objektin per√§st√§ tulevat t√§hdet (out of hyperspace style)
 
-	objekti kaartaa katsojan ympÑri (surround kierto) 
-	
-	kamera menee trackkaamaan
-	
-	kamera menee asteroidin pinnalle (leikkaus)
-	asteroidin pinnalla kamera paikallaan (horisonttibitmap)
-	
-	laukaistaan kahta erilaista hyîkkÑysalusta
-	
-	kamera takaisin ison alukseen, kulmasta jossa asteroidi/alukset
-	nÑkyvÑt taustalla (asteroidi bitmap)
-	
-	hyîkkÑÑjÑt lÑhestyvÑt
-	
-	kamera katsoo omaa alusta hyîkkÑÑjien takaa
-	
-	kamera siirtyy oman aluksen sivulta
-	
-	laukaistaan puolustajat
-	
-	kaukaa kuva kun alukset lÑhestyvÑt
-	
-	alkaa taistelu. trackkaillan omia aluksia, omat ampuvat Xwing
-	tyylisiÑ paukkuja, vÑlillÑ paikallaan olevaa kuvaa kauempaa.
-	(unrealin vektoripartin tyyppistÑ nopeaa)
+    objekti kaartaa katsojan ymp√§ri (surround kierto) 
+    
+    kamera menee trackkaamaan
+    
+    kamera menee asteroidin pinnalle (leikkaus)
+    asteroidin pinnalla kamera paikallaan (horisonttibitmap)
+    
+    laukaistaan kahta erilaista hy√∂kk√§ysalusta
+    
+    kamera takaisin ison alukseen, kulmasta jossa asteroidi/alukset
+    n√§kyv√§t taustalla (asteroidi bitmap)
+    
+    hy√∂kk√§√§j√§t l√§hestyv√§t
+    
+    kamera katsoo omaa alusta hy√∂kk√§√§jien takaa
+    
+    kamera siirtyy oman aluksen sivulta
+    
+    laukaistaan puolustajat
+    
+    kaukaa kuva kun alukset l√§hestyv√§t
+    
+    alkaa taistelu. trackkaillan omia aluksia, omat ampuvat Xwing
+    tyylisi√§ paukkuja, v√§lill√§ paikallaan olevaa kuvaa kauempaa.
+    (unrealin vektoripartin tyyppist√§ nopeaa)
 
-	ensin yksi vihollinen ohjuksella
+    ensin yksi vihollinen ohjuksella
 
-	yksi omista tuhoutuu, musa ottaa huomioon, tauko
-	
-	viholliset tuhoutuvat kaikki lÑhes samaan aikaan.
-	
-	hÑvittÑjÑ vetÑÑ voltit kohti kameraa 
-	
-	musa rauhallistuu, kuva kaukaa, iso alus lentÑÑ kohti
-	
-	fade mustaan
-	
+    yksi omista tuhoutuu, musa ottaa huomioon, tauko
+    
+    viholliset tuhoutuvat kaikki l√§hes samaan aikaan.
+    
+    h√§vitt√§j√§ vet√§√§ voltit kohti kameraa 
+    
+    musa rauhallistuu, kuva kaukaa, iso alus lent√§√§ kohti
+    
+    fade mustaan
+    
 [musa demoistuu,ei teknoksikuitenkaan...]
 
-	peiliscroll
-	- shakkilauta fadetaan kivasti
-	- pallo laskeuttuu
-	- scrolli alkaa "we have something to say"
-	
-	- pallo vÑlÑhtÑÑ dottipalloksi
-	- dottipallo leveÑÑ uudunkokoiseksi
-	- pisteet tasaiseksi gridiksi 
-	- pisteet paisuvat tÑyttÑen taustan valkoiseksi
+    peiliscroll
+    - shakkilauta fadetaan kivasti
+    - pallo laskeuttuu
+    - scrolli alkaa "we have something to say"
+    
+    - pallo v√§l√§ht√§√§ dottipalloksi
+    - dottipallo leve√§√§ uudunkokoiseksi
+    - pisteet tasaiseksi gridiksi 
+    - pisteet paisuvat t√§ytt√§en taustan valkoiseksi
 
-	MCGA=>EGA
-	 
-	desert dream stars
- 	- loppuu siten ettÑ vektoricube lentÑÑ kohti ja tÑyttÑÑ ruudun
- 	- cube on lightsource siten ettÑ musta kameraan pÑin
-	- ruutu lopuksi musta
-	
-	smoke
-	- hetkellinen 
+    MCGA=>EGA
+     
+    desert dream stars
+    - loppuu siten ett√§ vektoricube lent√§√§ kohti ja t√§ytt√§√§ ruudun
+    - cube on lightsource siten ett√§ musta kameraan p√§in
+    - ruutu lopuksi musta
+    
+    smoke
+    - hetkellinen 
 
-	EGA=>MCGA
+    EGA=>MCGA
  
-	Sinuslines 3D
-	- mustalla ruuulla kamera kÑÑntyile
-	- alkaa tyhjÑstÑ, pituus kasvaa
-	- poistuu menemÑllÑ alhaalta ulos
+    Sinuslines 3D
+    - mustalla ruuulla kamera k√§√§ntyile
+    - alkaa tyhj√§st√§, pituus kasvaa
+    - poistuu menem√§ll√§ alhaalta ulos
 
- 	Siisti kuva!
-	- kuva tippuu desert dreams tyyliin
-	- tauko
-	
-	Linssi
-	- pomppii ohi
-	- kaksi pomppua maahan
-	- 3 vÑri shade
-	- kuva fadeautuu valkoiseksi	
+    Siisti kuva!
+    - kuva tippuu desert dreams tyyliin
+    - tauko
+    
+    Linssi
+    - pomppii ohi
+    - kaksi pomppua maahan
+    - 3 v√§ri shade
+    - kuva fadeautuu valkoiseksi    
 
-	Fullscreen kouru
-	- fadeautuu valkoisesta
-	Plasmacube
-	- ilmestyy ylÑreunaan
-	- menee keskelle
-	- kouru loppuu
-	- cube suurenee
-	- cube tuplaantuu
-	- lopputulos musta ruutu
+    Fullscreen kouru
+    - fadeautuu valkoisesta
+    Plasmacube
+    - ilmestyy yl√§reunaan
+    - menee keskelle
+    - kouru loppuu
+    - cube suurenee
+    - cube tuplaantuu
+    - lopputulos musta ruutu
 
-	- kamera laskeutuu alaspÑin jolloin minivectorballsin lattia
-	  ilmestyy
-	Minivectorballs
-	- kaikkea kivaa
-	- pomppuja etc
-	
-	Vuoriscroll
-	- vuori nousee minivectorballsin tason lÑpi
-	- scrolli ilmesty
+    - kamera laskeutuu alasp√§in jolloin minivectorballsin lattia
+      ilmestyy
+    Minivectorballs
+    - kaikkea kivaa
+    - pomppuja etc
+    
+    Vuoriscroll
+    - vuori nousee minivectorballsin tason l√§pi
+    - scrolli ilmesty
 
-	Comanche canyon (water waves)
-	- aaltoileva merenpinta, kamera kiertÑÑ
-	- kamera nousee
-	- taivas tummene
-	
+    Comanche canyon (water waves)
+    - aaltoileva merenpinta, kamera kiert√§√§
+    - kamera nousee
+    - taivas tummene
+    
 [leffamusaa]
 
-	Uusi kuvakulma tÑhdillÑ ja alun aluksella
-	
-	
-	
+    Uusi kuvakulma t√§hdill√§ ja alun aluksella
+    
+    
+    
 -- Thanks for watching + lopputekstit --
 
 other ideas:
 ;uusi vuosi bang
-;pyîrivÑ tulisuihku joka polttaa maan ympÑriltÑ)
+;py√∂riv√§ tulisuihku joka polttaa maan ymp√§rilt√§)
 ;shadebobs
 ;2D jelloblock
 ;dotcuberise
