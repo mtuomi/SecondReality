@@ -38,7 +38,7 @@ MARVEL	Loppuscrollifontti		PSI?	320x400	?	16aa	-
 MARVEL	AlkuHorisontti (widescreen)	WILDF	320x200	640x150	63	-
 MARVEL	Siisti kuva 2 (lens/zoomer)	PSI	320x200	256x200	63	-
 MARVEL	FC-logo (loppuun)		PSI	320x400	320x400	127	-
-TRUG	Praxis rÑjÑhdys 		WILDF	320x200 320x200	255	80
+TRUG	Praxis r√§j√§hdys 		WILDF	320x200 320x200	255	80
 MARVEL	Siisti 3				320x400 200x400	63	-
 [1] tausta puuttuu
 
@@ -48,76 +48,76 @@ MARVEL	Siisti 3				320x400 200x400	63	-
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PSI	Setup screen
- 	- grafiikkatilassa (mutta nÑyttÑÑ tekstiltÑ)
-	- kun kaikki valittu, lentÑÑ face kohti ruutua ja jymÑhtÑÑ siihen
-	- hidas fade mustaksi facen vÑristÑ
+ 	- grafiikkatilassa (mutta n√§ytt√§√§ tekstilt√§)
+	- kun kaikki valittu, lent√§√§ face kohti ruutua ja jym√§ht√§√§ siihen
+	- hidas fade mustaksi facen v√§rist√§
 	
 (music) Leffatyylimusat
 
 WILDF	Alkutekstit I
 	- mustalle fadeaa yksinkertaisella leffafontilla 
-PIXEL 	  [fontti 3 vÑriÑ]
+PIXEL 	  [fontti 3 v√§ri√§]
 	"A FUTURE CREW production" [fade=>black]
 	"First presented at Assembly '93" [fade=>black]
 	[fade=>horisonttikuva]
 MARVEL	[ Horisonttikuva on 320x400 resoluutiossa widescreen.
-	  Itse kuva kooltaan 640x300 pikseliÑ. ]
+	  Itse kuva kooltaan 640x300 pikseli√§. ]
 	- Kuvaa scrollataan taustalla hitaasti vasemmalle, seuraavat
-	  tekstit fadetaan kuvan pÑÑlle
+	  tekstit fadetaan kuvan p√§√§lle
 	"Graphics by ..." [xfade]
-(sfx)	- Surround jyrinÑ voimistuu hiljalleen (takaa, surround)
+(sfx)	- Surround jyrin√§ voimistuu hiljalleen (takaa, surround)
 	"Music by ..." [xfade]			
-	- JyrinÑ nyt voimakasta (ja korkeaa) 
-	  (alus tulossa takaa (huom! doppler ilmiî!))
+	- Jyrin√§ nyt voimakasta (ja korkeaa) 
+	  (alus tulossa takaa (huom! doppler ilmi√∂!))
 	"Code by ..." [xfade]
 	
 PSI	Alkutekstit II (Vector Part 0)
-?	- Takaa lentÑÑ ylisuuri 'massiivi' alus kohti horisonttia
+?	- Takaa lent√§√§ ylisuuri 'massiivi' alus kohti horisonttia
 	  (alus yksinkertaisen muotoinen, mutta paljon detailia yms.
 	  esim textureilla)
-(sfx)	- Aluksen ohilentoÑÑnet
-	- Alus kiihdyttÑÑ lujaa kohti horisonttia
+(sfx)	- Aluksen ohilento√§√§net
+	- Alus kiihdytt√§√§ lujaa kohti horisonttia
 	- lopulta alus on pikselin kokoinen
 
 TRUG	Alkutekstit III
-	- Kun se pienenee pikselin kokoiseksi rÑjÑhtÑÑ piste (Praxis style)
-TRUG	- RÑjÑhdysvalli etenee kohti katsojaa (flic)
-	- vallin osuessa katsojaan ruutu jÑÑ valkoiseksi
+	- Kun se pienenee pikselin kokoiseksi r√§j√§ht√§√§ piste (Praxis style)
+TRUG	- R√§j√§hdysvalli etenee kohti katsojaa (flic)
+	- vallin osuessa katsojaan ruutu j√§√§ valkoiseksi
 	- Valkoisesta fadeaa ensin mustavalkoisena demon logo
 PIXEL	[ Logo on 320x200x256, valkotaustainen ]
-	- Logoon fadeautuvat vÑrit
+	- Logoon fadeautuvat v√§rit
 
-(music)	Teknomaista trackkiÑ
+(music)	Teknomaista trackki√§
 
 PSI	Glenz part 
-	- ruutu kÑÑntyy alaspÑin keskustansa ympÑri (precalc logon aikana)
-	  jolloin alkuperÑinen logo jÑÑ kÑÑntvÑn levyn alle
-	- lopulta nÑkyy vain blokin reuna jonka alapuolella logo oli
-PIXEL	- blokin ylÑpuolella on 1 vÑrinen simppeli muoto (smoothattu
+	- ruutu k√§√§ntyy alasp√§in keskustansa ymp√§ri (precalc logon aikana)
+	  jolloin alkuper√§inen logo j√§√§ k√§√§ntv√§n levyn alle
+	- lopulta n√§kyy vain blokin reuna jonka alapuolella logo oli
+PIXEL	- blokin yl√§puolella on 1 v√§rinen simppeli muoto (smoothattu
 	  fadella)
 	- blokki pomppii alas
-	- blokin pÑÑlle tippuu glenzi (precalcattu jello)
-	- kun glenzi on pysÑhtynyt, levy laskeutuu alas ja vain glenzi 
-	  jÑÑ ruutuun
-	- glenzi alkaa pyîriÑ
-	- sen sisÑlle fadeautuu toinen glenzi
-	- molemmat pyîrivÑt
+	- blokin p√§√§lle tippuu glenzi (precalcattu jello)
+	- kun glenzi on pys√§htynyt, levy laskeutuu alas ja vain glenzi 
+	  j√§√§ ruutuun
+	- glenzi alkaa py√∂ri√§
+	- sen sis√§lle fadeautuu toinen glenzi
+	- molemmat py√∂riv√§t
 	- ulommainen suurenee yli ruudun
-	- pienempi jÑÑ keskelle 'valonlÑhteeksi'
+	- pienempi j√§√§ keskelle 'valonl√§hteeksi'
 	
 TRUG	Dottunnel
-	- glenzin ympÑrille tulee dottitunneli
-	- lopuksi tunneli himmenee valonlÑhteen mukana
+	- glenzin ymp√§rille tulee dottitunneli
+	- lopuksi tunneli himmenee valonl√§hteen mukana
 	- eli siis musta ruutu 
 
 PSI	Interferenssi
 	- EGA tilaan
 
 PSI	Techno
-	- teknobaarit pyîrivÑt jne.
+	- teknobaarit py√∂riv√§t jne.
 	- lopuksi vauhti kiihtyy, kunnes
 (sfx)	- pamahdus
-	- ruutu pysÑhtyy (vÑlÑhtÑÑ samalla)
+	- ruutu pys√§htyy (v√§l√§ht√§√§ samalla)
 	- hetken paikallaan
 	- MCGA tweakkiin
 PIXEL	- siisti kuva [320x400x256]
@@ -126,7 +126,7 @@ WILDF	- panic style: ruutu pienenee pisteeksi ja musa samalla sammahtaa
 	- Taukoa noin 5 sec.
 
 TRUG	MountainScroll
-	- puut ilmestyvÑt
+	- puut ilmestyv√§t
 	- scrolli fadeaa
 	- scrolli scrollaa yli
 	[ scrolli on kuva 320x31 joka on jokin logo]
@@ -134,22 +134,22 @@ TRUG	MountainScroll
 
 PSI	Lens
 MARVEL	[ 320x400x64 siisti kuva]
-	- linssi (3 vÑrin varjostus) pomppii pari kertaa
+	- linssi (3 v√§rin varjostus) pomppii pari kertaa
 
 PSI	Rotazoomer
-	- zoomaillaan ja pyîritellÑÑn linssikuvaa
+	- zoomaillaan ja py√∂ritell√§√§n linssikuvaa
 	- kuva fadeautuu valkoiseksi
 
 WILDF	Plasma
 
 WILDF	Plasmacube
-	- plasmacube on harmaan horisonttitason pÑÑllÑ (siis myîs varjo)
-	- pyîrii etc kivaa
-	- lentelee ympÑri
+	- plasmacube on harmaan horisonttitason p√§√§ll√§ (siis my√∂s varjo)
+	- py√∂rii etc kivaa
+	- lentelee ymp√§ri
 	- kahdentuminen?
 
 PSI	MiniVectorBalls
-	- kaikkea kivaa, suihkulÑhde jne...
+	- kaikkea kivaa, suihkul√§hde jne...
 	- pomppuja
 	- poistuvat pomppien/kulkien/etc
 
@@ -157,9 +157,9 @@ TRUG	Raytrace Scroll
 	- vesisinus ja peilipallo + tietty scrolli
 
 PSI	Comanche = 3D-Sinusfield
-	- fade ?sinisestÑ efektiin
+	- fade ?sinisest√§ efektiin
 	- aaltoileva aavikonpinta
-	- lopulta kamera nousee ylîspÑin ja efekti himmenee mustaksi
+	- lopulta kamera nousee yl√∂sp√§in ja efekti himmenee mustaksi
 
 PSI	Jellykuva (MARVEL)
 	
@@ -174,8 +174,8 @@ PIXEL	Loppukuva = FC-Logo
 ?	EndScroller
 	- 320x400x256
 MARVEL	[ fontti 12x24x32 ]
-	- creditseistÑ pienet kuvat scrollaavat
-	- greetingsit ja muut mîlinÑt
+	- creditseist√§ pienet kuvat scrollaavat
+	- greetingsit ja muut m√∂lin√§t
 	
 SOME1	The End
 	- dossiin tai looppi (alussa valittavissa)

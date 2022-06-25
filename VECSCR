@@ -3,92 +3,92 @@
 +=code -=3DS
 	
 + Ruutu on musta
-+ T„hdet v„l„ht„v„t ja avaruus leimahtaa (=back from hyperspace)
-- Alus suhahtaa vauhdilla kameran alta poisp„in jarruttaen.
-  (nopeus on per„isin hyperspacesta poistumisesta)
-- Alus pys„htyy kun se on noin nelj„sosaruudun kokoinen.
-+ Taustalla (aluksen edessa = aluksen osittain peitt„m„n„) n„kyy paljon 
++ TÃ¤hdet vÃ¤lÃ¤htÃ¤vÃ¤t ja avaruus leimahtaa (=back from hyperspace)
+- Alus suhahtaa vauhdilla kameran alta poispÃ¤in jarruttaen.
+  (nopeus on perÃ¤isin hyperspacesta poistumisesta)
+- Alus pysÃ¤htyy kun se on noin neljÃ¤sosaruudun kokoinen.
++ Taustalla (aluksen edessa = aluksen osittain peittÃ¤mÃ¤nÃ¤) nÃ¤kyy paljon 
   pikku aluksia (=polygoneja) Niihin sinus/spline kaukana
 - 3 sec paikallaan
-- kamera kiert„„ kerran aluksen ymp„ri oikealta stylesti (yl„puolelta)
-- kamera lopulta samassa suunnassa kuin alunperin, mutta l„hemp„n„
+- kamera kiertÃ¤Ã¤ kerran aluksen ympÃ¤ri oikealta stylesti (ylÃ¤puolelta)
+- kamera lopulta samassa suunnassa kuin alunperin, mutta lÃ¤hempÃ¤nÃ¤
 
-- kamera paikallaan ison aluksen p„„ll„ l„hell„ sen pintaa (n„kyy vain
-  pala pintaa jossa tutka-antenni, joka py”rii, sek„ taustalla avaruutta,
-  jonka ep„keskell„ erottuu juuri oma alus)
-- antenni osoittaa aluksi suoraan eteenp„in (=oikealle omasta aluksesta) 
-  kokoajan tasaisella nopeudella py”rien. Antenni on oikeassa
+- kamera paikallaan ison aluksen pÃ¤Ã¤llÃ¤ lÃ¤hellÃ¤ sen pintaa (nÃ¤kyy vain
+  pala pintaa jossa tutka-antenni, joka pyÃ¶rii, sekÃ¤ taustalla avaruutta,
+  jonka epÃ¤keskellÃ¤ erottuu juuri oma alus)
+- antenni osoittaa aluksi suoraan eteenpÃ¤in (=oikealle omasta aluksesta) 
+  kokoajan tasaisella nopeudella pyÃ¶rien. Antenni on oikeassa
   alakulmassa.
 - kun antenni on tehnyt vajaan kierroksen ja osoittaa kohti omaa alusta,
-  se pys„htyy
+  se pysÃ¤htyy
 - 1 sec tauko
-- antenni alkaa taas p”yri„
-- viisi vihollisalusta lent„v„t kameran takaa l„helt„ surroundina vasemmasta
+- antenni alkaa taas pÃ¶yriÃ¤
+- viisi vihollisalusta lentÃ¤vÃ¤t kameran takaa lÃ¤heltÃ¤ surroundina vasemmasta
   reunasta kohti omaa alusta 
-- kamera l„htee seuraamaan
-- lennet„„n noin 2 sec
-- alukset siirtyv„t muodostelmaan
+- kamera lÃ¤htee seuraamaan
+- lennetÃ¤Ã¤n noin 2 sec
+- alukset siirtyvÃ¤t muodostelmaan
 
-- yleiskuva jossa n„kyv„t sek„ muodostelma ett„ iso alus
+- yleiskuva jossa nÃ¤kyvÃ¤t sekÃ¤ muodostelma ettÃ¤ iso alus
 - kamera taas muodostelman taakse, muodostelma hajoaa
-- johtoalus j„„ taakse (eli kamera suhahtaa sen yli)
-- kamera alkaa seurata kahta oikeanpuoleista alusta (kiihdytt„„)
-- oikeanpuoleiset kaartavat oikealle kauemmas aluksesta, k„„ntyv„t
-  kohti sit„ ja hidastavat 
+- johtoalus jÃ¤Ã¤ taakse (eli kamera suhahtaa sen yli)
+- kamera alkaa seurata kahta oikeanpuoleista alusta (kiihdyttÃ¤Ã¤)
+- oikeanpuoleiset kaartavat oikealle kauemmas aluksesta, kÃ¤Ã¤ntyvÃ¤t
+  kohti sitÃ¤ ja hidastavat 
 - viholliset ampuvat
-- kamera ison aluksen l„helt„ kohti vihollismuodostelmaa, paukut
-  osuvat l„helle kameraa (=menev„t juuri taakse). Vihollisalukset
-  n„ytt„v„t oman aluksen pinnalta pisteilt„, joista l„htee paukkuja
+- kamera ison aluksen lÃ¤heltÃ¤ kohti vihollismuodostelmaa, paukut
+  osuvat lÃ¤helle kameraa (=menevÃ¤t juuri taakse). Vihollisalukset
+  nÃ¤yttÃ¤vÃ¤t oman aluksen pinnalta pisteiltÃ¤, joista lÃ¤htee paukkuja
 - kuva taas kahden vihollisen takaa
-- n„kyy kun pohjasta ilmestyy omia aluksia (putoavat) ja samalla
+- nÃ¤kyy kun pohjasta ilmestyy omia aluksia (putoavat) ja samalla
   etualalla juuri ampuneet viholliset
 - omat alukset kaartavat peliin ison aluksen alta kohti kameraa
-  ja kahta vihollista (viholliset t„ytt„v„t noin puoli ruutua, 
+  ja kahta vihollista (viholliset tÃ¤yttÃ¤vÃ¤t noin puoli ruutua, 
   vasemmassa reunassa)
 - omat ampuvat paukkusarjan
 - viholliset kaartavat, toinen oikelle, toinen vasemmalle,
-  kaarto menee pois ruudusta sill„ kamera jatkaa suoraan kohti
+  kaarto menee pois ruudusta sillÃ¤ kamera jatkaa suoraan kohti
   omia
 - laserit suhahtavat kameran alta
 - omat alukset suhahtavat kameran alta (immelman)
-- immelmanin lopuksi suhahtavat takaisin kameran ylt„
-- omat alukset jakautuvat kahteen ryhm„„n, joista oikealle
+- immelmanin lopuksi suhahtavat takaisin kameran yltÃ¤
+- omat alukset jakautuvat kahteen ryhmÃ¤Ã¤n, joista oikealle
   kaartavaa alkaa kamera seurata
-- kamera omien takana, vihollinen n„kyy ampumalinjalla
-- omat heitt„v„t paukkupinkan
+- kamera omien takana, vihollinen nÃ¤kyy ampumalinjalla
+- omat heittÃ¤vÃ¤t paukkupinkan
 - PUM!
-- omat kaartavat aluksen takap„„n ymp„ri
-- kun ne ovat viel„ kaarteessa, tulee vasemmalta yll„tt„en paukkusuihku
+- omat kaartavat aluksen takapÃ¤Ã¤n ympÃ¤ri
+- kun ne ovat vielÃ¤ kaarteessa, tulee vasemmalta yllÃ¤ttÃ¤en paukkusuihku
   joka osuu niiden kattoon ja PUM!
 - kamera vaihtuu vasemmalle menneen partion taakse (omat) joka on 
   nyt melkein aluksen keulan kohdalla
-- ruudussa juuri n„kyy toisen aluksen r„j„hdys 
-- lennet„„n r„j„hdyspilven l„pi
-- omat kaartavat jyrk„sti oman ison aluksen alle
-- kamera lent„„ per„ss„ (katsoja saa ensivilkauksen pohjasta)
-- alukset lent„v„t juuri dockicompleksin alta keulan puolelta
-- kamera loikkaa kahden j„ljell„olevan vihollisaluksen taakse
+- ruudussa juuri nÃ¤kyy toisen aluksen rÃ¤jÃ¤hdys 
+- lennetÃ¤Ã¤n rÃ¤jÃ¤hdyspilven lÃ¤pi
+- omat kaartavat jyrkÃ¤sti oman ison aluksen alle
+- kamera lentÃ¤Ã¤ perÃ¤ssÃ¤ (katsoja saa ensivilkauksen pohjasta)
+- alukset lentÃ¤vÃ¤t juuri dockicompleksin alta keulan puolelta
+- kamera loikkaa kahden jÃ¤ljellÃ¤olevan vihollisaluksen taakse
   katse kohti omaa alusta ja sen pohjaa. (vihollisalukset noin
   1/6 ruutua)
-- oman aluksen alta kaartavat 2 j„ljell„olevaa (joita juuri trackattiin)
-- omat laukaisevat paukut yl”salaisin kaartaen (siististi)
+- oman aluksen alta kaartavat 2 jÃ¤ljellÃ¤olevaa (joita juuri trackattiin)
+- omat laukaisevat paukut ylÃ¶salaisin kaartaen (siististi)
 - viholliset PUM!
-- omat kaartavat kohti keulaa kameran edest„ (immelman part 2)
-- kuva vihollisen johtoaluksen takaa (edess„ oma iso alus)
-- johtoalus k„„ntyy paikallaan, ja painaa kaasua
-- kamera j„„ paikalleen
+- omat kaartavat kohti keulaa kameran edestÃ¤ (immelman part 2)
+- kuva vihollisen johtoaluksen takaa (edessÃ¤ oma iso alus)
+- johtoalus kÃ¤Ã¤ntyy paikallaan, ja painaa kaasua
+- kamera jÃ¤Ã¤ paikalleen
 - taukoa
-- omat h„vitt„j„t lent„v„t kameran ohi ja samalla kamera k„„ntyy
+- omat hÃ¤vittÃ¤jÃ¤t lentÃ¤vÃ¤t kameran ohi ja samalla kamera kÃ¤Ã¤ntyy
   niiden menosuuntaan
-- kuva kaukaa ylh„„lt„, n„kyy kun omat saavat vihollista kiinni
-- kuva omien alusten per„st„
+- kuva kaukaa ylhÃ¤Ã¤ltÃ¤, nÃ¤kyy kun omat saavat vihollista kiinni
+- kuva omien alusten perÃ¤stÃ¤
 - omat alkavat ampua PALJON!
 - kuvakulma vihollisesta omiin
 - kuvakulma omiin vihollisesta 
 - kuvakulma vihollisesta omiin
 - PUMPUM!
-- omat kaartavat oikealle U-k„„nn”ksen
-- kamera j„„ katsomaan niiden matkaa kohti omaa alusta
+- omat kaartavat oikealle U-kÃ¤Ã¤nnÃ¶ksen
+- kamera jÃ¤Ã¤ katsomaan niiden matkaa kohti omaa alusta
 
 Faces:	Tarvelista:
 200	Iso alus (1)
